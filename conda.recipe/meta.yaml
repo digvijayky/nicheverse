@@ -1,0 +1,63 @@
+{% set name = "nicheverse" %}
+{% set version = "0.2.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  # Build from the local working tree. For a conda-forge submission this becomes
+  # a url + sha256 of the PyPI sdist:
+  #   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
+  #   sha256: <sdist sha256>
+  path: ../
+
+build:
+  noarch: python
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  entry_points:
+    - nicheverse = nicheverse.cli:main
+
+requirements:
+  host:
+    - python >=3.10
+    - pip
+    - hatchling
+  run:
+    - python >=3.10
+    - pytorch >=2.0
+    - numpy >=1.24
+    - pandas >=2.0
+    - scipy >=1.10
+    - scikit-learn >=1.3
+    - scanpy >=1.10
+    - anndata >=0.10
+    - matplotlib-base >=3.7
+    - pyarrow >=14
+    - h5py >=3.9
+    - tqdm >=4.65
+
+test:
+  imports:
+    - nicheverse
+    - nicheverse.models
+  commands:
+    - nicheverse --version
+    - pip check
+
+about:
+  home: https://github.com/digvijayky/nicheverse
+  license: MIT
+  license_file: LICENSE
+  summary: "NICHEVERSE: hierarchical vector-quantized codebooks of cell states and spatial niches for 10x Xenium spatial transcriptomics."
+  description: |
+    NICHEVERSE learns paired discrete codebooks over single cells and their
+    spatial neighborhoods from imaging based spatial transcriptomics, yielding
+    reproducible cell state and multicellular niche annotations.
+  doc_url: https://nicheverse.readthedocs.io/
+  dev_url: https://github.com/digvijayky/nicheverse
+
+extra:
+  recipe-maintainers:
+    - digvijayky
