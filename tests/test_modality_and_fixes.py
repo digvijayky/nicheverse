@@ -168,10 +168,17 @@ def test_encoder_kwargs_roundtrip():
 
 # --- training guards ---
 def test_nb_recon_requires_raw_counts():
-    cfg = ModelConfig(input_dim=6, recon="nb", gene_names=tuple(f"g{i}" for i in range(6)))
+    # cell_recon="nb" (the default) needs raw integer counts to build the count
+    # reconstruction target; a normalized / non-integer matrix must be rejected up front.
+    a = _adata(20)
+    a.X = a.X.astype("float32")
+    a.X.data = np.log1p(a.X.data)  # make X non-integer (already-normalized-looking)
+    cfg = ModelConfig(
+        input_dim=6, cell_recon="nb", niche_recon="mse", gene_names=tuple(f"g{i}" for i in range(6))
+    )
     with pytest.raises(ValueError, match="raw counts"):
         train_model(
-            _adata(20), tempfile.mkdtemp(), model_config=cfg, train_config=TrainConfig(num_epochs=1)
+            a, tempfile.mkdtemp(), model_config=cfg, train_config=TrainConfig(num_epochs=1)
         )
 
 

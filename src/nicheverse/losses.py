@@ -243,18 +243,28 @@ def nb_nll(
     torch.Tensor
         Scalar mean NB negative log-likelihood over the batch.
     """
-    library = x.sum(1, keepdim=True) if library is None else library.reshape(-1, 1).to(cr.dtype)
-    mu = torch.softmax(cr, dim=1) * library
-    theta = log_theta.exp()
-    lg = torch.log(theta + mu + eps)
-    res = (
-        theta * (torch.log(theta + eps) - lg)
-        + x * (torch.log(mu + eps) - lg)
-        + torch.lgamma(x + theta)
-        - torch.lgamma(theta)
-        - torch.lgamma(x + 1.0)
-    )
-    return -res.sum(1).mean()
+    # Force fp32 for the lgamma / log / exp / softmax math: torch.lgamma is not
+    # fp16-safe, softmax*library can underflow, and log_theta.exp() can overflow in
+    # half precision. Disabling autocast + upcasting keeps this correct under AMP and
+    # is numerically identical to the fp32 path when AMP is off. See _f32 helper.
+    with torch.autocast(device_type=cr.device.type, enabled=False):
+        cr = cr.float()
+        x = x.float()
+        log_theta = log_theta.float()
+        library = (
+            x.sum(1, keepdim=True) if library is None else library.reshape(-1, 1).float()
+        )
+        mu = torch.softmax(cr, dim=1) * library
+        theta = log_theta.exp()
+        lg = torch.log(theta + mu + eps)
+        res = (
+            theta * (torch.log(theta + eps) - lg)
+            + x * (torch.log(mu + eps) - lg)
+            + torch.lgamma(x + theta)
+            - torch.lgamma(theta)
+            - torch.lgamma(x + 1.0)
+        )
+        return -res.sum(1).mean()
 
 
 def poisson_nll(
@@ -289,9 +299,15 @@ def poisson_nll(
     torch.Tensor
         Scalar mean Poisson negative log-likelihood over the batch.
     """
-    library = x.sum(1, keepdim=True) if library is None else library.reshape(-1, 1).to(cr.dtype)
-    mu = torch.softmax(cr, dim=1) * library
-    return (mu - x * torch.log(mu + eps)).sum(1).mean()
+    # fp32 for the softmax / log math (fp16-unsafe under AMP); identical when AMP off.
+    with torch.autocast(device_type=cr.device.type, enabled=False):
+        cr = cr.float()
+        x = x.float()
+        library = (
+            x.sum(1, keepdim=True) if library is None else library.reshape(-1, 1).float()
+        )
+        mu = torch.softmax(cr, dim=1) * library
+        return (mu - x * torch.log(mu + eps)).sum(1).mean()
 
 
 def bernoulli_detection_bce(x: torch.Tensor, logits: torch.Tensor) -> torch.Tensor:
@@ -316,8 +332,12 @@ def bernoulli_detection_bce(x: torch.Tensor, logits: torch.Tensor) -> torch.Tens
     torch.Tensor
         Scalar mean BCE (summed over genes, averaged over cells).
     """
-    target = (x > 0).to(logits.dtype)
-    return F.binary_cross_entropy_with_logits(logits, target, reduction="none").sum(1).mean()
+    # binary_cross_entropy_with_logits is autocast-unsafe in fp16 (PyTorch disallows
+    # it under autocast); force fp32. Identical to the fp32 path when AMP is off.
+    with torch.autocast(device_type=logits.device.type, enabled=False):
+        logits = logits.float()
+        target = (x > 0).float()
+        return F.binary_cross_entropy_with_logits(logits, target, reduction="none").sum(1).mean()
 
 
 def dirichlet_multinomial_nll(
@@ -339,8 +359,12 @@ def dirichlet_multinomial_nll(
     Parameters
     ----------
     target : torch.Tensor
-        Compositional count target, shape ``(B, N)``, non-negative. Its per-row
-        sum is used as the multinomial total.
+        COUNT-SCALE compositional target, shape ``(B, N)``, non-negative. Its per-row
+        sum is used as the multinomial total ``N``, so this must be on the raw-count
+        scale (e.g. the weighted-mean aggregation of the raw neighbor counts), NOT a
+        log1p mean whose row sum has no count interpretation. Fractional values are
+        allowed (the density is evaluated with ``lgamma``), so a continuous count-scale
+        aggregate is fine without rounding.
     logits : torch.Tensor
         Per-feature decoder logits, shape ``(B, N)``; softmaxed to the mean
         composition.
@@ -356,23 +380,28 @@ def dirichlet_multinomial_nll(
     torch.Tensor
         Scalar mean Dirichlet-multinomial NLL over the batch.
     """
-    c = target.clamp_min(0.0)
-    N = c.sum(1)  # (B,)
-    p = torch.softmax(logits, dim=1)
-    conc = log_alpha.exp().sum().clamp_min(eps)  # scalar precision
-    alpha = p * conc + eps  # (B, N)
-    a0 = alpha.sum(1)  # (B,)
-    # log DM(c | alpha) = lgamma(N+1) - sum_i lgamma(c_i+1)
-    #                   + lgamma(a0) - lgamma(a0+N)
-    #                   + sum_i [ lgamma(c_i + alpha_i) - lgamma(alpha_i) ]
-    ll = (
-        torch.lgamma(N + 1.0)
-        - torch.lgamma(c + 1.0).sum(1)
-        + torch.lgamma(a0)
-        - torch.lgamma(a0 + N)
-        + (torch.lgamma(c + alpha) - torch.lgamma(alpha)).sum(1)
-    )
-    return -ll.mean()
+    # fp32 for the lgamma / exp / softmax math (fp16-unsafe under AMP); identical when
+    # AMP is off.
+    with torch.autocast(device_type=logits.device.type, enabled=False):
+        logits = logits.float()
+        log_alpha = log_alpha.float()
+        c = target.float().clamp_min(0.0)
+        N = c.sum(1)  # (B,)
+        p = torch.softmax(logits, dim=1)
+        conc = log_alpha.exp().sum().clamp_min(eps)  # scalar precision
+        alpha = p * conc + eps  # (B, N)
+        a0 = alpha.sum(1)  # (B,)
+        # log DM(c | alpha) = lgamma(N+1) - sum_i lgamma(c_i+1)
+        #                   + lgamma(a0) - lgamma(a0+N)
+        #                   + sum_i [ lgamma(c_i + alpha_i) - lgamma(alpha_i) ]
+        ll = (
+            torch.lgamma(N + 1.0)
+            - torch.lgamma(c + 1.0).sum(1)
+            + torch.lgamma(a0)
+            - torch.lgamma(a0 + N)
+            + (torch.lgamma(c + alpha) - torch.lgamma(alpha)).sum(1)
+        )
+        return -ll.mean()
 
 
 def graph_total_variation(z: torch.Tensor, coords: torch.Tensor, k: int = 6) -> torch.Tensor:

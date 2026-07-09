@@ -26,6 +26,10 @@ def _toy():
 
 
 def _mc(a, recon="mse"):
+    # Pin the pre-composite defaults so these tests exercise the classic ``recon=``
+    # path (cell_recon="default" defers to recon; niche MSE; no detection). The
+    # ModelConfig defaults are now the composite loss (cell_recon="nb",
+    # niche_recon="mse_dirmult", detection_weight=0.5); those are covered separately.
     return ModelConfig(
         input_dim=a.n_vars,
         hidden_dims=(16,),
@@ -34,6 +38,9 @@ def _mc(a, recon="mse"):
         neighborhood_embedding_dim=8,
         neighborhood_num_embeddings=4,
         recon=recon,
+        cell_recon="default",
+        niche_recon="mse",
+        detection_weight=0.0,
         gene_names=tuple(a.var_names),
     )
 
@@ -197,9 +204,14 @@ def test_config_validation():
     # count cell_recon is incompatible with recon in {nb,poisson}
     with pytest.raises(ValueError, match="cell_recon"):
         ModelConfig(input_dim=4, recon="nb", cell_recon="nb")
-    # detection requires a count-mode cell_recon (needs raw counts as target)
+    # negative weights rejected
+    with pytest.raises(ValueError, match="w_nb"):
+        ModelConfig(input_dim=4, w_nb=-1.0)
     with pytest.raises(ValueError, match="detection_weight"):
-        ModelConfig(input_dim=4, cell_recon="mse", detection_weight=1.0)
+        ModelConfig(input_dim=4, detection_weight=-0.5)
+    # detection on a non-count mode is IGNORED (warned, not an error), so pure-MSE
+    # recovery does not have to also zero detection_weight -> must not raise.
+    ModelConfig(input_dim=4, cell_recon="mse", detection_weight=1.0)
 
 
 @pytest.mark.parametrize("mode", ["nb", "poisson", "both"])
@@ -227,9 +239,11 @@ def test_train_detection_hurdle(tmp_path):
 
 
 def test_train_dirmult_niche(tmp_path):
+    # A DM niche mode needs raw counts (count cell mode) so the count-scale neighbor
+    # composition can be built; pair it with cell_recon="nb".
     a = _toy()
-    tc = TrainConfig(num_epochs=2, batch_size=32, k_neighbors=5)  # mse cell default
-    Trainer(tc).fit(a, tmp_path, model_config=_mc_opt(a, niche_recon="dirichlet_multinomial"))
+    tc = TrainConfig(num_epochs=2, batch_size=32, k_neighbors=5, normalize=True, log1p=True)
+    Trainer(tc).fit(a, tmp_path, model_config=_mc_opt(a, "nb", niche_recon="dirichlet_multinomial"))
     losses = json.loads((Path(tmp_path) / "training_losses.json").read_text())
     assert all(np.isfinite(x["total"]) for x in losses)
 
@@ -245,16 +259,138 @@ def test_train_graph_tv_spatial(tmp_path):
     assert all(np.isfinite(x["total"]) for x in losses)
 
 
-def test_default_config_byte_identical(tmp_path):
-    """A default-config run (mse cell, mse niche, no detection/TV/dirmult) must match a
-    run built the old way (recon='mse' only), proving the new options are inert when off."""
+# ---- new-default composite loss (cell_recon=nb + niche_recon=mse_dirmult) ----
+
+
+def _mc_default(a):
+    """ModelConfig at the NEW composite defaults (nb + mse_dirmult + detection 0.5),
+    only shrinking the codebook/embedding dims for the tiny toy adata."""
+    return ModelConfig(
+        input_dim=a.n_vars,
+        hidden_dims=(16,),
+        cell_embedding_dim=6,
+        cell_num_embeddings=8,
+        neighborhood_embedding_dim=8,
+        neighborhood_num_embeddings=4,
+        gene_names=tuple(a.var_names),
+    )
+
+
+def test_new_default_is_composite():
+    """The shipped ModelConfig default must be the composite loss."""
+    mc = ModelConfig(input_dim=8)
+    assert mc.cell_recon == "nb"
+    assert mc.niche_recon == "mse_dirmult"
+    assert mc.detection_weight == 0.5
+
+
+def test_train_new_default_finite(tmp_path):
+    """The NEW default (nb + mse_dirmult + detection) trains on tiny integer counts
+    and yields finite cell AND niche losses at every epoch."""
+    a = _toy()  # raw integer Poisson counts
+    tc = TrainConfig(num_epochs=3, batch_size=32, k_neighbors=5, normalize=True, log1p=True)
+    Trainer(tc).fit(a, tmp_path, model_config=_mc_default(a))
+    losses = json.loads((Path(tmp_path) / "training_losses.json").read_text())
+    assert len(losses) == 3
+    for e in losses:
+        assert np.isfinite(e["total"]) and np.isfinite(e["cell"]) and np.isfinite(e["neighborhood"])
+    m = load_checkpoint(Path(tmp_path) / "hierarchical_vqvae_checkpoint.pt")
+    assert m.config.cell_recon == "nb" and m.config.niche_recon == "mse_dirmult"
+
+
+def test_pure_mse_recovers_old_path(tmp_path):
+    """cell_recon='mse' + niche_recon='mse' + detection_weight=0 must reproduce the OLD
+    gaussian-only path EXACTLY (torch.equal on the per-epoch losses)."""
     a = _toy()
     tc = TrainConfig(num_epochs=3, batch_size=32, k_neighbors=5, normalize=True, log1p=True)
-    old = _mc(a, "mse")  # no cell_recon/niche_recon/detection fields set -> all defaults
-    new = _mc_opt(a)  # cell_recon="default", niche_recon="mse", detection_weight=0
+    # old path built via the classic recon= route (cell_recon="default", recon="mse").
+    old = _mc(a, "mse")
+    # explicit pure-MSE recovery via the new selectors.
+    recov = _mc_opt(a, cell_recon="mse", niche_recon="mse", detection_weight=0.0)
     Trainer(tc).fit(a.copy(), tmp_path / "old", model_config=old)
-    Trainer(tc).fit(a.copy(), tmp_path / "new", model_config=new)
+    Trainer(tc).fit(a.copy(), tmp_path / "recov", model_config=recov)
     lo = json.loads((tmp_path / "old" / "training_losses.json").read_text())
-    ln = json.loads((tmp_path / "new" / "training_losses.json").read_text())
-    for eo, en in zip(lo, ln):
-        assert eo["total"] == pytest.approx(en["total"], abs=0, rel=0)
+    lr = json.loads((tmp_path / "recov" / "training_losses.json").read_text())
+    assert len(lo) == len(lr) == 3
+    for eo, er in zip(lo, lr):
+        # exact equality: both paths are gaussian_nll(cb,cr) + gaussian_nll(nb,nr) with
+        # identical seeds, data, and no count/detection/dirmult terms.
+        assert torch.equal(torch.tensor(eo["total"]), torch.tensor(er["total"]))
+        assert torch.equal(torch.tensor(eo["cell"]), torch.tensor(er["cell"]))
+        assert torch.equal(torch.tensor(eo["neighborhood"]), torch.tensor(er["neighborhood"]))
+
+
+def test_niche_dm_target_is_count_scale():
+    """The DM niche target (niche_count_target) must be on the RAW-count scale, not the
+    log1p mean: its per-cell row sum tracks the raw counts, and scaling the raw counts
+    by a constant (holding the log1p neighborhood fixed) changes the DM term."""
+    from nicheverse.data import SpatialDataset
+
+    rng = np.random.default_rng(3)
+    n, g = 60, 10
+    counts = rng.poisson(3.0, size=(n, g)).astype("float32")
+    log1p = np.log1p(counts)  # a stand-in log1p "cell feature"
+    coords = np.column_stack([rng.uniform(0, 200, n), rng.uniform(0, 200, n)])
+    samples = np.array(["S1"] * n)
+    ds = SpatialDataset(
+        log1p, coords, samples, k_neighbors=6, recon_target=counts,
+    )
+    assert ds.niche_count_target is not None
+    nct = ds.niche_count_target
+    # count-scale: the weighted mean of raw neighbor counts has a per-row total on the
+    # count scale (order ~ mean raw total), NOT a tiny log1p sum. Compare magnitudes:
+    raw_total = counts.sum(1).mean()
+    nct_total = float(nct.sum(1).mean())
+    log1p_total = float(np.log1p(counts).sum(1).mean())
+    # nct total should be near the raw per-cell transcript total, far above the log1p sum.
+    assert nct_total > 2.0 * log1p_total
+    assert abs(nct_total - raw_total) / raw_total < 0.6
+    # DM term must respond to a constant rescaling of the RAW counts (10x) even though
+    # the log1p neighborhood is unchanged.
+    ds10 = SpatialDataset(
+        log1p, coords, samples, k_neighbors=6, recon_target=counts * 10.0,
+    )
+    logits = torch.zeros(n, g)
+    la = torch.zeros(g)
+    dm1 = dirichlet_multinomial_nll(ds.niche_count_target, logits, la)
+    dm10 = dirichlet_multinomial_nll(ds10.niche_count_target, logits, la)
+    assert not torch.allclose(dm1, dm10)
+
+
+def test_dirmult_niche_without_raw_counts_raises(tmp_path):
+    """Selecting a DM niche mode without a count cell mode (no raw counts) must fail
+    loudly rather than silently feeding a log1p mean to the multinomial."""
+    a = _toy()
+    tc = TrainConfig(num_epochs=1, batch_size=32, k_neighbors=5, normalize=True, log1p=True)
+    # cell_recon="mse" -> no raw-count target -> DM niche cannot build its count target.
+    mc = _mc_opt(a, cell_recon="mse", niche_recon="mse_dirmult")
+    with pytest.raises(ValueError, match="Dirichlet-multinomial|count"):
+        Trainer(tc).fit(a, tmp_path, model_config=mc)
+
+
+def test_count_losses_fp32_identical_when_amp_off():
+    """The fp32-wrapped count losses must be numerically identical to a plain fp32 call
+    (AMP off is the default, so the wrapper must be a no-op there)."""
+    x = torch.randint(0, 8, (16, 12)).float()
+    cr = torch.randn(16, 12)
+    lt = torch.randn(12) * 0.1
+    la = torch.randn(12) * 0.1
+    tgt = torch.rand(16, 12) * 5.0
+    # Recompute the NB NLL by hand in fp32 and compare.
+    lib = x.sum(1, keepdim=True)
+    mu = torch.softmax(cr, 1) * lib
+    theta = lt.exp()
+    lg = torch.log(theta + mu + 1e-8)
+    res = (theta * (torch.log(theta + 1e-8) - lg) + x * (torch.log(mu + 1e-8) - lg)
+           + torch.lgamma(x + theta) - torch.lgamma(theta) - torch.lgamma(x + 1.0))
+    manual_nb = -res.sum(1).mean()
+    assert torch.allclose(nb_nll(x, cr, lt), manual_nb, atol=1e-6)
+    # Poisson, BCE, DM finite + differentiable through the fp32 wrapper.
+    for fn, args in [
+        (poisson_nll, (x, cr)),
+        (bernoulli_detection_bce, (x, cr.clone().requires_grad_(True))),
+    ]:
+        v = fn(*args)
+        assert torch.isfinite(v)
+    dm = dirichlet_multinomial_nll(tgt, cr.clone().requires_grad_(True), la.clone().requires_grad_(True))
+    assert torch.isfinite(dm)

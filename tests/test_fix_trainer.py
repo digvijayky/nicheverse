@@ -78,7 +78,7 @@ def test_best_val_checkpoint_is_exported_not_last(tmp_path, monkeypatch):
     # epoch (real optimizer steps run), so last-epoch weights differ from epoch 2.
     seq = iter([1.0, 0.1, 0.5, 0.8, 0.9])
 
-    def fake_val_loss(model, loader, device, tc):
+    def fake_val_loss(model, loader, device, tc, count_dataset=None):
         return next(seq)
 
     monkeypatch.setattr(trainer_mod, "_val_loss", fake_val_loss)

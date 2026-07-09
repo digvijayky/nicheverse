@@ -63,7 +63,7 @@ def _round_pow2(x: float) -> int:
 def auto_batch_size(
     input_dim: int,
     device: object | None = None,
-    encoder_type: str = "mlp_plr",
+    encoder_type: str = "mlp_deep",
     ref_batch: int = 8192,
     ref_dim: int = 732,
     lo: int = 512,
@@ -540,20 +540,23 @@ def _cell_recon(
 ) -> torch.Tensor:
     """Cell reconstruction loss.
 
-    Dispatch (the default path is byte-identical to the released behavior):
+    The DEFAULT (``config.cell_recon="nb"``) is a count likelihood on the RAW counts
+    plus a detection hurdle, NO MSE on the cell branch:
 
-    * ``config.cell_recon`` in {``"nb"``, ``"poisson"``, ``"both"``}: the encoder
-      input ``cb`` is log1p expression, so the count likelihood is evaluated on
-      the raw-count ``recon_target`` (supplied by the trainer), with the softmax
-      proportion scaled by the OBSERVED total count per cell
-      (``recon_target.sum(1)``, the standard scVI library). ``"both"`` also adds
-      the MSE-on-log1p term (:func:`~nicheverse.losses.gaussian_nll`). An optional Bernoulli/BCE
-      detection hurdle (``config.detection_weight > 0``) is added on top, using the
-      decoder output as the detection logits on the 0-vs-nonzero mask of the raw
-      counts.
-    * ``config.cell_recon`` in {``"default"``, ``"mse"``}: fall back to
-      ``config.recon`` on ``cb`` (``"mse"`` default; or ``"nb"`` / ``"poisson"``
-      when the encoder input is itself raw counts, the released count path).
+    ``cell_loss = per_gene_mean(NB_NLL(raw)) + detection_weight * per_gene_mean(BCE)``
+
+    The NB NLL uses a softmax-proportion decoder scaled by the OBSERVED total count
+    per cell (``recon_target.sum(1)``, the scVI library). The NB and BCE terms are
+    each divided by ``input_dim`` (turned into per-gene means) so they are on a
+    comparable O(1) scale and only ``detection_weight`` balances NB vs BCE; there is
+    no log-space-vs-count-space mixing because there is no MSE term.
+
+    Other selectable modes: ``"mse"`` = pure MSE-on-log1p (with detection off this
+    is the released MSE-only path); ``"poisson"`` = pure Poisson NLL; ``"both"`` =
+    ``w_mse * MSE(log1p) + w_nb * per_gene_mean(NB)`` (the NB term reduced to a
+    per-gene mean so it is comparable to the per-element MSE at unit weights);
+    ``"default"`` = defer to ``config.recon`` on the encoder input directly. The
+    detection hurdle is added to any count mode when ``detection_weight > 0``.
     """
     cm = getattr(model.config, "cell_recon", "default")
     if cm in ("nb", "poisson", "both"):
@@ -562,16 +565,24 @@ def _cell_recon(
                 f"cell_recon={cm!r} requires a raw-count recon_target; the trainer did not "
                 "provide one."
             )
+        d = float(recon_target.shape[1])  # n_genes, for per-gene-mean reduction
         library = recon_target.sum(1, keepdim=True)  # observed total count (scVI library)
         if cm == "poisson":
-            loss = poisson_nll(recon_target, cr, library=library)
+            count_nll = poisson_nll(recon_target, cr, library=library)
         else:
-            loss = nb_nll(recon_target, cr, model.cell_log_theta, library=library)
+            count_nll = nb_nll(recon_target, cr, model.cell_log_theta, library=library)
         if cm == "both":
-            loss = gaussian_nll(cb, cr) + loss
+            # Balance MSE-on-log1p (per-element mean) against the NB term (reduced to
+            # a per-gene mean) so neither dominates; weights default to 1.0.
+            w_mse = float(getattr(model.config, "w_mse", 1.0))
+            w_nb = float(getattr(model.config, "w_nb", 1.0))
+            loss = w_mse * gaussian_nll(cb, cr) + w_nb * (count_nll / d)
+        else:
+            # nb / poisson default: per-gene mean of the count NLL.
+            loss = count_nll / d
         dw = float(getattr(model.config, "detection_weight", 0.0))
         if dw > 0:
-            loss = loss + dw * bernoulli_detection_bce(recon_target, cr)
+            loss = loss + dw * (bernoulli_detection_bce(recon_target, cr) / d)
         return loss
     recon = model.config.recon
     if recon == "mse":
@@ -581,23 +592,56 @@ def _cell_recon(
     return poisson_nll(cb, cr)
 
 
-def _niche_recon(model: HierarchicalVQVAE, nr: torch.Tensor, nb: torch.Tensor) -> torch.Tensor:
+def _niche_recon(
+    model: HierarchicalVQVAE,
+    nr: torch.Tensor,
+    nb: torch.Tensor,
+    niche_count_target: torch.Tensor | None = None,
+) -> torch.Tensor:
     """Neighborhood reconstruction loss.
 
-    ``config.niche_recon="mse"`` (default) is the released composition MSE over the
-    full ``(B, 2*input_dim)`` niche vector. ``"dirichlet_multinomial"`` replaces the
-    MSE on the aggregated-neighbor half (the second ``input_dim`` features, a
-    compositional niche vector) with a Dirichlet-multinomial NLL, and keeps an MSE
-    on the self half so the self-expression part of the target is still fit.
+    The DEFAULT (``config.niche_recon="mse_dirmult"``) is a balanced sum of the
+    composition MSE over the full log1p niche vector and a Dirichlet-multinomial NLL
+    on the COUNT-SCALE aggregated-neighbor composition, the DirMult reduced to a
+    per-feature mean so it is comparable to the MSE:
+
+    ``niche_loss = w_niche_mse * MSE(nb, nr) + w_dirmult * per_feature_mean(DirMult(niche_count_target, comp_logits))``
+
+    The MSE term is on the log1p features (``nb`` / ``nr``) exactly as released. The
+    DirMult target is ``niche_count_target`` -- the SAME weighted-mean neighbor
+    aggregation applied to the RAW counts (a count-scale composition whose row sum is
+    a real transcript total), NOT the log1p mean. ``comp_logits = nr[:, d:]`` (the
+    aggregated-neighbor half of the decoder output) are the DM composition logits.
+
+    ``"mse"`` is the released composition MSE (pure, no count target needed).
+    ``"dirichlet_multinomial"`` is a pure DirMult on the count-scale composition plus
+    an MSE on the self half (log1p). Both DM modes require ``niche_count_target``
+    (they need raw integer counts); a clear error is raised when it is missing.
     """
-    if getattr(model.config, "niche_recon", "mse") == "dirichlet_multinomial":
-        d = model.config.input_dim
-        self_half, comp_half = nr[:, :d], nr[:, d:]
-        self_tgt, comp_tgt = nb[:, :d], nb[:, d:]
-        return gaussian_nll(self_tgt, self_half) + dirichlet_multinomial_nll(
-            comp_tgt, comp_half, model.niche_log_alpha
+    mode = getattr(model.config, "niche_recon", "mse")
+    if mode == "mse":
+        return gaussian_nll(nb, nr)
+    if niche_count_target is None:
+        raise ValueError(
+            f"niche_recon={mode!r} needs a count-scale niche_count_target (the raw-count "
+            "weighted-mean neighbor composition), but none was provided. The Dirichlet-"
+            "multinomial niche modes require raw integer counts; run with a count cell mode "
+            "(cell_recon in {'nb','poisson','both'}) so the raw counts are available, or set "
+            "niche_recon='mse'."
         )
-    return gaussian_nll(nb, nr)
+    d = model.config.input_dim
+    comp_logits = nr[:, d:]  # aggregated-neighbor half of the decoder output
+    dirmult = dirichlet_multinomial_nll(
+        niche_count_target, comp_logits, model.niche_log_alpha
+    ) / float(d)
+    if mode == "mse_dirmult":
+        w_mse = float(getattr(model.config, "w_niche_mse", 1.0))
+        w_dm = float(getattr(model.config, "w_dirmult", 1.0))
+        return w_mse * gaussian_nll(nb, nr) + w_dm * dirmult
+    # pure "dirichlet_multinomial": DirMult on the count-scale composition, MSE on the
+    # self (log1p) half so the self-expression part of the target is still fit.
+    self_half, self_tgt = nr[:, :d], nb[:, :d]
+    return gaussian_nll(self_tgt, self_half) + dirmult
 
 
 def train_model(
@@ -669,12 +713,31 @@ def train_model(
     if not 0.0 <= tc.val_fraction < 1.0:
         raise ValueError(f"val_fraction must be in [0, 1), got {tc.val_fraction}")
     _cell_recon_mode = (
-        getattr(model_config, "cell_recon", "default") if model_config is not None else "default"
+        getattr(model_config, "cell_recon", "default")
+        if model_config is not None
+        else ModelConfig.__dataclass_fields__["cell_recon"].default
     )
     # Count-likelihood cell modes: encoder input stays log1p, but the likelihood is
     # evaluated on the RAW counts (captured to a layer below), scaled by the
     # observed total count per cell (the scVI library). No external size factor.
     _count_mode = _cell_recon_mode in ("nb", "poisson", "both")
+    _niche_mode = (
+        getattr(model_config, "niche_recon", "mse")
+        if model_config is not None
+        else ModelConfig.__dataclass_fields__["niche_recon"].default
+    )
+    # Dirichlet-multinomial niche modes need the COUNT-SCALE neighbor composition,
+    # which the dataset only builds when a raw-count recon_target is present (i.e. a
+    # count cell mode). Fail loudly up front if a DM niche mode is selected without
+    # raw counts, mirroring the cell count-mode guard.
+    _niche_dirmult_mode = _niche_mode in ("dirichlet_multinomial", "mse_dirmult")
+    if _niche_dirmult_mode and not _count_mode:
+        raise ValueError(
+            f"niche_recon={_niche_mode!r} (Dirichlet-multinomial) needs the count-scale "
+            "neighbor composition, which is only built for a count cell mode "
+            "(cell_recon in {'nb','poisson','both'}) so raw integer counts are available. "
+            f"Got cell_recon={_cell_recon_mode!r}. Set a count cell_recon, or niche_recon='mse'."
+        )
     if (
         model_config is not None
         and model_config.recon in ("nb", "poisson")
@@ -946,16 +1009,21 @@ def train_model(
             cb = cb.to(device_t)
             nb = nb.to(device_t)
             optim.zero_grad(set_to_none=True)
-            rt = None
+            rt = nct = None
             if _count_mode:
                 bidx = batch_idx.to(dataset.recon_target.device)
                 rt = dataset.recon_target[bidx].to(device_t)
+            if _niche_dirmult_mode:
+                # Index in the full-dataset row space, exactly like recon_target.
+                nct = dataset.niche_count_target[batch_idx.to(dataset.niche_count_target.device)].to(
+                    device_t
+                )
             with torch.autocast(
                 device_type=device_t.type, enabled=tc.amp and device_t.type == "cuda"
             ):
                 cr, nr, cvq, nvq, _ci, _ni, cp, np_ = model(cb, nb)
                 cell_recon = _cell_recon(core, cr, cb, recon_target=rt)
-                neigh_recon = _niche_recon(core, nr, nb)
+                neigh_recon = _niche_recon(core, nr, nb, niche_count_target=nct)
                 loss = tc.cell_weight * (cell_recon + cvq) + tc.neighborhood_weight * (
                     neigh_recon + nvq
                 )
@@ -1203,19 +1271,25 @@ def _val_loss(
     count-recon cell modes so the raw-count target can be indexed by the batch
     index; it is ``None`` on all other paths (released signature).
     """
+    # The count-scale niche target exists only when a DM niche mode is active (which
+    # requires a count cell mode, so count_dataset is not None). Index it in the
+    # full-dataset row space exactly like recon_target.
+    use_nct = count_dataset is not None and getattr(count_dataset, "niche_count_target", None) is not None
     model.eval()
     total = 0.0
     n = 0
     with torch.inference_mode():
         for cb, nb, bidx in loader:
             cb, nb = cb.to(device), nb.to(device)
-            rt = None
+            rt = nct = None
             if count_dataset is not None:
                 rt = count_dataset.recon_target[bidx].to(device)
+            if use_nct:
+                nct = count_dataset.niche_count_target[bidx].to(device)
             cr, nr, cvq, nvq, _ci, _ni, _cp, _np = model(cb, nb)
             loss = tc.cell_weight * (
                 _cell_recon(model, cr, cb, recon_target=rt) + cvq
-            ) + tc.neighborhood_weight * (_niche_recon(model, nr, nb) + nvq)
+            ) + tc.neighborhood_weight * (_niche_recon(model, nr, nb, niche_count_target=nct) + nvq)
             total += float(loss.item())
             n += 1
     model.train()

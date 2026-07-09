@@ -20,20 +20,34 @@ from .quantizers import _QUANTIZERS, build_quantizer
 
 logger = logging.getLogger(__name__)
 
-# Cell-branch reconstruction modes. "default" defers to ``recon`` (byte-identical
-# to the released MSE-on-log1p path). "nb"/"poisson"/"both" put a count likelihood
-# on the RAW counts with a softmax-proportion decoder scaled by the OBSERVED total
-# count per cell (the standard scVI library, i.e. recon_target.sum(1)); the encoder
-# input stays the log1p expression, so the count modes need the raw counts carried
-# separately as a reconstruction target. "both" sums MSE-on-log1p and the NB term.
+# Cell-branch reconstruction modes.
+#   "nb" (NEW DEFAULT): NB-NLL on the RAW counts (softmax-proportion decoder scaled
+#       by the OBSERVED total count = the scVI library), PLUS a Bernoulli/BCE
+#       detection hurdle when detection_weight>0 (positive by default). No MSE on
+#       the cell branch, so there is no log-space-vs-count-space scale mixing; only
+#       NB vs BCE need balancing (both are reduced to per-gene means). Needs raw
+#       INTEGER counts as the target (captured before normalize/log1p); the log1p
+#       expression is the encoder input.
+#   "mse": pure MSE-on-log1p (with niche_recon="mse" and detection_weight=0 this is
+#       the exact old released MSE-only path).
+#   "poisson": pure Poisson count NLL on the raw counts (no dispersion).
+#   "both": MSE-on-log1p + NB, summed (the two terms are each reduced so neither
+#       dominates); detection added when detection_weight>0.
+#   "default": defer to ``recon`` (mse/nb/poisson on the encoder input directly).
 CELL_RECON_MODES = ("default", "mse", "nb", "poisson", "both")
 # Modes that need the raw-count reconstruction target (and hence a cell_log_theta
 # for the NB variants). Membership gates the raw-count plumbing in the trainer.
 CELL_RECON_COUNT_MODES = ("nb", "poisson", "both")
 # Modes that allocate a learned per-gene NB dispersion.
 CELL_RECON_NB_MODES = ("nb", "both")
-# Niche-branch reconstruction modes. "mse" is the released composition MSE.
-NICHE_RECON_MODES = ("mse", "dirichlet_multinomial")
+# Niche-branch reconstruction modes.
+#   "mse_dirmult" (NEW DEFAULT): balanced sum of composition MSE + a
+#       Dirichlet-multinomial NLL on the aggregated-neighbor composition.
+#   "mse": the released composition MSE (pure).
+#   "dirichlet_multinomial": pure Dirichlet-multinomial NLL (self half stays MSE).
+NICHE_RECON_MODES = ("mse", "dirichlet_multinomial", "mse_dirmult")
+# Niche modes that use the Dirichlet-multinomial term (allocate niche_log_alpha).
+NICHE_DIRMULT_MODES = ("dirichlet_multinomial", "mse_dirmult")
 
 
 @dataclass
@@ -78,39 +92,73 @@ class ModelConfig:
         ``qinco`` / ``pq``) and its extra keyword arguments. See
         :func:`~nicheverse.models.build_quantizer`.
     encoder_type, encoder_kwargs
-        Encoder backbone (``"mlp_plr"`` default; also ``mlp`` / ``mlp_deep`` /
+        Encoder backbone (``"mlp_deep"`` default; also ``mlp`` / ``mlp_plr`` /
         ``residual_mlp`` / ``transformer``) and its extra keyword arguments.
-        The default is ``mlp_plr`` because transcript context is now the default
-        input representation and ``mlp_plr`` won on it in the RCC Xenium sweep.
-        See :func:`~nicheverse.models.build_encoder`.
+        The default is ``mlp_deep`` (a SwiGLU pre-norm residual MLP, no per-gene
+        numerical embedding): it had the best raw codebook health in the RCC
+        Xenium sweep, and per-gene numerical embeddings (``mlp_plr`` / PLE)
+        degenerate on the very sparse Xenium counts that are the default sweep
+        data. See :func:`~nicheverse.models.build_encoder`.
     recon
         Reconstruction likelihood: ``"mse"`` (default, Gaussian), ``"nb"``
         (negative binomial, raw counts), or ``"poisson"`` (raw counts).
     cell_recon
-        Cell-branch reconstruction mode (opt-in; ``"default"`` keeps the released
-        behavior). ``"default"`` defers to ``recon`` and is byte-identical to the
-        MSE-on-log1p path. The count modes decouple the encoder input (which stays
-        log1p expression) from the decoder likelihood, which is evaluated on the
-        RAW integer counts with a softmax-proportion decoder scaled by the
-        OBSERVED total count per cell (the standard scVI library):
-        ``"nb"`` uses a negative-binomial NLL (allocating a learned
-        ``cell_log_theta`` dispersion), ``"poisson"`` uses a Poisson NLL, and
-        ``"both"`` sums the MSE-on-log1p term and the NB NLL. The count modes
-        require ``TrainConfig(normalize=True, log1p=True)`` (log1p encoder input);
-        the trainer captures the raw counts into a layer as the reconstruction
-        target automatically.
+        Cell-branch reconstruction mode. **The default is now ``"nb"``**, a
+        negative-binomial count likelihood on the RAW integer counts PLUS a
+        Bernoulli detection hurdle:
+
+        ``cell_loss = NB_NLL(raw counts) + detection_weight * BCE(detection)``
+
+        The NB NLL uses a softmax-proportion decoder scaled by the OBSERVED total
+        count per cell (the standard scVI library) and allocates a learned per-gene
+        dispersion ``cell_log_theta``; BCE is a hurdle on the 0-vs-nonzero mask of
+        the raw counts (the decoder output is reused as the detection logits). There
+        is NO MSE term on the cell branch, so there is no log-space-vs-count-space
+        scale mixing; only the NB and BCE terms need balancing, and both are reduced
+        to per-gene means (divided by ``input_dim``) so they are comparable, then
+        BCE is weighted by ``detection_weight``. The default needs raw INTEGER counts
+        as the NB / detection target, captured before normalize/log1p; the default
+        training pipeline provides them via ``TrainConfig(normalize=True,
+        log1p=True)`` (log1p expression is the encoder input, raw counts stashed to a
+        layer).
+
+        The remaining modes stay selectable so the old behavior is fully
+        recoverable: ``"mse"`` = pure MSE-on-log1p (with ``niche_recon="mse"`` and
+        ``detection_weight=0`` this is the exact released MSE-only path);
+        ``"poisson"`` = a pure Poisson count NLL on the raw counts; ``"both"`` =
+        MSE-on-log1p + NB (each term reduced so neither dominates), balanced by
+        ``w_mse`` / ``w_nb``; ``"default"`` = defer to ``recon`` on the encoder input
+        directly (byte-identical to the pre-composite path). For every count mode
+        (``nb`` / ``poisson`` / ``both``), the detection hurdle is added whenever
+        ``detection_weight > 0``.
     detection_weight
-        Weight of an optional additive Bernoulli/BCE detection hurdle on the cell
-        branch (``0`` default = off). When ``> 0``, a binary-cross-entropy term on
-        the 0-vs-nonzero mask of the raw counts (using the decoder output as the
-        detection logits) is added to the cell reconstruction loss with this
-        weight. Requires a count-mode ``cell_recon`` (so the raw counts are
-        available as the target).
+        Weight of the Bernoulli/BCE detection-hurdle term (per-gene-mean BCE on the
+        0-vs-nonzero mask of the raw counts, decoder output reused as the detection
+        logits). **Default ``0.5``** (on, so the default ``"nb"`` mode is NB + BCE).
+        Applied for any count mode (``nb`` / ``poisson`` / ``both``); IGNORED for
+        ``"mse"`` / ``"default"`` (no raw-count target). Set to ``0`` to drop it.
+    w_mse, w_nb
+        Balancing weights for the MSE-on-log1p and NB-NLL terms of the ``"both"``
+        cell mode (unused by the default ``"nb"`` mode, which has no MSE term). Both
+        default to ``1.0``. The NB term in ``"both"`` is reduced to a per-gene mean
+        so it is comparable to the per-element MSE at unit weight.
     niche_recon
-        Neighborhood-branch reconstruction mode (opt-in; ``"mse"`` default =
-        released composition MSE). ``"dirichlet_multinomial"`` replaces the MSE on
-        the aggregated neighbor composition with a Dirichlet-multinomial NLL over
-        that composition (a proper likelihood for compositional niche vectors).
+        Neighborhood-branch reconstruction mode. **The default is now
+        ``"mse_dirmult"``**, a balanced sum of the composition MSE on the log1p niche
+        vector and a Dirichlet-multinomial NLL whose target is the COUNT-SCALE
+        aggregated-neighbor composition (the SAME weighted-mean neighbor aggregation
+        applied to the RAW counts, so its row sum is a real transcript total, NOT a
+        log1p mean): ``niche_loss = w_niche_mse * MSE(log1p niche) + w_dirmult *
+        DirMult_NLL(count-scale comp)``, with the DirMult reduced to a per-feature
+        mean so it is comparable to the MSE. ``"mse"`` (pure released composition MSE)
+        and ``"dirichlet_multinomial"`` (pure count-scale DirMult on the neighbor half,
+        log1p MSE on the self half) stay selectable. The DM niche modes require raw
+        integer counts (so the count-scale neighbor composition can be built), i.e. a
+        count ``cell_recon``; otherwise the trainer raises a clear error.
+    w_niche_mse, w_dirmult
+        Balancing weights for the two terms of the composite niche loss
+        (``"mse_dirmult"``). Both default to ``1.0``; the DirMult term is a
+        per-feature mean so it is comparable to the composition MSE at unit weight.
     gene_names
         Tuple of gene names matching ``input_dim``. Recorded in the checkpoint
         so that :func:`nicheverse.predict_codes` can verify gene
@@ -136,12 +184,16 @@ class ModelConfig:
     vq_distance: str = "l2"
     quantizer_type: str = "vq"
     quantizer_kwargs: dict[str, Any] = field(default_factory=dict)
-    encoder_type: str = "mlp_plr"
+    encoder_type: str = "mlp_deep"
     encoder_kwargs: dict[str, Any] = field(default_factory=dict)
     recon: str = "mse"
-    cell_recon: str = "default"
-    detection_weight: float = 0.0
-    niche_recon: str = "mse"
+    cell_recon: str = "nb"
+    detection_weight: float = 0.5
+    w_mse: float = 1.0
+    w_nb: float = 1.0
+    niche_recon: str = "mse_dirmult"
+    w_niche_mse: float = 1.0
+    w_dirmult: float = 1.0
     gene_names: tuple[str, ...] = field(default_factory=tuple)
 
     def __post_init__(self) -> None:
@@ -187,10 +239,22 @@ class ModelConfig:
         if self.detection_weight < 0:
             raise ValueError(f"detection_weight must be >= 0, got {self.detection_weight}")
         if self.detection_weight > 0 and self.cell_recon not in CELL_RECON_COUNT_MODES:
-            raise ValueError(
-                "detection_weight>0 (BCE detection hurdle) needs the raw counts as target; "
-                f"set cell_recon to one of {CELL_RECON_COUNT_MODES}, got {self.cell_recon!r}."
+            # The detection hurdle needs the raw counts as its target, which only the
+            # count modes carry. Rather than error (which would force every pure-MSE
+            # recovery to also zero detection_weight), silently IGNORE it for
+            # non-count modes and warn once, so cell_recon="mse" recovers the exact
+            # old MSE-only path even at the default detection_weight.
+            logger.warning(
+                "detection_weight=%.3g is ignored for cell_recon=%r (no raw-count target); "
+                "the detection hurdle only applies to count modes %s.",
+                self.detection_weight,
+                self.cell_recon,
+                CELL_RECON_COUNT_MODES,
             )
+        for wname in ("w_mse", "w_nb", "w_niche_mse", "w_dirmult"):
+            wv = getattr(self, wname)
+            if wv < 0:
+                raise ValueError(f"{wname} must be >= 0, got {wv}")
         if self.encoder_type not in _ENCODERS:
             raise ValueError(
                 f"encoder_type must be one of {sorted(_ENCODERS)}, got {self.encoder_type!r}"
@@ -318,7 +382,7 @@ class HierarchicalVQVAE(nn.Module):
         )
         if config.recon == "nb" or config.cell_recon in CELL_RECON_NB_MODES:
             self.cell_log_theta = nn.Parameter(torch.zeros(config.input_dim))
-        if config.niche_recon == "dirichlet_multinomial":
+        if config.niche_recon in NICHE_DIRMULT_MODES:
             # Per-feature log-concentration for the Dirichlet-multinomial niche
             # likelihood (the niche decoder emits (B, 2*input_dim); the DirMult is
             # applied to the aggregated-neighbor half, input_dim features).

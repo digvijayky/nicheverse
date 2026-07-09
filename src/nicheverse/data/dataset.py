@@ -444,6 +444,18 @@ class SpatialDataset(Dataset):
     def _compute_neighborhood_features(self) -> torch.Tensor:
         n_cells, feat_dim = self.cell_features.shape
         out = torch.full((n_cells, feat_dim * 2), float("nan"), dtype=torch.float32)
+        # Count-scale aggregated-neighbor composition, built ONLY when a raw-count
+        # recon_target is present (count / Dirichlet-multinomial modes). It applies
+        # the SAME neighbor aggregation (same graph, same indices, same weights) as
+        # the log1p neighborhood half, but to the RAW counts, so the DM likelihood
+        # sees a count-scale composition whose row sum is a meaningful transcript
+        # total (not a sum of log1p values). None otherwise.
+        make_counts = self.recon_target is not None
+        self.niche_count_target: torch.Tensor | None = (
+            torch.full((n_cells, feat_dim), float("nan"), dtype=torch.float32)
+            if make_counts
+            else None
+        )
         for sample in np.unique(self.sample_ids):
             sidx = np.where(self.sample_ids == sample)[0]
             n_in_sample = len(sidx)
@@ -452,15 +464,28 @@ class SpatialDataset(Dataset):
             self_feats = self.cell_features[sidx]
             if n_in_sample == 1:
                 out[sidx[0]] = torch.cat([self_feats[0], self_feats[0]])
+                if make_counts:
+                    # Mirror the log1p single-cell fallback (neighbor half = self):
+                    # the count-scale neighbor composition is the cell's own counts.
+                    self.niche_count_target[sidx[0]] = self.recon_target[sidx[0]]
                 continue
             idx, dist = self._neighbor_graph(self.spatial_coords[sidx])
             agg = self._aggregate(self_feats, idx, dist)
             out[torch.as_tensor(sidx)] = torch.cat([self_feats, agg], dim=1)
+            if make_counts:
+                # Reuse the identical (idx, dist): re-run only the aggregation on the
+                # raw counts. No kNN / graph rebuild.
+                agg_counts = self._aggregate(self.recon_target[sidx], idx, dist)
+                self.niche_count_target[torch.as_tensor(sidx)] = agg_counts
         if torch.isnan(out).any():
             n_bad = int(torch.isnan(out).any(dim=1).sum().item())
             raise RuntimeError(
                 f"Internal error: {n_bad} cells did not receive a neighborhood feature. "
                 "This is a bug; please file an issue with input shape information."
+            )
+        if make_counts and torch.isnan(self.niche_count_target).any():
+            raise RuntimeError(
+                "Internal error: some cells did not receive a niche_count_target. This is a bug."
             )
         return out
 
