@@ -39,12 +39,44 @@ import torch.nn.functional as F
 
 __all__ = [
     "SPATIAL_LOSSES",
+    "NICHE_SPATIAL_LOSSES",
+    "gaussian_nll",
     "nb_nll",
     "poisson_nll",
+    "dirichlet_multinomial_nll",
+    "bernoulli_detection_bce",
+    "graph_total_variation",
     "codebook_consistency",
     "laplacian_smoothness",
     "spatial_contrastive",
 ]
+
+
+def gaussian_nll(target: torch.Tensor, pred: torch.Tensor) -> torch.Tensor:
+    """Gaussian reconstruction loss (mean squared error), the default cell/niche head.
+
+    Up to an additive constant and a factor, the negative log-likelihood of a
+    Gaussian with fixed unit variance is the mean squared error between the
+    prediction and the target, so this is the MSE reconstruction term named as a
+    likelihood for uniform, by-name dispatch alongside :func:`nb_nll`,
+    :func:`poisson_nll`, and :func:`dirichlet_multinomial_nll`. It is the released
+    default for both the cell branch (on the log1p expression) and the niche branch
+    (on the aggregated composition), and is numerically identical to
+    ``torch.nn.functional.mse_loss(pred, target)`` (mean reduction).
+
+    Parameters
+    ----------
+    target : torch.Tensor
+        Reconstruction target (any shape).
+    pred : torch.Tensor
+        Predicted reconstruction, same shape as ``target``.
+
+    Returns
+    -------
+    torch.Tensor
+        Scalar mean squared error.
+    """
+    return F.mse_loss(pred, target)
 
 
 def _knn(coords: torch.Tensor, k: int) -> torch.Tensor:
@@ -167,15 +199,12 @@ def codebook_consistency(
     return F.relu(diff - margin).mean()
 
 
-SPATIAL_LOSSES = {
-    "laplacian": laplacian_smoothness,
-    "contrastive": spatial_contrastive,
-    "codebook_consistency": codebook_consistency,
-}
-
-
 def nb_nll(
-    x: torch.Tensor, cr: torch.Tensor, log_theta: torch.Tensor, eps: float = 1e-8
+    x: torch.Tensor,
+    cr: torch.Tensor,
+    log_theta: torch.Tensor,
+    eps: float = 1e-8,
+    library: torch.Tensor | None = None,
 ) -> torch.Tensor:
     """Negative-binomial negative log-likelihood (scVI mean-dispersion parameterization).
 
@@ -194,19 +223,27 @@ def nb_nll(
         Observed raw counts, shape ``(B, N)`` (N genes). Not normalized.
     cr : torch.Tensor
         Per-gene decoder logits, shape ``(B, N)``; softmaxed to proportions and
-        scaled by ``x.sum(1)`` (library size).
+        scaled by ``library`` to form the NB mean ``mu``.
     log_theta : torch.Tensor
         Per-gene log inverse-dispersion, shape ``(N,)`` (a learned
         ``model.cell_log_theta`` parameter).
     eps : float, default=1e-8
         Numerical floor added inside logs.
+    library : torch.Tensor, optional
+        Per-cell multiplier for the softmax proportion (the library / GLM offset),
+        shape ``(B,)`` or ``(B, 1)``. When ``None`` (default, byte-identical to the
+        released path) the observed count sum ``x.sum(1)`` is used, which is the
+        standard scVI library. Pass an explicit per-cell size factor to override
+        it (the trainer passes the observed total count of the raw-count target so
+        the softmax proportion is scaled to the correct count scale even though the
+        encoder input was the log1p expression).
 
     Returns
     -------
     torch.Tensor
         Scalar mean NB negative log-likelihood over the batch.
     """
-    library = x.sum(1, keepdim=True)
+    library = x.sum(1, keepdim=True) if library is None else library.reshape(-1, 1).to(cr.dtype)
     mu = torch.softmax(cr, dim=1) * library
     theta = log_theta.exp()
     lg = torch.log(theta + mu + eps)
@@ -220,7 +257,9 @@ def nb_nll(
     return -res.sum(1).mean()
 
 
-def poisson_nll(x: torch.Tensor, cr: torch.Tensor, eps: float = 1e-8) -> torch.Tensor:
+def poisson_nll(
+    x: torch.Tensor, cr: torch.Tensor, eps: float = 1e-8, library: torch.Tensor | None = None
+) -> torch.Tensor:
     """Poisson negative log-likelihood with a library-size-scaled softmax mean.
 
     Count reconstruction loss selected by ``ModelConfig.recon="poisson"``. Like
@@ -239,12 +278,144 @@ def poisson_nll(x: torch.Tensor, cr: torch.Tensor, eps: float = 1e-8) -> torch.T
         library size to form the rate ``mu``.
     eps : float, default=1e-8
         Numerical floor inside the log.
+    library : torch.Tensor, optional
+        Per-cell multiplier for the softmax proportion (the library / GLM offset),
+        shape ``(B,)`` or ``(B, 1)``. When ``None`` (default) the observed count
+        sum ``x.sum(1)`` is used; pass an explicit per-cell size factor to override
+        it. See :func:`nb_nll`.
 
     Returns
     -------
     torch.Tensor
         Scalar mean Poisson negative log-likelihood over the batch.
     """
-    library = x.sum(1, keepdim=True)
+    library = x.sum(1, keepdim=True) if library is None else library.reshape(-1, 1).to(cr.dtype)
     mu = torch.softmax(cr, dim=1) * library
     return (mu - x * torch.log(mu + eps)).sum(1).mean()
+
+
+def bernoulli_detection_bce(x: torch.Tensor, logits: torch.Tensor) -> torch.Tensor:
+    """Binary-cross-entropy detection hurdle on the 0-vs-nonzero mask of counts.
+
+    A per-gene Bernoulli likelihood over whether each gene is DETECTED (count > 0)
+    in a cell, using ``logits`` as the detection logits. Summing this with a count
+    NLL forms a hurdle model that separates the probability of detection from the
+    conditional count magnitude, which better fits the excess zeros of sparse
+    imaging panels (Xenium). Opt-in via ``ModelConfig.detection_weight > 0``.
+
+    Parameters
+    ----------
+    x : torch.Tensor
+        Observed raw counts, shape ``(B, N)``. The target mask is ``(x > 0)``.
+    logits : torch.Tensor
+        Per-gene detection logits, shape ``(B, N)`` (the cell decoder output is
+        reused as the logits, so no extra head is needed).
+
+    Returns
+    -------
+    torch.Tensor
+        Scalar mean BCE (summed over genes, averaged over cells).
+    """
+    target = (x > 0).to(logits.dtype)
+    return F.binary_cross_entropy_with_logits(logits, target, reduction="none").sum(1).mean()
+
+
+def dirichlet_multinomial_nll(
+    target: torch.Tensor, logits: torch.Tensor, log_alpha: torch.Tensor, eps: float = 1e-8
+) -> torch.Tensor:
+    """Dirichlet-multinomial negative log-likelihood for a compositional target.
+
+    A proper likelihood for a niche composition vector: the decoder ``logits`` are
+    softmaxed into a mean composition ``p`` and scaled by a learned per-feature
+    concentration ``exp(log_alpha)`` to form the Dirichlet parameters
+    ``alpha = p * sum(exp(log_alpha))`` (a mean/precision parameterization). The
+    ``target`` is treated as a (possibly fractional) count vector ``c`` with total
+    ``N = c.sum(1)``, and the Dirichlet-multinomial log-density is evaluated with
+    ``lgamma`` (well-defined for non-integer ``c``, so it handles the continuous
+    aggregated-neighbor composition without rounding). Unlike an MSE on the
+    composition, it respects that the target is a normalized, overdispersed
+    proportion. Opt-in via ``ModelConfig.niche_recon="dirichlet_multinomial"``.
+
+    Parameters
+    ----------
+    target : torch.Tensor
+        Compositional count target, shape ``(B, N)``, non-negative. Its per-row
+        sum is used as the multinomial total.
+    logits : torch.Tensor
+        Per-feature decoder logits, shape ``(B, N)``; softmaxed to the mean
+        composition.
+    log_alpha : torch.Tensor
+        Per-feature log-concentration, shape ``(N,)`` (a learned
+        ``model.niche_log_alpha`` parameter). ``sum(exp(log_alpha))`` sets the
+        overall precision.
+    eps : float, default=1e-8
+        Numerical floor.
+
+    Returns
+    -------
+    torch.Tensor
+        Scalar mean Dirichlet-multinomial NLL over the batch.
+    """
+    c = target.clamp_min(0.0)
+    N = c.sum(1)  # (B,)
+    p = torch.softmax(logits, dim=1)
+    conc = log_alpha.exp().sum().clamp_min(eps)  # scalar precision
+    alpha = p * conc + eps  # (B, N)
+    a0 = alpha.sum(1)  # (B,)
+    # log DM(c | alpha) = lgamma(N+1) - sum_i lgamma(c_i+1)
+    #                   + lgamma(a0) - lgamma(a0+N)
+    #                   + sum_i [ lgamma(c_i + alpha_i) - lgamma(alpha_i) ]
+    ll = (
+        torch.lgamma(N + 1.0)
+        - torch.lgamma(c + 1.0).sum(1)
+        + torch.lgamma(a0)
+        - torch.lgamma(a0 + N)
+        + (torch.lgamma(c + alpha) - torch.lgamma(alpha)).sum(1)
+    )
+    return -ll.mean()
+
+
+def graph_total_variation(z: torch.Tensor, coords: torch.Tensor, k: int = 6) -> torch.Tensor:
+    """Graph total-variation (L1 fused-lasso) penalty on latents across neighbors.
+
+    The L1 analogue of :func:`laplacian_smoothness`: it penalizes the mean L1
+    (not squared-L2) difference between each cell's latent and its ``k`` spatial
+    nearest neighbors, ``mean_i mean_j |z_i - z_j|_1``. The L1 form is the fused
+    lasso / anisotropic total variation, which promotes piecewise-constant latent
+    fields (sharp niche boundaries with flat interiors) rather than the smooth
+    gradients an L2 penalty prefers. Registered as spatial loss ``"graph_tv"`` and
+    applied to the niche latent over the per-sample in-batch graph; it is opt-in
+    (``TrainConfig.spatial_loss_weight > 0``). Note that random mini-batches contain
+    few true spatial edges, so a spatial-contiguous sampler would strengthen this
+    term (not built here).
+
+    Parameters
+    ----------
+    z : torch.Tensor
+        Latent vectors, shape ``(B, D)``.
+    coords : torch.Tensor
+        Cell coordinates in microns, shape ``(B, 2)``.
+    k : int, default=6
+        Nearest neighbors per cell (excluding itself). Capped at ``B - 1``.
+
+    Returns
+    -------
+    torch.Tensor
+        Scalar mean L1 total-variation penalty over neighbor pairs.
+    """
+    nbr = _knn(coords, k)
+    return (z.unsqueeze(1) - z[nbr]).abs().sum(-1).mean()
+
+
+SPATIAL_LOSSES = {
+    "laplacian": laplacian_smoothness,
+    "contrastive": spatial_contrastive,
+    "codebook_consistency": codebook_consistency,
+    "graph_tv": graph_total_variation,
+}
+
+#: Spatial-loss names applied to the NICHE (neighborhood) latent instead of the
+#: cell latent. ``"graph_tv"`` (L1 fused-lasso total variation) smooths niche
+#: assignments across the spatial graph, so the trainer feeds it the neighborhood
+#: encoder output; all other entries operate on the cell latent.
+NICHE_SPATIAL_LOSSES = frozenset({"graph_tv"})

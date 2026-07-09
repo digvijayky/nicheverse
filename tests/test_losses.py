@@ -14,7 +14,7 @@ import torch
 from nicheverse import ModelConfig, TrainConfig, Trainer
 from nicheverse.losses import SPATIAL_LOSSES
 
-_TYPES = ["laplacian", "contrastive", "codebook_consistency"]
+_TYPES = ["laplacian", "contrastive", "codebook_consistency", "graph_tv"]
 
 
 def test_registry_names():

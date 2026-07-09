@@ -118,6 +118,7 @@ class SpatialDataset(Dataset):
         radius: float | None = 50.0,
         bandwidth: float | None = None,
         agg_chunk: int = _DEFAULT_AGG_CHUNK,
+        recon_target: Any | None = None,
     ) -> None:
         if hasattr(cell_features, "toarray"):
             cell_features = cell_features.toarray()
@@ -165,6 +166,21 @@ class SpatialDataset(Dataset):
             )
         if n_cells == 0:
             raise ValueError("SpatialDataset received zero cells; cannot build a dataset.")
+        # Optional per-cell raw-count reconstruction target. Stored, NOT returned
+        # by __getitem__ (which keeps its 3-tuple contract); the trainer indexes it
+        # by batch_idx so a count likelihood (NB / Poisson) can be evaluated on the
+        # raw counts while the encoder input (self.cell_features) stays the log1p
+        # expression. Stays None on the released path (byte-identical behavior).
+        self.recon_target: torch.Tensor | None = None
+        if recon_target is not None:
+            if hasattr(recon_target, "toarray"):
+                recon_target = recon_target.toarray()
+            self.recon_target = torch.as_tensor(np.asarray(recon_target), dtype=torch.float32)
+            if self.recon_target.shape != self.cell_features.shape:
+                raise ValueError(
+                    f"recon_target shape {tuple(self.recon_target.shape)} != cell_features shape "
+                    f"{tuple(self.cell_features.shape)}"
+                )
         self.neighborhood_features = self._compute_neighborhood_features()
 
     @classmethod
@@ -177,6 +193,7 @@ class SpatialDataset(Dataset):
         y_col: str | None = None,
         coord_scale: float = 1.0,
         transcript_context_key: str | None = None,
+        recon_target_layer: str | None = None,
         **kwargs: Any,
     ) -> SpatialDataset:
         """Build a dataset from an AnnData of any imaging spatial-transcriptomics platform.
@@ -203,6 +220,13 @@ class SpatialDataset(Dataset):
             transcript-context features from :func:`~nicheverse.data.transcript_context`)
             onto ``X`` to form the cell features. The model ``input_dim`` must then be
             ``X.shape[1] + obsm[key].shape[1]``.
+        recon_target_layer
+            If given, take the per-cell raw-count reconstruction target from
+            ``adata.layers[recon_target_layer]`` (shape must match ``X``). Used by
+            the count-recon cell modes (``cell_recon`` in ``{"nb","poisson","both"}``)
+            so the encoder can see log1p ``X`` while the likelihood models the raw
+            counts. ``None`` (default) leaves the dataset with no separate recon
+            target (MSE reconstructs the input).
         **kwargs
             Forwarded to :class:`SpatialDataset` (``k_neighbors``, ``spatial_graph``, ...).
         """
@@ -232,7 +256,21 @@ class SpatialDataset(Dataset):
                 xc = xc.toarray()
             tc = np.asarray(adata.obsm[transcript_context_key], dtype=np.float32)
             cell_feats = np.concatenate([np.asarray(xc, dtype=np.float32), tc], axis=1)
-        return cls(cell_feats, coords * float(coord_scale), samples, **kwargs)
+        recon_target = None
+        if recon_target_layer is not None:
+            if recon_target_layer not in adata.layers:
+                raise ValueError(
+                    f"recon_target_layer={recon_target_layer!r} not in adata.layers "
+                    f"(have {list(adata.layers.keys())})."
+                )
+            recon_target = adata.layers[recon_target_layer]
+        return cls(
+            cell_feats,
+            coords * float(coord_scale),
+            samples,
+            recon_target=recon_target,
+            **kwargs,
+        )
 
     def _knn_graph(self, coords: np.ndarray, n: int) -> tuple[np.ndarray, np.ndarray]:
         """Plain k-nearest-neighbor graph (also the fallback for degenerate samples)."""

@@ -20,6 +20,21 @@ from .quantizers import _QUANTIZERS, build_quantizer
 
 logger = logging.getLogger(__name__)
 
+# Cell-branch reconstruction modes. "default" defers to ``recon`` (byte-identical
+# to the released MSE-on-log1p path). "nb"/"poisson"/"both" put a count likelihood
+# on the RAW counts with a softmax-proportion decoder scaled by the OBSERVED total
+# count per cell (the standard scVI library, i.e. recon_target.sum(1)); the encoder
+# input stays the log1p expression, so the count modes need the raw counts carried
+# separately as a reconstruction target. "both" sums MSE-on-log1p and the NB term.
+CELL_RECON_MODES = ("default", "mse", "nb", "poisson", "both")
+# Modes that need the raw-count reconstruction target (and hence a cell_log_theta
+# for the NB variants). Membership gates the raw-count plumbing in the trainer.
+CELL_RECON_COUNT_MODES = ("nb", "poisson", "both")
+# Modes that allocate a learned per-gene NB dispersion.
+CELL_RECON_NB_MODES = ("nb", "both")
+# Niche-branch reconstruction modes. "mse" is the released composition MSE.
+NICHE_RECON_MODES = ("mse", "dirichlet_multinomial")
+
 
 @dataclass
 class ModelConfig:
@@ -71,6 +86,31 @@ class ModelConfig:
     recon
         Reconstruction likelihood: ``"mse"`` (default, Gaussian), ``"nb"``
         (negative binomial, raw counts), or ``"poisson"`` (raw counts).
+    cell_recon
+        Cell-branch reconstruction mode (opt-in; ``"default"`` keeps the released
+        behavior). ``"default"`` defers to ``recon`` and is byte-identical to the
+        MSE-on-log1p path. The count modes decouple the encoder input (which stays
+        log1p expression) from the decoder likelihood, which is evaluated on the
+        RAW integer counts with a softmax-proportion decoder scaled by the
+        OBSERVED total count per cell (the standard scVI library):
+        ``"nb"`` uses a negative-binomial NLL (allocating a learned
+        ``cell_log_theta`` dispersion), ``"poisson"`` uses a Poisson NLL, and
+        ``"both"`` sums the MSE-on-log1p term and the NB NLL. The count modes
+        require ``TrainConfig(normalize=True, log1p=True)`` (log1p encoder input);
+        the trainer captures the raw counts into a layer as the reconstruction
+        target automatically.
+    detection_weight
+        Weight of an optional additive Bernoulli/BCE detection hurdle on the cell
+        branch (``0`` default = off). When ``> 0``, a binary-cross-entropy term on
+        the 0-vs-nonzero mask of the raw counts (using the decoder output as the
+        detection logits) is added to the cell reconstruction loss with this
+        weight. Requires a count-mode ``cell_recon`` (so the raw counts are
+        available as the target).
+    niche_recon
+        Neighborhood-branch reconstruction mode (opt-in; ``"mse"`` default =
+        released composition MSE). ``"dirichlet_multinomial"`` replaces the MSE on
+        the aggregated neighbor composition with a Dirichlet-multinomial NLL over
+        that composition (a proper likelihood for compositional niche vectors).
     gene_names
         Tuple of gene names matching ``input_dim``. Recorded in the checkpoint
         so that :func:`nicheverse.predict_codes` can verify gene
@@ -99,6 +139,9 @@ class ModelConfig:
     encoder_type: str = "mlp_plr"
     encoder_kwargs: dict[str, Any] = field(default_factory=dict)
     recon: str = "mse"
+    cell_recon: str = "default"
+    detection_weight: float = 0.0
+    niche_recon: str = "mse"
     gene_names: tuple[str, ...] = field(default_factory=tuple)
 
     def __post_init__(self) -> None:
@@ -125,6 +168,29 @@ class ModelConfig:
             raise ValueError(f"cross_attention_heads must be >= 1, got {self.cross_attention_heads}")
         if self.recon not in ("mse", "nb", "poisson"):
             raise ValueError(f"recon must be one of (mse, nb, poisson), got {self.recon!r}")
+        if self.cell_recon not in CELL_RECON_MODES:
+            raise ValueError(
+                f"cell_recon must be one of {CELL_RECON_MODES}, got {self.cell_recon!r}"
+            )
+        if self.cell_recon in CELL_RECON_COUNT_MODES and self.recon != "mse":
+            # The count-mode cell_recon carries its own likelihood on the raw
+            # counts (encoder input stays log1p). Combining it with recon in
+            # {nb,poisson} (which forces raw-count encoder input) is contradictory.
+            raise ValueError(
+                f"cell_recon={self.cell_recon!r} expects recon='mse' (log1p encoder input); "
+                f"got recon={self.recon!r}."
+            )
+        if self.niche_recon not in NICHE_RECON_MODES:
+            raise ValueError(
+                f"niche_recon must be one of {NICHE_RECON_MODES}, got {self.niche_recon!r}"
+            )
+        if self.detection_weight < 0:
+            raise ValueError(f"detection_weight must be >= 0, got {self.detection_weight}")
+        if self.detection_weight > 0 and self.cell_recon not in CELL_RECON_COUNT_MODES:
+            raise ValueError(
+                "detection_weight>0 (BCE detection hurdle) needs the raw counts as target; "
+                f"set cell_recon to one of {CELL_RECON_COUNT_MODES}, got {self.cell_recon!r}."
+            )
         if self.encoder_type not in _ENCODERS:
             raise ValueError(
                 f"encoder_type must be one of {sorted(_ENCODERS)}, got {self.encoder_type!r}"
@@ -250,8 +316,13 @@ class HierarchicalVQVAE(nn.Module):
         self.neighborhood_decoder = _mlp(
             config.neighborhood_embedding_dim, list(reversed(hd)), config.input_dim * 2
         )
-        if config.recon == "nb":
+        if config.recon == "nb" or config.cell_recon in CELL_RECON_NB_MODES:
             self.cell_log_theta = nn.Parameter(torch.zeros(config.input_dim))
+        if config.niche_recon == "dirichlet_multinomial":
+            # Per-feature log-concentration for the Dirichlet-multinomial niche
+            # likelihood (the niche decoder emits (B, 2*input_dim); the DirMult is
+            # applied to the aggregated-neighbor half, input_dim features).
+            self.niche_log_alpha = nn.Parameter(torch.zeros(config.input_dim))
 
     def forward(
         self,

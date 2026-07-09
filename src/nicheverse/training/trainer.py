@@ -25,12 +25,19 @@ import anndata as ad
 import numpy as np
 import scanpy as sc
 import torch
-import torch.nn.functional as F
 from torch.utils.data import DataLoader, Subset
 
 from ..data import SpatialDataset
 from ..data.xenium import attach_codes_to_adata
-from ..losses import SPATIAL_LOSSES, nb_nll, poisson_nll
+from ..losses import (
+    NICHE_SPATIAL_LOSSES,
+    SPATIAL_LOSSES,
+    bernoulli_detection_bce,
+    dirichlet_multinomial_nll,
+    gaussian_nll,
+    nb_nll,
+    poisson_nll,
+)
 from ..models import HierarchicalVQVAE, ModelConfig, save_checkpoint
 from ..utils import seed_everything, write_env_snapshot
 
@@ -525,14 +532,72 @@ def _build_scheduler(
     return torch.optim.lr_scheduler.ReduceLROnPlateau(optim, "min", patience=5, factor=0.5), True
 
 
-def _cell_recon(model: HierarchicalVQVAE, cr: torch.Tensor, cb: torch.Tensor) -> torch.Tensor:
-    """Cell reconstruction loss per ``model.config.recon`` (mse default = released behavior)."""
+def _cell_recon(
+    model: HierarchicalVQVAE,
+    cr: torch.Tensor,
+    cb: torch.Tensor,
+    recon_target: torch.Tensor | None = None,
+) -> torch.Tensor:
+    """Cell reconstruction loss.
+
+    Dispatch (the default path is byte-identical to the released behavior):
+
+    * ``config.cell_recon`` in {``"nb"``, ``"poisson"``, ``"both"``}: the encoder
+      input ``cb`` is log1p expression, so the count likelihood is evaluated on
+      the raw-count ``recon_target`` (supplied by the trainer), with the softmax
+      proportion scaled by the OBSERVED total count per cell
+      (``recon_target.sum(1)``, the standard scVI library). ``"both"`` also adds
+      the MSE-on-log1p term (:func:`~nicheverse.losses.gaussian_nll`). An optional Bernoulli/BCE
+      detection hurdle (``config.detection_weight > 0``) is added on top, using the
+      decoder output as the detection logits on the 0-vs-nonzero mask of the raw
+      counts.
+    * ``config.cell_recon`` in {``"default"``, ``"mse"``}: fall back to
+      ``config.recon`` on ``cb`` (``"mse"`` default; or ``"nb"`` / ``"poisson"``
+      when the encoder input is itself raw counts, the released count path).
+    """
+    cm = getattr(model.config, "cell_recon", "default")
+    if cm in ("nb", "poisson", "both"):
+        if recon_target is None:
+            raise ValueError(
+                f"cell_recon={cm!r} requires a raw-count recon_target; the trainer did not "
+                "provide one."
+            )
+        library = recon_target.sum(1, keepdim=True)  # observed total count (scVI library)
+        if cm == "poisson":
+            loss = poisson_nll(recon_target, cr, library=library)
+        else:
+            loss = nb_nll(recon_target, cr, model.cell_log_theta, library=library)
+        if cm == "both":
+            loss = gaussian_nll(cb, cr) + loss
+        dw = float(getattr(model.config, "detection_weight", 0.0))
+        if dw > 0:
+            loss = loss + dw * bernoulli_detection_bce(recon_target, cr)
+        return loss
     recon = model.config.recon
     if recon == "mse":
-        return F.mse_loss(cr, cb)
+        return gaussian_nll(cb, cr)
     if recon == "nb":
         return nb_nll(cb, cr, model.cell_log_theta)
     return poisson_nll(cb, cr)
+
+
+def _niche_recon(model: HierarchicalVQVAE, nr: torch.Tensor, nb: torch.Tensor) -> torch.Tensor:
+    """Neighborhood reconstruction loss.
+
+    ``config.niche_recon="mse"`` (default) is the released composition MSE over the
+    full ``(B, 2*input_dim)`` niche vector. ``"dirichlet_multinomial"`` replaces the
+    MSE on the aggregated-neighbor half (the second ``input_dim`` features, a
+    compositional niche vector) with a Dirichlet-multinomial NLL, and keeps an MSE
+    on the self half so the self-expression part of the target is still fit.
+    """
+    if getattr(model.config, "niche_recon", "mse") == "dirichlet_multinomial":
+        d = model.config.input_dim
+        self_half, comp_half = nr[:, :d], nr[:, d:]
+        self_tgt, comp_tgt = nb[:, :d], nb[:, d:]
+        return gaussian_nll(self_tgt, self_half) + dirichlet_multinomial_nll(
+            comp_tgt, comp_half, model.niche_log_alpha
+        )
+    return gaussian_nll(nb, nr)
 
 
 def train_model(
@@ -603,6 +668,13 @@ def train_model(
         )
     if not 0.0 <= tc.val_fraction < 1.0:
         raise ValueError(f"val_fraction must be in [0, 1), got {tc.val_fraction}")
+    _cell_recon_mode = (
+        getattr(model_config, "cell_recon", "default") if model_config is not None else "default"
+    )
+    # Count-likelihood cell modes: encoder input stays log1p, but the likelihood is
+    # evaluated on the RAW counts (captured to a layer below), scaled by the
+    # observed total count per cell (the scVI library). No external size factor.
+    _count_mode = _cell_recon_mode in ("nb", "poisson", "both")
     if (
         model_config is not None
         and model_config.recon in ("nb", "poisson")
@@ -612,8 +684,28 @@ def train_model(
             f"recon={model_config.recon!r} expects raw counts; set "
             "TrainConfig(normalize=False, log1p=False)."
         )
+    if _count_mode and not (tc.normalize and tc.log1p):
+        raise ValueError(
+            f"cell_recon={_cell_recon_mode!r} needs log1p encoder input; set "
+            "TrainConfig(normalize=True, log1p=True). The raw counts are captured into a "
+            "layer before preprocessing and used as the count reconstruction target."
+        )
 
     adata = adata.copy()
+    # Capture raw counts BEFORE log1p so the count modes can reconstruct them while
+    # the encoder still sees the log1p input. Guarded by _count_mode so the released
+    # MSE / nb / poisson paths add no layer and stay byte-identical.
+    if _count_mode:
+        if not _looks_like_raw_counts(adata):
+            raise ValueError(
+                f"cell_recon={_cell_recon_mode!r} needs raw integer counts in adata.X to build "
+                "the count reconstruction target, but adata.X does not look like raw counts."
+            )
+        import scipy.sparse as sp
+
+        adata.layers["_raw_counts"] = adata.X.copy() if sp.issparse(adata.X) else np.asarray(
+            adata.X
+        ).copy()
     _preprocess(adata, tc.normalize, tc.log1p)
 
     input_dim = int(adata.X.shape[1])
@@ -730,6 +822,7 @@ def train_model(
         spatial_graph=tc.spatial_graph,
         radius=tc.radius,
         bandwidth=tc.bandwidth,
+        recon_target_layer="_raw_counts" if _count_mode else None,
     )
 
     pin = (device_t.type == "cuda") if tc.pin_memory is None else bool(tc.pin_memory)
@@ -853,12 +946,16 @@ def train_model(
             cb = cb.to(device_t)
             nb = nb.to(device_t)
             optim.zero_grad(set_to_none=True)
+            rt = None
+            if _count_mode:
+                bidx = batch_idx.to(dataset.recon_target.device)
+                rt = dataset.recon_target[bidx].to(device_t)
             with torch.autocast(
                 device_type=device_t.type, enabled=tc.amp and device_t.type == "cuda"
             ):
                 cr, nr, cvq, nvq, _ci, _ni, cp, np_ = model(cb, nb)
-                cell_recon = _cell_recon(core, cr, cb)
-                neigh_recon = F.mse_loss(nr, nb)
+                cell_recon = _cell_recon(core, cr, cb, recon_target=rt)
+                neigh_recon = _niche_recon(core, nr, nb)
                 loss = tc.cell_weight * (cell_recon + cvq) + tc.neighborhood_weight * (
                     neigh_recon + nvq
                 )
@@ -871,9 +968,14 @@ def train_model(
                     coords_np = spatial_coords_np[bidx].astype(np.float64).copy()
                     coords_np += sample_codes_np[bidx][:, None] * (coord_span * 10.0)
                     coords_b = torch.as_tensor(coords_np, dtype=torch.float64, device=device_t)
-                    z_cell = core.cell_encoder(cb)
+                    # graph_tv smooths the NICHE latent over the spatial graph; all
+                    # other spatial losses regularize the cell latent (released path).
+                    if tc.spatial_loss_type in NICHE_SPATIAL_LOSSES:
+                        z_reg = core.neighborhood_encoder(nb)
+                    else:
+                        z_reg = core.cell_encoder(cb)
                     loss = loss + tc.spatial_loss_weight * SPATIAL_LOSSES[tc.spatial_loss_type](
-                        z_cell, coords_b, k=tc.spatial_loss_k
+                        z_reg, coords_b, k=tc.spatial_loss_k
                     )
             scaler.scale(loss).backward()
             if tc.grad_clip is not None:
@@ -932,7 +1034,11 @@ def train_model(
             }
         monitor = avg["total"]
         if val_loader is not None:
-            avg["val_total"] = _val_loss(core, val_loader, device_t, tc)
+            # Pass the count-target dataset only in the count-recon modes so the
+            # released signature (model, loader, device, tc) is used verbatim
+            # otherwise (keeps monkeypatch-based tests and external callers working).
+            _val_kw = {"count_dataset": dataset} if _count_mode else {}
+            avg["val_total"] = _val_loss(core, val_loader, device_t, tc, **_val_kw)
             monitor = avg["val_total"]
         avg["epoch_seconds"] = round(time.perf_counter() - t_epoch_start, 3)
         losses.append(avg)
@@ -1074,6 +1180,8 @@ def train_model(
     np.savez_compressed(checkpoint_dir / "hierarchical_neighborhood_indices.npz", indices=neigh_idx)
 
     attach_codes_to_adata(adata, cell_idx, neigh_idx, cell_emb, neigh_emb)
+    # Drop the internal raw-count target layer so the exported adata stays lean.
+    adata.layers.pop("_raw_counts", None)
     adata.write_h5ad(checkpoint_dir / "adata_with_hierarchical_embeddings.h5ad")
     if use_ddp:
         from .._distributed import cleanup_distributed
@@ -1083,19 +1191,31 @@ def train_model(
 
 
 def _val_loss(
-    model: HierarchicalVQVAE, loader: DataLoader, device: torch.device, tc: TrainConfig
+    model: HierarchicalVQVAE,
+    loader: DataLoader,
+    device: torch.device,
+    tc: TrainConfig,
+    count_dataset: object | None = None,
 ) -> float:
-    """Mean total loss over a validation loader (no grad)."""
+    """Mean total loss over a validation loader (no grad).
+
+    ``count_dataset`` (the full :class:`SpatialDataset`) is passed only for the
+    count-recon cell modes so the raw-count target can be indexed by the batch
+    index; it is ``None`` on all other paths (released signature).
+    """
     model.eval()
     total = 0.0
     n = 0
     with torch.inference_mode():
-        for cb, nb, _ in loader:
+        for cb, nb, bidx in loader:
             cb, nb = cb.to(device), nb.to(device)
+            rt = None
+            if count_dataset is not None:
+                rt = count_dataset.recon_target[bidx].to(device)
             cr, nr, cvq, nvq, _ci, _ni, _cp, _np = model(cb, nb)
-            loss = tc.cell_weight * (_cell_recon(model, cr, cb) + cvq) + tc.neighborhood_weight * (
-                F.mse_loss(nr, nb) + nvq
-            )
+            loss = tc.cell_weight * (
+                _cell_recon(model, cr, cb, recon_target=rt) + cvq
+            ) + tc.neighborhood_weight * (_niche_recon(model, nr, nb) + nvq)
             total += float(loss.item())
             n += 1
     model.train()
