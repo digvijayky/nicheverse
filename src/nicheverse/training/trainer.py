@@ -300,13 +300,38 @@ def _already_log_normalized(adata: ad.AnnData) -> bool:
     return "log1p" in adata.uns or "normalize_total" in adata.uns
 
 
+def _looks_like_raw_counts(adata: ad.AnnData) -> bool:
+    """True iff ``adata.X`` holds non-negative integer values (raw counts). Checks a
+    bounded sample of the (nonzero) values so it is cheap on multi-million-cell matrices."""
+    import scipy.sparse as sp
+
+    X = adata.X
+    vals = X.data[:200_000] if sp.issparse(X) else np.asarray(X[:5000]).ravel()
+    if vals.size == 0:
+        return True  # all-zero matrix: treat as counts
+    return bool(np.nanmin(vals) >= 0 and np.allclose(vals, np.round(vals)))
+
+
 def _preprocess(adata: ad.AnnData, normalize: bool, log1p: bool) -> ad.AnnData:
-    if _already_log_normalized(adata) and (normalize or log1p):
+    if not (normalize or log1p):
+        return adata
+    # Guard 1: scanpy provenance marker says the matrix is already processed -> skip.
+    if _already_log_normalized(adata):
         logger.warning(
             "AnnData appears to be already log-normalized (uns has 'log1p' or "
             "'normalize_total'); skipping requested normalize/log1p to avoid double normalization."
         )
         return adata
+    # Guard 2: no marker, but X is not integer-valued -> almost certainly already
+    # transformed; refuse to (double-)normalize rather than silently corrupt the input.
+    if not _looks_like_raw_counts(adata):
+        raise ValueError(
+            "normalize/log1p was requested but adata.X does not look like raw counts "
+            "(non-integer or negative values) and carries no scanpy normalization marker. "
+            "Refusing to transform to avoid double-normalizing an already-processed matrix. "
+            "Pass normalize=False, log1p=False if the input is already normalized; "
+            "otherwise ensure adata.X holds integer counts."
+        )
     if normalize:
         sc.pp.normalize_total(adata)
     if log1p:
