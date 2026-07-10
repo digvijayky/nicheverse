@@ -8,12 +8,26 @@ differential expression, and the code's distribution over metadata columns
 
 from __future__ import annotations
 
+import os
+
 import anndata as ad
 import numpy as np
 import pandas as pd
 import scipy.sparse as sp
 
-__all__ = ["code_evidence", "niche_evidence", "cluster_codes"]
+__all__ = [
+    "code_evidence",
+    "niche_evidence",
+    "cluster_codes",
+    "code_groundtruth_concordance",
+    "code_context",
+    "write_evidence_bundle",
+]
+
+
+def _sorted_codes(codes: pd.Series) -> list[str]:
+    """Codes as strings, sorted by (length, value) so 2 < 10 for numeric-looking codes."""
+    return sorted(codes.astype(str).unique(), key=lambda c: (len(c), c))
 
 
 def code_evidence(
@@ -176,3 +190,224 @@ def cluster_codes(
     k = min(n_clusters or max(2, len(uniq) // 8), len(uniq))
     labels = fcluster(linkage_z, t=k, criterion="maxclust")
     return pd.DataFrame({"cluster": [int(v) for v in labels]}, index=uniq)
+
+
+def code_groundtruth_concordance(
+    adata: ad.AnnData, code_col: str, groundtruth_col: str
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Cross-check codes against an independent ground-truth clustering/annotation.
+
+    Compares the learned codes in ``obs[code_col]`` to a separately-derived label
+    column (e.g. a Leiden clustering or a manual annotation) in ``obs[groundtruth_col]``.
+    This is the Leiden cross-check step of the codebook-review pipeline.
+
+    Parameters
+    ----------
+    adata
+        AnnData carrying both columns in ``obs``.
+    code_col
+        Column with the learned code index.
+    groundtruth_col
+        Column with the independent ground-truth label.
+
+    Returns
+    -------
+    tuple
+        ``(crosstab, majority)``. ``crosstab`` is a DataFrame of code (rows) x
+        ground-truth group (columns) normalized so each code row sums to ~1
+        (rows for codes with no valid ground-truth cells are all zero).
+        ``majority`` has one row per code with columns
+        ``code, majority_group, majority_frac, n_cells``.
+    """
+    codes_all = adata.obs[code_col].astype(str)
+    uniq = _sorted_codes(codes_all)
+    if groundtruth_col not in adata.obs.columns:
+        crosstab = pd.DataFrame(0.0, index=uniq, columns=[])
+        maj = pd.DataFrame(
+            {
+                "code": uniq,
+                "majority_group": [None] * len(uniq),
+                "majority_frac": [0.0] * len(uniq),
+                "n_cells": [int((codes_all == c).sum()) for c in uniq],
+            }
+        )
+        return crosstab, maj
+
+    gt = adata.obs[groundtruth_col].astype("object")
+    valid = gt.notna().to_numpy() & (gt.astype(str).to_numpy() != "nan")
+    gt_str = gt.astype(str)
+    counts = pd.crosstab(codes_all[valid], gt_str[valid])
+    gt_groups = sorted(map(str, counts.columns)) if counts.shape[1] else []
+    counts = counts.reindex(index=uniq, columns=gt_groups, fill_value=0)
+    row_tot = counts.sum(1).replace(0, np.nan)
+    crosstab = counts.div(row_tot, axis=0).fillna(0.0)
+    crosstab.index.name = "code"
+
+    rows = []
+    for c in uniq:
+        n_cells = int((codes_all == c).sum())
+        if len(gt_groups) and float(counts.loc[c].sum()) > 0:
+            top = counts.loc[c].idxmax()
+            frac = float(crosstab.loc[c, top])
+            rows.append((c, str(top), round(frac, 4), n_cells))
+        else:
+            rows.append((c, None, 0.0, n_cells))
+    maj = pd.DataFrame(rows, columns=["code", "majority_group", "majority_frac", "n_cells"])
+    return crosstab, maj
+
+
+def code_context(
+    adata: ad.AnnData,
+    code_col: str,
+    *,
+    patient_col: str | None = None,
+    context_cols: tuple[str, ...] = (),
+) -> pd.DataFrame:
+    """Per-code patient / specimen context.
+
+    One row per code with ``n_cells``, ``frac``, the number of distinct patients
+    (if ``patient_col`` given), and for each column in ``context_cols`` the
+    dominant value and its fraction. This is the patient/specimen-context step of
+    the codebook-review pipeline. Robust to absent columns (silently skipped).
+
+    Returns a DataFrame indexed by code with columns ``n_cells, frac``,
+    optional ``n_patients``, and per context col ``<col>_dominant`` +
+    ``<col>_dominant_frac``.
+    """
+    codes_all = adata.obs[code_col].astype(str)
+    uniq = _sorted_codes(codes_all)
+    n_total = len(codes_all)
+    rows: dict[str, dict] = {}
+    for c in uniq:
+        m = (codes_all == c).to_numpy()
+        row: dict = {"n_cells": int(m.sum()), "frac": float(m.mean()) if n_total else 0.0}
+        if patient_col and patient_col in adata.obs.columns:
+            row["n_patients"] = int(adata.obs.loc[m, patient_col].astype(str).nunique())
+        for col in context_cols:
+            if col in adata.obs.columns:
+                vc = adata.obs.loc[m, col].astype(str).value_counts(normalize=True)
+                if len(vc):
+                    row[f"{col}_dominant"] = str(vc.index[0])
+                    row[f"{col}_dominant_frac"] = round(float(vc.iloc[0]), 4)
+                else:
+                    row[f"{col}_dominant"] = None
+                    row[f"{col}_dominant_frac"] = 0.0
+        rows[c] = row
+    df = pd.DataFrame.from_dict(rows, orient="index")
+    df.index.name = "code"
+    return df
+
+
+def write_evidence_bundle(
+    adata: ad.AnnData,
+    code_col: str,
+    out_dir: str,
+    *,
+    groundtruth_col: str | None = None,
+    patient_col: str | None = None,
+    context_cols: tuple[str, ...] = (),
+    top_markers: int = 30,
+    top_degs: int = 30,
+    layer: str | None = None,
+) -> dict[str, str]:
+    """Compute the full per-code evidence bundle and dump it as CSVs.
+
+    Mirrors the documented 8-part codebook-review pipeline: per-code mean
+    expression, z-score across codes, top markers, one-vs-rest DEGs,
+    patient/specimen context, hierarchical code clustering, and (when a
+    ground-truth column is given) the ground-truth crosstab + per-code majority.
+
+    Parameters
+    ----------
+    adata
+        AnnData carrying the code assignment in ``obs[code_col]``.
+    code_col
+        Column of ``obs`` with the code index.
+    out_dir
+        Directory to write CSVs into (created if absent).
+    groundtruth_col
+        Optional independent label column for the Leiden/ground-truth cross-check.
+    patient_col
+        Optional column counted for ``n_patients`` in the context table.
+    context_cols
+        ``obs`` columns to summarize (dominant value) in the context table.
+    top_markers, top_degs
+        Numbers passed through to :func:`code_evidence`.
+    layer
+        Optional ``layers`` key for expression; defaults to ``X``.
+
+    Returns
+    -------
+    dict
+        Mapping of artifact name -> written CSV path.
+    """
+    os.makedirs(out_dir, exist_ok=True)
+    written: dict[str, str] = {}
+
+    codes = adata.obs[code_col].astype(str)
+    genes = list(map(str, adata.var_names))
+    uniq = _sorted_codes(codes)
+    x = adata.layers[layer] if layer else adata.X
+    xd = x.toarray() if sp.issparse(x) else np.asarray(x)
+    xd = np.nan_to_num(xd, nan=0.0, posinf=0.0, neginf=0.0)
+    means = np.vstack([xd[(codes == c).to_numpy()].mean(0) for c in uniq])
+    z = (means - means.mean(0)) / (means.std(0) + 1e-9)
+
+    mean_df = pd.DataFrame(means, index=uniq, columns=genes)
+    mean_df.index.name = "code"
+    p = os.path.join(out_dir, "per_code_mean_expression.csv")
+    mean_df.to_csv(p)
+    written["per_code_mean_expression"] = p
+
+    z_df = pd.DataFrame(z, index=uniq, columns=genes)
+    z_df.index.name = "code"
+    p = os.path.join(out_dir, "per_code_zscore_across_codes.csv")
+    z_df.to_csv(p)
+    written["per_code_zscore_across_codes"] = p
+
+    ev = code_evidence(
+        adata, code_col, top_markers=top_markers, top_degs=top_degs, layer=layer
+    )
+    mk_rows = []
+    for c in uniq:
+        for rank, (g, zz) in enumerate(ev.get(c, {}).get("top_markers", []), start=1):
+            mk_rows.append({"code": c, "rank": rank, "gene": g, "zscore": zz})
+    mk_df = pd.DataFrame(mk_rows, columns=["code", "rank", "gene", "zscore"])
+    p = os.path.join(out_dir, "per_code_top_markers.csv")
+    mk_df.to_csv(p, index=False)
+    written["per_code_top_markers"] = p
+
+    deg_rows = []
+    for c in uniq:
+        for rank, (g, lfc, padj) in enumerate(ev.get(c, {}).get("top_degs", []), start=1):
+            deg_rows.append(
+                {"code": c, "rank": rank, "gene": g, "log2fc": lfc, "pval_adj": padj}
+            )
+    deg_df = pd.DataFrame(deg_rows, columns=["code", "rank", "gene", "log2fc", "pval_adj"])
+    p = os.path.join(out_dir, "per_code_DEG_top30_1vsRest.csv")
+    deg_df.to_csv(p, index=False)
+    written["per_code_DEG_top30_1vsRest"] = p
+
+    ctx_df = code_context(
+        adata, code_col, patient_col=patient_col, context_cols=context_cols
+    )
+    p = os.path.join(out_dir, "per_code_context.csv")
+    ctx_df.to_csv(p)
+    written["per_code_context"] = p
+
+    clu = cluster_codes(adata, code_col, layer=layer)
+    clu.index.name = "code"
+    p = os.path.join(out_dir, "per_code_hier_cluster_assignment.csv")
+    clu.to_csv(p)
+    written["per_code_hier_cluster_assignment"] = p
+
+    if groundtruth_col is not None:
+        crosstab, maj = code_groundtruth_concordance(adata, code_col, groundtruth_col)
+        p = os.path.join(out_dir, "per_code_groundtruth_crosstab.csv")
+        crosstab.to_csv(p)
+        written["per_code_groundtruth_crosstab"] = p
+        p = os.path.join(out_dir, "per_code_groundtruth_majority.csv")
+        maj.to_csv(p, index=False)
+        written["per_code_groundtruth_majority"] = p
+
+    return written

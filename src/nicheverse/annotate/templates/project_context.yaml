@@ -1,0 +1,68 @@
+# nicheverse project context (annotated example: RCC brain-metastasis Xenium)
+# Fill in what you know; leave fields blank/[] to omit them from the LLM prompt.
+# nicheverse supports imaging-based / in-situ spatial transcriptomics (IMST) ONLY
+# (e.g. Xenium, CosMx, MERFISH/MERSCOPE, seqFISH, STARmap, ISS). A sequencing/array
+# platform (Visium, Slide-seq, Stereo-seq, GeoMx, ...) is rejected.
+
+name: RCC brain-metastasis atlas          # short study name
+species: human
+disease: clear cell renal cell carcinoma  # dominant histology in the cohort
+tissue: kidney and brain metastasis
+platform: xenium                          # imaging-based platform (10x Xenium)
+panel: custom 366-gene Xenium panel       # panel name / size
+
+sites:                                    # anatomical/site classes present in the data
+  - BrM
+  - Primary
+  - Metastasis
+
+# obs columns the harness should use for per-code context summaries
+site_col: site_class                      # obs column holding the site label
+patient_col: mrn                          # obs column identifying the patient
+context_cols:                             # extra obs columns to summarize per code
+  - site_class
+  - sample_id
+  - diagnosis
+
+# Cell types you expect, with a few canonical markers each. These anchor the LLM's
+# labels; markers are gene symbols on your panel.
+expected_cell_types:
+  - name: ccRCC tumor
+    markers: [CA9, NDUFA4L2, VHL, PAX8]
+    notes: CA9 can be low in some tumor subclones; do not require it.
+  - name: T cell
+    markers: [CD3D, CD3E, CD8A, IL7R]
+    notes: ""
+  - name: Macrophage
+    markers: [CD68, CD163, LYZ, C1QA]
+    notes: ""
+  - name: Endothelial
+    markers: [PECAM1, VWF, CLDN5]
+    notes: ""
+  - name: Fibroblast
+    markers: [COL1A1, DCN, PDGFRB]
+    notes: ""
+  - name: Astrocyte
+    markers: [GFAP, AQP4, ALDH1L1]
+    notes: Expected only at brain-metastasis sites.
+
+# Spatial niches (multicellular microenvironments) you expect, by their composition.
+expected_niches:
+  - name: tumor core
+    description: dense ccRCC tumor with sparse immune infiltrate
+    expected_cell_types: [ccRCC tumor, Macrophage]
+  - name: tumor-immune boundary
+    description: interface of tumor and infiltrating lymphocytes
+    expected_cell_types: [ccRCC tumor, T cell, Macrophage]
+
+# PMIDs / DOIs you consider authoritative for this system.
+references:
+  - PMID:34290408        # Krishna 2021, ccRCC single-cell immune landscape
+  - PMID:34019793        # Bi 2021, ccRCC ICI response
+  - PMID:33861994        # Braun 2021, ccRCC tumor microenvironment
+
+# Free-text guidance for the annotator (biology, caveats, priorities).
+notes: >
+  Brain-metastasis samples contain normal CNS cells (astrocytes, oligodendrocytes,
+  microglia); do not mistake tumor-adjacent glial transcript leakage for a glial code.
+  CA9-low, PAX8-retaining codes spanning most patients are still ccRCC tumor.
