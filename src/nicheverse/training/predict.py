@@ -97,7 +97,7 @@ def predict_codes(
     device: str | None = None,
     return_embeddings: bool = True,
     config: ModelConfig | None = None,
-    seed: int = 49,
+    seed: int = 9,
     deterministic: bool = True,
 ) -> ad.AnnData:
     """Assign cell and neighborhood codebook indices to ``adata`` using a checkpoint.

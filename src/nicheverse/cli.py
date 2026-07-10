@@ -72,7 +72,7 @@ def _add_train(sp: argparse._SubParsersAction) -> None:
     p.add_argument("--k-neighbors", type=int, default=20)
     p.add_argument("--batch-size", type=int, default=2048)
     p.add_argument("--lr", type=float, default=3e-4)
-    p.add_argument("--seed", type=int, default=49)
+    p.add_argument("--seed", type=int, default=9)
     p.add_argument("--sample-col", default="sample_id")
     p.add_argument("--no-cross-attention", action="store_true")
     p.add_argument("--device", default=None)
@@ -91,7 +91,7 @@ def _add_predict(sp: argparse._SubParsersAction) -> None:
     p.add_argument("--sample-col", default="sample_id")
     p.add_argument("--k-neighbors", type=int, default=20)
     p.add_argument("--batch-size", type=int, default=2048)
-    p.add_argument("--seed", type=int, default=49)
+    p.add_argument("--seed", type=int, default=9)
     p.add_argument("--device", default=None)
     p.add_argument(
         "--no-figures",

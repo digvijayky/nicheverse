@@ -131,7 +131,7 @@ class BatchContiguousDistributedSampler(torch.utils.data.Sampler):
         rank: int,
         global_batch_size: int,
         shuffle: bool = True,
-        seed: int = 49,
+        seed: int = 9,
     ) -> None:
         if global_batch_size % num_replicas != 0:
             raise ValueError(

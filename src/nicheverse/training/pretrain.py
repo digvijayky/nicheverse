@@ -23,7 +23,7 @@ def mae_pretrain(
     lr: float = 1e-3,
     normalize: bool = True,
     log1p: bool = True,
-    seed: int = 49,
+    seed: int = 9,
     device: str | None = None,
 ):
     """Pretrain an encoder by masked-gene reconstruction; return the pretrained encoder.

@@ -307,7 +307,7 @@ class TrainConfig:
     amp: bool = False
     resume_from: str | None = None
     save_best: bool = True
-    seed: int = 49
+    seed: int = 9
     log_every: int = 10
     deterministic: bool = True
     num_workers: int = 0

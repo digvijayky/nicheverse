@@ -33,7 +33,7 @@ _CUBLAS_ENV = "CUBLAS_WORKSPACE_CONFIG"
 _CUBLAS_VALUE = ":4096:8"
 
 
-def seed_everything(seed: int = 49, deterministic: bool = True) -> None:
+def seed_everything(seed: int = 9, deterministic: bool = True) -> None:
     """Seed Python, NumPy, and PyTorch (CPU + CUDA) for reproducible runs.
 
     Parameters
