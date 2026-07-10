@@ -157,10 +157,19 @@ class TrainConfig:
     num_epochs
         Number of full passes over the dataset.
     batch_size
-        Cells per mini-batch. An ``int`` (default ``2048``, byte-identical to the
-        released run) or the string ``"auto"`` to resolve it at train time from
-        the panel size via :func:`auto_batch_size`. Only ``"auto"`` triggers the
-        adaptive path; any int keeps the released optimization trajectory.
+        Cells per mini-batch. An ``int`` (default ``32768``) or the string
+        ``"auto"`` to resolve it at train time from the panel size via
+        :func:`auto_batch_size`. Only ``"auto"`` triggers the adaptive path; any int
+        is used verbatim. The default was raised from 2048 to 32768 following the
+        large-batch literature (McCandlish 2018 critical batch size; Goyal 2017
+        linear-scaling + warmup; Smith 2018): at cohort scale (millions of cells) a
+        much larger batch improves gradient-estimate quality and hardware
+        utilization with no loss of final quality when paired with LR warmup (see
+        ``lr_schedule='warmup_cosine'`` and ``warmup_frac``). A batch of 32768 was
+        measured at ~45 GB resident on an 80 GB A100, so it fits the
+        ``device_resident`` path with headroom; the power-of-two floor logic in
+        :func:`auto_batch_size` and the ``device_resident`` fit-check both hold for
+        32768. Pass a smaller int (e.g. 2048) to reproduce the released trajectory.
     scale_lr_with_batch
         When ``batch_size="auto"`` and this is ``True`` (default), scale the
         learning rate by ``sqrt(effective_batch / 2048)`` so a larger resolved
@@ -194,9 +203,23 @@ class TrainConfig:
         Gaussian kernel bandwidth in microns for
         ``neighborhood_aggregation="gaussian"``.
     lr_schedule
-        ``"plateau"`` (default, released) or ``"warmup_cosine"``.
+        ``"plateau"`` (default, released) or ``"warmup_cosine"``. The
+        ``"warmup_cosine"`` schedule is applied PER OPTIMIZER STEP over
+        ``total_steps = steps_per_epoch * num_epochs``: a linear warmup over the
+        first ``warmup_frac`` of the steps, then a cosine decay to ``min_lr`` at the
+        final step (Goyal 2017; Nicheformer 2025 uses warmup + cosine at spatial
+        scale).
+    warmup_frac
+        Fraction of total optimizer steps spent linearly ramping the LR from ~0 up
+        to the peak (base) LR before the cosine decay begins, for
+        ``"warmup_cosine"``. ``0.03`` (default). ``0.0`` reproduces a pure per-step
+        cosine anneal with no warmup (back-compatible). Ignored by the plateau
+        schedule.
     warmup_steps, min_lr
-        Warmup epochs and learning-rate floor for ``"warmup_cosine"``.
+        ``min_lr`` is the learning-rate floor the cosine decays to at the final step
+        for ``"warmup_cosine"`` (``0.0`` decays fully to zero). ``warmup_steps`` is a
+        legacy epoch-based field retained for API compatibility; the per-step
+        ``"warmup_cosine"`` schedule uses ``warmup_frac`` for its warmup length.
     decoupled_weight_decay
         Use selective (decoupled) AdamW weight decay: decay ONLY the weight
         matrices of ``nn.Linear`` / ``nn.Conv*`` (and the attention QKV
@@ -313,12 +336,13 @@ class TrainConfig:
     """
 
     num_epochs: int = 300
-    batch_size: int | str = 2048
+    batch_size: int | str = 32768
     scale_lr_with_batch: bool = True
     learning_rate: float = 3e-4
     weight_decay: float = 0.01
     lr_schedule: str = "plateau"
     warmup_steps: int = 0
+    warmup_frac: float = 0.03
     min_lr: float = 0.0
     decoupled_weight_decay: bool = True
     spatial_loss_type: str = "none"
@@ -667,28 +691,77 @@ def _build_optimizer(
     return torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=tc.weight_decay)
 
 
+def _warmup_cosine_lr_lambda(total_steps: int, warmup_frac: float, floor_ratio: float):
+    """Per-optimizer-step LR multiplier: linear warmup then cosine decay to a floor.
+
+    Returns a closure ``lr_lambda(step)`` (for ``torch.optim.lr_scheduler.LambdaLR``)
+    that maps the 0-based optimizer step to a multiplier of the base LR over the whole
+    run of ``total_steps`` steps:
+
+    * ``step < warmup_steps``  -> linear ramp ``(step + 1) / warmup_steps`` from
+      ``1/warmup_steps`` up to ``1.0`` at the last warmup step
+      (``warmup_steps = round(warmup_frac * total_steps)``);
+    * ``step >= warmup_steps`` -> cosine decay from ``1.0`` down to ``floor_ratio``,
+      with the cosine spanning the remaining ``total_steps - warmup_steps`` steps so it
+      reaches ``floor_ratio`` EXACTLY at the final step (``step == total_steps - 1``).
+
+    Back-compat: ``warmup_frac == 0.0`` gives ``warmup_steps == 0`` and the closure is a
+    PURE cosine from ``1.0`` at step 0 to ``floor_ratio`` at the last step, identical to a
+    plain per-step cosine anneal with no warmup.
+
+    ``floor_ratio`` is ``min_lr / base_lr`` (the LR floor as a fraction of the peak);
+    ``0.0`` decays fully to zero at the end.
+    """
+    total = max(1, int(total_steps))
+    warmup_steps = int(round(max(0.0, float(warmup_frac)) * total))
+    warmup_steps = min(warmup_steps, total)  # never warm up past the whole run
+    floor = float(floor_ratio)
+
+    def lr_lambda(step: int) -> float:
+        if warmup_steps > 0 and step < warmup_steps:
+            return (step + 1) / warmup_steps
+        # Cosine over the remaining steps; denom is (last_step - warmup_steps) so
+        # prog hits 1.0 (cos -> -1 -> factor floor) exactly at step == total - 1.
+        denom = max(1, (total - 1) - warmup_steps)
+        prog = min(1.0, (step - warmup_steps) / denom)
+        cos = 0.5 * (1.0 + math.cos(math.pi * prog))
+        return floor + (1.0 - floor) * cos
+
+    return lr_lambda
+
+
 def _build_scheduler(
-    optim: torch.optim.Optimizer, tc: TrainConfig, lr: float | None = None
-) -> tuple[object, bool]:
-    """Return ``(scheduler, needs_monitor)``; default is the released ReduceLROnPlateau.
+    optim: torch.optim.Optimizer,
+    tc: TrainConfig,
+    lr: float | None = None,
+    steps_per_epoch: int | None = None,
+) -> tuple[object, bool, bool]:
+    """Return ``(scheduler, needs_monitor, per_step)``; default is ReduceLROnPlateau.
 
     ``lr`` overrides ``tc.learning_rate`` for the ``warmup_cosine`` floor ratio so
     the schedule is consistent with the effective (possibly batch-scaled) lr; the
     ``ReduceLROnPlateau`` default does not depend on ``lr``.
+
+    ``warmup_cosine`` is a PER-OPTIMIZER-STEP schedule over
+    ``total_steps = steps_per_epoch * num_epochs``: a linear warmup over the first
+    ``warmup_frac`` of the steps, then a cosine decay reaching ``min_lr`` at the FINAL
+    step. ``warmup_frac == 0.0`` reproduces a pure per-step cosine anneal (no warmup).
+    ``per_step`` is ``True`` for ``warmup_cosine`` (step every optimizer update) and
+    ``False`` for the plateau schedule (step once per epoch with the monitored loss).
+    ``steps_per_epoch`` is required for ``warmup_cosine`` (number of optimizer steps
+    per epoch = mini-batches per epoch); it defaults to 1 if not supplied.
     """
     lr = tc.learning_rate if lr is None else lr
     if tc.lr_schedule == "warmup_cosine":
         floor = tc.min_lr / lr if lr > 0 else 0.0
-
-        def lr_lambda(epoch):
-            if epoch < tc.warmup_steps:
-                return (epoch + 1) / max(1, tc.warmup_steps)
-            prog = (epoch - tc.warmup_steps) / max(1, tc.num_epochs - tc.warmup_steps)
-            cos = 0.5 * (1.0 + math.cos(math.pi * min(1.0, prog)))
-            return floor + (1.0 - floor) * cos
-
-        return torch.optim.lr_scheduler.LambdaLR(optim, lr_lambda), False
-    return torch.optim.lr_scheduler.ReduceLROnPlateau(optim, "min", patience=5, factor=0.5), True
+        total_steps = max(1, int(steps_per_epoch or 1)) * max(1, int(tc.num_epochs))
+        lr_lambda = _warmup_cosine_lr_lambda(total_steps, tc.warmup_frac, floor)
+        return torch.optim.lr_scheduler.LambdaLR(optim, lr_lambda), False, True
+    return (
+        torch.optim.lr_scheduler.ReduceLROnPlateau(optim, "min", patience=5, factor=0.5),
+        True,
+        False,
+    )
 
 
 def _cell_recon(
@@ -1222,11 +1295,15 @@ def train_model(
     # Pass the effective (possibly batch-scaled) lr explicitly; tc.learning_rate
     # stays the nominal value so the persisted train_config.json is unchanged.
     optim = _build_optimizer(core, tc, lr=effective_lr)
-    sched, _sched_needs_monitor = _build_scheduler(optim, tc, lr=effective_lr)
     scaler = _make_grad_scaler(enabled=tc.amp and device_t.type == "cuda")
 
     losses: list[dict[str, float]] = []
     n_batches = len(loader)
+    # steps_per_epoch = optimizer updates per epoch = mini-batches; needed so the
+    # per-step warmup+cosine schedule spans total_steps = n_batches * num_epochs.
+    sched, _sched_needs_monitor, _sched_per_step = _build_scheduler(
+        optim, tc, lr=effective_lr, steps_per_epoch=n_batches
+    )
     best_loss = float("inf")
     best_epoch = -1
     no_improve = 0
@@ -1327,6 +1404,11 @@ def train_model(
                 gnorm = total_grad_norm(core.parameters()) / max(_scale, 1e-12)
             scaler.step(optim)
             scaler.update()
+            # Per-step LR schedules (warmup_cosine) advance once per optimizer update
+            # so the warmup+cosine spans total_steps = n_batches * num_epochs. The
+            # plateau schedule is per-epoch and stepped below with the monitored loss.
+            if _sched_per_step:
+                sched.step()
             lv = float(loss.item())
             if math.isfinite(lv):
                 tl += lv
@@ -1440,7 +1522,10 @@ def train_model(
             avg["neighborhood_usage_gini"] = _ns["gini"]
             avg["neighborhood_usage_entropy_norm"] = _ns["entropy_norm"]
         losses.append(avg)
-        sched.step(monitor) if _sched_needs_monitor else sched.step()
+        # Plateau steps once per epoch on the monitored loss; per-step schedules
+        # (warmup_cosine) already advanced inside the batch loop, so skip here.
+        if _sched_needs_monitor:
+            sched.step(monitor)
         # One concise, always-visible summary line per epoch. Emitted via the module
         # logger (INFO) AND printed to stdout on rank 0 so the standard metrics show
         # up in the run log even when the logger is otherwise unconfigured/silent.

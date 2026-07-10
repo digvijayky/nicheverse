@@ -61,8 +61,9 @@ def test_default_schedule_is_plateau():
     tc = TrainConfig()
     opt = _build_optimizer(m, tc)
     assert isinstance(opt, torch.optim.AdamW)
-    sched, needs = _build_scheduler(opt, tc)
+    sched, needs, per_step = _build_scheduler(opt, tc)
     assert needs is True
+    assert per_step is False
     assert isinstance(sched, torch.optim.lr_scheduler.ReduceLROnPlateau)
 
 
@@ -180,8 +181,11 @@ def test_selective_wd_grouping_molecule_set():
 def test_warmup_cosine_schedule_type():
     m = HierarchicalVQVAE(_mc(_toy_adata()))
     opt = _build_optimizer(m, TrainConfig())
-    sched, needs = _build_scheduler(opt, TrainConfig(lr_schedule="warmup_cosine", warmup_steps=2))
+    sched, needs, per_step = _build_scheduler(
+        opt, TrainConfig(lr_schedule="warmup_cosine", warmup_steps=2), steps_per_epoch=4
+    )
     assert needs is False
+    assert per_step is True
     assert isinstance(sched, torch.optim.lr_scheduler.LambdaLR)
 
 
