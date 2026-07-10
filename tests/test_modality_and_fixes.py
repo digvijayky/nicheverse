@@ -190,6 +190,29 @@ def test_size_one_trailing_batch_does_not_crash():
     )
 
 
+def test_old_config_dict_loads_without_new_loss_params():
+    # A pre-loss-refactor config dict (no cell_recon/niche_recon keys) must fall back
+    # to the OLD (MSE-only) behavior so it does NOT allocate cell_log_theta /
+    # niche_log_alpha, otherwise an old strict state_dict fails to load.
+    d = {"input_dim": 8, "recon": "mse", "gene_names": [f"g{i}" for i in range(8)]}
+    cfg = ModelConfig.from_dict(d)
+    assert cfg.cell_recon == "default" and cfg.niche_recon == "mse"
+    m = HierarchicalVQVAE(cfg)
+    assert not hasattr(m, "cell_log_theta") and not hasattr(m, "niche_log_alpha")
+
+
+def test_ema_codebook_is_frozen_from_optimizer():
+    # The default EMA VQ codebook must be frozen (requires_grad=False) so the diversity
+    # loss cannot feed the optimizer a gradient that fights the EMA update; a non-EMA
+    # codebook stays trainable.
+    cfg = ModelConfig(
+        input_dim=8, cell_recon="mse", niche_recon="mse", gene_names=tuple(f"g{i}" for i in range(8))
+    )
+    m = HierarchicalVQVAE(cfg)
+    assert m.cell_vq.embedding.weight.requires_grad is False
+    assert m.neighborhood_vq.embedding.weight.requires_grad is False
+
+
 def test_predict_skips_double_normalization(caplog):
     gn = tuple(f"g{i}" for i in range(6))
     m = HierarchicalVQVAE(

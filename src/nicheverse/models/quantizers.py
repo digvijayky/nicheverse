@@ -168,6 +168,12 @@ class VectorQuantizer(nn.Module):
         self.epsilon = 1e-5
         self.embedding = nn.Embedding(num_embeddings, embedding_dim)
         self.embedding.weight.data.uniform_(-1.0, 1.0)
+        if use_ema:
+            # The EMA codebook is updated by the EMA rule, not the optimizer; freeze it
+            # so the diversity loss (which reads embedding.weight) cannot feed it an
+            # AdamW gradient that fights the EMA update. The encoder still receives the
+            # diversity gradient through the soft assignment.
+            self.embedding.weight.requires_grad_(False)
         self.register_buffer("_initialized", torch.tensor(False))
         if use_ema:
             self.register_buffer("ema_cluster_size", torch.zeros(num_embeddings))
@@ -381,7 +387,9 @@ class VectorQuantizer(nn.Module):
         enc.scatter_(1, enc_idx, 1)
         quantized = self.embedding.weight[enc_idx.squeeze(1)].view(input_shape)
         if self.training and self.use_ema:
-            with torch.no_grad():
+            # Disable autocast so the EMA embed-sum matmul accumulates in true fp32
+            # (autocast would downcast the matmul to fp16 even inside no_grad).
+            with torch.no_grad(), torch.autocast(device_type=flat.device.type, enabled=False):
                 self.update_count.add_(1)
                 enc_sum = enc.sum(0)
                 e_sum = enc.t() @ flat.float()

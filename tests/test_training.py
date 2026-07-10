@@ -123,9 +123,11 @@ def test_selective_wd_grouping_invariants(enc):
     assert id_decay | id_nodecay == all_ids
     assert len(decay) + len(no_decay) == len(all_ids)
 
-    # (a) both VQ codebook embeddings in no-decay
-    assert id(m.cell_vq.embedding.weight) in id_nodecay
-    assert id(m.neighborhood_vq.embedding.weight) in id_nodecay
+    # (a) both EMA VQ codebooks are frozen, so excluded from the optimizer entirely
+    # (never weight-decayed and not in the no-decay group either)
+    for cb in (m.cell_vq.embedding.weight, m.neighborhood_vq.embedding.weight):
+        assert cb.requires_grad is False
+        assert id(cb) not in id_decay and id(cb) not in id_nodecay
 
     # (c) all biases and all LayerNorm/BatchNorm params in no-decay
     norm_types = (torch.nn.LayerNorm, torch.nn.GroupNorm, torch.nn.BatchNorm1d,
@@ -162,11 +164,15 @@ def test_selective_wd_grouping_molecule_set():
         hidden=(16,), enc_width=16, enc_inds=4,
     )
     decay, no_decay, dn, ndn = _split_decay_params(m)
+    id_decay = {id(p) for p in decay}
     id_nodecay = {id(p) for p in no_decay}
     all_ids = {id(p) for p in m.parameters() if p.requires_grad}
-    # Union covers all params, codebooks + gene embedding excluded from decay.
-    assert ({id(p) for p in decay} | id_nodecay) == all_ids
-    assert id(m.cell_vq.embedding.weight) in id_nodecay
+    # Union covers all trainable params; the EMA codebook is frozen (excluded), the
+    # gene embedding stays trainable in no-decay.
+    assert (id_decay | id_nodecay) == all_ids
+    assert m.cell_vq.embedding.weight.requires_grad is False
+    assert id(m.cell_vq.embedding.weight) not in id_decay
+    assert id(m.cell_vq.embedding.weight) not in id_nodecay
     assert id(m.cell_encoder.gene_embed.weight) in id_nodecay
     assert all(n.endswith("weight") for n in dn)
 

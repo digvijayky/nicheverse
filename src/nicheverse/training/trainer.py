@@ -123,7 +123,11 @@ def auto_batch_size(
         total = torch.cuda.get_device_properties(dev).total_memory
         budget = mem_fraction * total
         max_bs = budget / max(per_sample_bytes, 1)
-        bs = min(bs, _round_pow2(max_bs))
+        # Floor (not nearest-round) to a power of two so the memory clamp never selects
+        # a batch LARGER than the budget it just computed (which would OOM the very
+        # small-VRAM auto-batch case the clamp exists to protect).
+        cap = 1 << (int(max_bs).bit_length() - 1) if max_bs >= 1 else lo
+        bs = min(bs, cap)
     return int(min(max(bs, lo), hi))
 
 
@@ -1051,11 +1055,19 @@ def train_model(
                 torch.nn.utils.clip_grad_norm_(core.parameters(), tc.grad_clip)
             scaler.step(optim)
             scaler.update()
-            tl += float(loss.item())
-            tcell += float((cell_recon + cvq).item())
-            tn += float((neigh_recon + nvq).item())
-            tcp += float(cp.item())
-            tnp += float(np_.item())
+            lv = float(loss.item())
+            if math.isfinite(lv):
+                tl += lv
+                tcell += float((cell_recon + cvq).item())
+                tn += float((neigh_recon + nvq).item())
+                tcp += float(cp.item())
+                tnp += float(np_.item())
+            else:
+                logger.warning(
+                    "epoch %d batch %d: non-finite loss skipped from the logged average",
+                    ep + 1,
+                    bi,
+                )
             if bi % tc.log_every == 0:
                 logger.info(
                     "epoch %d/%d batch %d/%d loss=%.4f cell_perp=%.1f neigh_perp=%.1f",
@@ -1283,9 +1295,11 @@ def _val_loss(
             cb, nb = cb.to(device), nb.to(device)
             rt = nct = None
             if count_dataset is not None:
-                rt = count_dataset.recon_target[bidx].to(device)
+                ri = bidx.to(count_dataset.recon_target.device)
+                rt = count_dataset.recon_target[ri].to(device)
             if use_nct:
-                nct = count_dataset.niche_count_target[bidx].to(device)
+                ni = bidx.to(count_dataset.niche_count_target.device)
+                nct = count_dataset.niche_count_target[ni].to(device)
             cr, nr, cvq, nvq, _ci, _ni, _cp, _np = model(cb, nb)
             loss = tc.cell_weight * (
                 _cell_recon(model, cr, cb, recon_target=rt) + cvq

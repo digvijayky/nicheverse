@@ -286,6 +286,13 @@ class ModelConfig:
         load paths) by decoding them to str.
         """
         d = dict(d)
+        # Backward-compat: checkpoints saved before the loss refactor lack these keys.
+        # Fall back to the OLD (MSE-only) behavior so their state_dicts (which have no
+        # cell_log_theta / niche_log_alpha) still load strictly, instead of the new
+        # nb / mse_dirmult dataclass defaults which would allocate those params.
+        d.setdefault("cell_recon", "default")
+        d.setdefault("niche_recon", "mse")
+        d.setdefault("detection_weight", 0.0)
         d["hidden_dims"] = tuple(int(x) for x in d.get("hidden_dims", (256, 128)))
         gn = d.get("gene_names", ())
         gn_clean: list[str] = []
