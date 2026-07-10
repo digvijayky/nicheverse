@@ -68,8 +68,51 @@ NON_IMST = {
 }
 
 
-def _norm(s: str) -> str:
-    return (s or "").strip().lower()
+def _norm(s) -> str:
+    """Normalize a value to a trimmed lowercase string.
+
+    Tolerates non-string input (e.g. an int/float/bool arriving from a malformed YAML
+    ``platform:`` field): ``None`` and falsy values become ``""``; anything else is
+    coerced via :func:`str` before trimming/lowercasing, so callers never see an
+    ``AttributeError`` on ``.strip``.
+    """
+    if s is None or s == "":
+        return ""
+    if not isinstance(s, str):
+        s = str(s)
+    return s.strip().lower()
+
+
+# Dash characters the repo prose rules forbid in rendered output: em-dash and en-dash
+# (plain hyphen-minus is allowed inline). Mapped to ", " so a "foo — bar" note reads as
+# "foo, bar" rather than dropping the break.
+_DASH_MAP = {"—": ", ", "–": ", "}
+
+
+def _clean(s) -> str:
+    """Sanitize a user-supplied value for inclusion in :meth:`ProjectContext.to_prompt_block`.
+
+    Guarantees the rendered fragment cannot violate the repo's prose rules: em/en dashes
+    become ``", "`` and any leading markdown bullet marker (``- ``/``* ``/``+ ``) is
+    stripped from the value so numbered list items stay clean. Does not mutate stored
+    fields (callers pass a copy); inline hyphen-minus and other characters pass through.
+    """
+    if s is None:
+        return ""
+    if not isinstance(s, str):
+        s = str(s)
+    for bad, repl in _DASH_MAP.items():
+        if bad in s:
+            s = s.replace(bad, repl)
+    # collapse the doubled ", , " that "a — — b" style input could produce
+    while ",  ," in s or ", ," in s:
+        s = s.replace(",  ,", ",").replace(", ,", ",")
+    # neutralize a leading markdown bullet marker on the value itself
+    stripped = s.lstrip()
+    if stripped[:2] in ("- ", "* ", "+ "):
+        lead = len(s) - len(stripped)
+        s = s[:lead] + stripped[2:]
+    return s
 
 
 @dataclass
@@ -133,27 +176,40 @@ class ProjectContext:
 
     @classmethod
     def from_dict(cls, d: dict | None) -> "ProjectContext":
-        """Build from a plain dict, tolerating unknown keys and coercing nested priors."""
+        """Build from a plain dict, tolerating unknown keys and coercing nested priors.
+
+        Robust to messy YAML: ``None`` -> an empty context; unknown top-level keys are
+        dropped; ``expected_cell_types`` / ``expected_niches`` may be given as dataclass
+        instances, plain dicts, or any mix; a malformed nested entry (not a dict and not
+        the matching dataclass, e.g. a bare string) is skipped rather than raising.
+        """
         d = dict(d or {})
         fields = {f for f in cls.__dataclass_fields__}
-        ct = d.get("expected_cell_types", []) or []
-        nz = d.get("expected_niches", []) or []
-        cell_types = [
-            c if isinstance(c, CellTypePrior) else CellTypePrior(
-                name=str(c.get("name", "")),
-                markers=list(c.get("markers", []) or []),
-                notes=str(c.get("notes", "")),
-            )
-            for c in ct
-        ]
-        niches = [
-            n if isinstance(n, NichePrior) else NichePrior(
-                name=str(n.get("name", "")),
-                description=str(n.get("description", "")),
-                expected_cell_types=list(n.get("expected_cell_types", []) or []),
-            )
-            for n in nz
-        ]
+
+        def _as_cell(c):
+            if isinstance(c, CellTypePrior):
+                return c
+            if isinstance(c, dict):
+                return CellTypePrior(
+                    name=str(c.get("name", "")),
+                    markers=list(c.get("markers", []) or []),
+                    notes=str(c.get("notes", "")),
+                )
+            return None
+
+        def _as_niche(n):
+            if isinstance(n, NichePrior):
+                return n
+            if isinstance(n, dict):
+                return NichePrior(
+                    name=str(n.get("name", "")),
+                    description=str(n.get("description", "")),
+                    expected_cell_types=list(n.get("expected_cell_types", []) or []),
+                )
+            return None
+
+        cell_types = [x for x in (_as_cell(c) for c in (d.get("expected_cell_types") or [])) if x is not None]
+        niches = [x for x in (_as_niche(n) for n in (d.get("expected_niches") or [])) if x is not None]
         kept = {k: v for k, v in d.items() if k in fields}
         kept["expected_cell_types"] = cell_types
         kept["expected_niches"] = niches
@@ -185,12 +241,18 @@ class ProjectContext:
         """Render a compact, deterministic plain-text context block for an LLM prompt.
 
         Omits empty fields, truncates long lists gracefully, and stays well under
-        ~1500 chars for modest inputs. Uses ``name: value`` lines and numbered items
-        (no markdown ``-`` bullets).
+        ~1500 chars for modest inputs. Uses ``label: value`` lines and numbered items
+        (no markdown ``-`` bullets). The rendered block is guaranteed free of em-dashes
+        and of leading ``- ``/``* `` bullet markers even when user-supplied field values
+        (names, markers, notes, references) contain them: :func:`_clean` rewrites those
+        characters so the block always complies with the repo's prose rules. Stored field
+        values are never mutated (only the rendered copy is), so (de)serialization
+        roundtrips are unaffected.
         """
         lines: list[str] = ["PROJECT CONTEXT"]
 
         def kv(label: str, value: str):
+            value = _clean(value)
             if value:
                 lines.append(f"{label}: {value}")
 
@@ -201,14 +263,18 @@ class ProjectContext:
         kv("platform", self.platform)
         kv("panel", self.panel)
         if self.sites:
-            kv("sites present", ", ".join(str(s) for s in self.sites))
+            kv("sites present", ", ".join(_clean(str(s)) for s in self.sites))
 
         if self.expected_cell_types:
             lines.append("expected cell types (name: key markers):")
             shown = self.expected_cell_types[:max_cell_types]
             for i, c in enumerate(shown, 1):
-                mk = ", ".join(str(m) for m in c.markers[:max_markers]) if c.markers else "no markers given"
-                lines.append(f"  {i}. {c.name}: {mk}")
+                mk = (
+                    ", ".join(_clean(str(m)) for m in c.markers[:max_markers])
+                    if c.markers
+                    else "no markers given"
+                )
+                lines.append(f"  {i}. {_clean(c.name)}: {mk}")
             if len(self.expected_cell_types) > len(shown):
                 lines.append(f"  (+{len(self.expected_cell_types) - len(shown)} more)")
 
@@ -216,17 +282,18 @@ class ProjectContext:
             lines.append("expected niches (name: composition):")
             shown_n = self.expected_niches[:max_niches]
             for i, n in enumerate(shown_n, 1):
-                comp = ", ".join(str(t) for t in n.expected_cell_types) if n.expected_cell_types else ""
-                desc = n.description or comp
-                lines.append(f"  {i}. {n.name}: {desc}" if desc else f"  {i}. {n.name}")
+                comp = ", ".join(_clean(str(t)) for t in n.expected_cell_types) if n.expected_cell_types else ""
+                desc = _clean(n.description) or comp
+                name = _clean(n.name)
+                lines.append(f"  {i}. {name}: {desc}" if desc else f"  {i}. {name}")
             if len(self.expected_niches) > len(shown_n):
                 lines.append(f"  (+{len(self.expected_niches) - len(shown_n)} more)")
 
         if self.references:
-            lines.append("authoritative references: " + ", ".join(str(r) for r in self.references[:10]))
+            lines.append("authoritative references: " + ", ".join(_clean(str(r)) for r in self.references[:10]))
 
         if self.notes:
-            note = self.notes.strip()
+            note = _clean(self.notes.strip())
             if len(note) > 600:
                 note = note[:597].rstrip() + "..."
             lines.append(f"notes: {note}")
