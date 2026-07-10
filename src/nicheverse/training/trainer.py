@@ -250,6 +250,26 @@ class TrainConfig:
     prefetch_factor
         DataLoader ``prefetch_factor`` (only applies when ``num_workers > 0``).
         ``None`` (default) uses the PyTorch default (2). Verified accuracy neutral.
+    device_resident
+        Opt-in GPU-resident dataset that eliminates the per-batch host->device
+        copy. ``False`` (default) keeps the released CPU-DataLoader path exactly
+        (byte-identical). When ``True`` and the resident tensors fit in GPU memory
+        (see :func:`_device_resident_fits`), the feature tensors
+        (``cell_features``, ``neighborhood_features`` and, in the count modes,
+        ``recon_target`` / ``niche_count_target``) are moved to the GPU ONCE after
+        dataset construction; the DataLoader then yields only the seeded batch
+        INDEX tensor and the features are gathered on the GPU inside the loop
+        (``cb = cell_features_gpu[idx]``). This is accuracy neutral: the SAME
+        seeded shuffle/BatchSampler produces the SAME batch indices in the SAME
+        order as the CPU path, so for a fixed seed the per-batch loss is identical
+        (to floating-point tolerance). Requires CUDA; on CPU it is a no-op
+        (falls back to the CPU path). If the resident tensors plus a safety margin
+        do not fit under ``mem_fraction`` of the GPU (wide panels, e.g. CosMx
+        21731 genes or a big merged Xenium), a clear message is logged and the
+        normal CPU DataLoader path is used instead (never OOMs silently). Because
+        the resident tensors cannot be forked to DataLoader workers, ``num_workers``
+        is forced to ``0`` when this path is active (logged). Not currently combined
+        with DDP: under DDP this flag is ignored (logged) and the CPU path is used.
 
     Notes on ``num_workers``. ``num_workers=0`` (the default) is byte-identical
     to the released training run. ``pin_memory`` and ``prefetch_factor`` are
@@ -296,6 +316,57 @@ class TrainConfig:
     pin_memory: bool | None = None
     persistent_workers: bool | None = None
     prefetch_factor: int | None = None
+    device_resident: bool = False
+
+
+def _device_resident_bytes(
+    dataset: SpatialDataset,
+    count_mode: bool,
+    niche_dirmult_mode: bool,
+) -> int:
+    """Total bytes of the tensors that would be moved onto the GPU for the
+    device-resident path.
+
+    Always counts ``cell_features`` and ``neighborhood_features``. Adds
+    ``recon_target`` when a count cell mode is active and ``niche_count_target``
+    when a Dirichlet-multinomial niche mode is active (mirrors the tensors the
+    train loop indexes). Uses ``element_size * nelement`` so the estimate reflects
+    the real dtype (float32).
+    """
+
+    def _nbytes(t: object | None) -> int:
+        if t is None:
+            return 0
+        return int(t.element_size()) * int(t.nelement())
+
+    total = _nbytes(dataset.cell_features) + _nbytes(dataset.neighborhood_features)
+    if count_mode:
+        total += _nbytes(getattr(dataset, "recon_target", None))
+    if niche_dirmult_mode:
+        total += _nbytes(getattr(dataset, "niche_count_target", None))
+    return total
+
+
+def _device_resident_fits(
+    resident_bytes: int,
+    total_gpu_bytes: int,
+    mem_fraction: float = 0.5,
+    safety_factor: float = 1.5,
+) -> bool:
+    """Decide whether the resident tensors fit alongside model+activations+grads.
+
+    Returns ``True`` iff ``resident_bytes * safety_factor <= mem_fraction *
+    total_gpu_bytes``. The ``safety_factor`` (default 1.5x) reserves headroom for
+    the model parameters, forward activations, and gradients; ``mem_fraction``
+    (default 0.5) keeps the whole footprint to at most half of total GPU memory.
+    A non-positive ``total_gpu_bytes`` (unknown budget) returns ``False`` so the
+    caller falls back to the CPU path rather than risk an OOM.
+    """
+    if total_gpu_bytes <= 0:
+        return False
+    return float(resident_bytes) * float(safety_factor) <= float(mem_fraction) * float(
+        total_gpu_bytes
+    )
 
 
 def _make_grad_scaler(enabled: bool) -> torch.amp.GradScaler:
@@ -360,6 +431,7 @@ def _make_loader(
     sampler: object | None = None,
     persistent_workers: bool | None = None,
     prefetch_factor: int | None = None,
+    collate_fn: object | None = None,
 ) -> DataLoader:
     """Build a DataLoader with a seeded generator so shuffling is reproducible.
 
@@ -386,6 +458,8 @@ def _make_loader(
         pin_memory=pin_memory,
         persistent_workers=pw,
     )
+    if collate_fn is not None:
+        kwargs["collate_fn"] = collate_fn
     if prefetch_factor is not None and num_workers > 0:
         kwargs["prefetch_factor"] = prefetch_factor
     if sampler is not None:
@@ -394,6 +468,41 @@ def _make_loader(
         kwargs["shuffle"] = shuffle
         kwargs["generator"] = gen if shuffle else None
     return DataLoader(dataset, **kwargs)
+
+
+class _IndexView(torch.utils.data.Dataset):
+    """Wrap a :class:`SpatialDataset` (or a train/val :class:`Subset` of one) and
+    yield ONLY the full-dataset row index for each position, never touching the
+    feature tensors.
+
+    This is the loader used by the device-resident path. Its length and the
+    per-position -> full-dataset-row mapping are IDENTICAL to the wrapped object,
+    so with the SAME seeded generator in :func:`_make_loader` the shuffle produces
+    the SAME batch indices in the SAME order as the CPU feature loader. The train
+    loop then gathers ``cell_features_gpu[idx]`` on the GPU, so accuracy is neutral
+    (identical per-batch loss for a fixed seed). Because it returns a plain int and
+    reads no CPU/GPU feature tensor, it is safe to run with ``num_workers=0`` (which
+    the device-resident path forces) and adds no host->device copy.
+    """
+
+    def __init__(self, wrapped: SpatialDataset | Subset) -> None:
+        # Subset stores .indices in the underlying full-dataset row space; a bare
+        # SpatialDataset maps position -> position. Precompute the mapping once.
+        if isinstance(wrapped, Subset):
+            self._indices = list(wrapped.indices)
+        else:
+            self._indices = list(range(len(wrapped)))
+
+    def __len__(self) -> int:
+        return len(self._indices)
+
+    def __getitem__(self, pos: int) -> int:
+        return int(self._indices[pos])
+
+
+def _collate_index(batch: list[int]) -> torch.Tensor:
+    """Collate a list of full-dataset row indices into a 1-D long tensor."""
+    return torch.as_tensor(batch, dtype=torch.long)
 
 
 def _split_decay_params(model: torch.nn.Module) -> tuple[list, list, list, list]:
@@ -892,22 +1001,99 @@ def train_model(
         recon_target_layer="_raw_counts" if _count_mode else None,
     )
 
+    # ------------------------------------------------------------------
+    # Opt-in GPU-resident dataset (device_resident). Default OFF -> the whole block
+    # below is skipped and the released CPU-DataLoader path is byte-identical.
+    #
+    # When ON, and CUDA is available, and it is not a DDP run, and the resident
+    # tensors fit under mem_fraction of GPU memory (with a safety margin), move the
+    # feature tensors (cell_features, neighborhood_features, and recon_target /
+    # niche_count_target when present) onto device_t ONCE. The DataLoader then yields
+    # only the seeded batch INDEX tensor (via _IndexView + _collate_index) and the
+    # features are gathered on the GPU inside the loop. This preserves the EXACT
+    # seeded shuffle order (same length, same generator) so the per-batch loss is
+    # identical to the CPU path for a fixed seed. If it does not fit, or CUDA is
+    # absent, or DDP is active, log why and fall back to the CPU path (never OOM).
+    # ------------------------------------------------------------------
+    device_resident = False
+    if tc.device_resident:
+        if device_t.type != "cuda":
+            logger.info(
+                "device_resident requested but device is %s (not CUDA); using the CPU "
+                "DataLoader path.",
+                device_t,
+            )
+        elif use_ddp:
+            logger.info(
+                "device_resident requested but DDP is active; the GPU-resident path is not "
+                "combined with DDP yet, using the CPU DataLoader path."
+            )
+        else:
+            resident_bytes = _device_resident_bytes(dataset, _count_mode, _niche_dirmult_mode)
+            total_gpu_bytes = int(torch.cuda.get_device_properties(device_t).total_memory)
+            if _device_resident_fits(resident_bytes, total_gpu_bytes):
+                device_resident = True
+            else:
+                logger.info(
+                    "device_resident requested but the resident tensors do not fit: %.2f GB "
+                    "x 1.5 safety > 0.5 x %.2f GB total GPU memory; falling back to the CPU "
+                    "DataLoader path.",
+                    resident_bytes / (1024**3),
+                    total_gpu_bytes / (1024**3),
+                )
+    if device_resident:
+        # Move the resident tensors onto the GPU ONCE. Indexing is in the full-dataset
+        # row space (recon_target / niche_count_target are aligned to cell_features),
+        # so a single GPU gather by batch index serves the train loop, _val_loss, and
+        # _embed. Workers cannot fork GPU tensors, so force num_workers=0.
+        dataset.cell_features = dataset.cell_features.to(device_t)
+        dataset.neighborhood_features = dataset.neighborhood_features.to(device_t)
+        if _count_mode and getattr(dataset, "recon_target", None) is not None:
+            dataset.recon_target = dataset.recon_target.to(device_t)
+        if _niche_dirmult_mode and getattr(dataset, "niche_count_target", None) is not None:
+            dataset.niche_count_target = dataset.niche_count_target.to(device_t)
+        resident_num_workers = 0
+        if tc.num_workers != 0:
+            logger.info(
+                "device_resident active: forcing num_workers=0 (was %d); GPU-resident "
+                "tensors cannot be forked to DataLoader workers.",
+                tc.num_workers,
+            )
+        _rb = _device_resident_bytes(dataset, _count_mode, _niche_dirmult_mode)
+        logger.info(
+            "device_resident active: %.2f GB of feature tensors resident on %s; the loader "
+            "yields batch indices only and features are gathered on the GPU.",
+            _rb / (1024**3),
+            device_t,
+        )
+    else:
+        resident_num_workers = tc.num_workers
+
     pin = (device_t.type == "cuda") if tc.pin_memory is None else bool(tc.pin_memory)
+    # The index-only loaders yield tiny long tensors and gather features already on
+    # the GPU, so pinning host memory has no benefit; disable it on the resident path.
+    loader_pin = False if device_resident else pin
+    # Index-only collate for the resident path; None keeps default_collate (CPU path).
+    resident_collate = _collate_index if device_resident else None
     if tc.val_fraction > 0:
         n = len(dataset)
         perm = torch.randperm(n, generator=torch.Generator().manual_seed(tc.seed)).tolist()
         n_val = max(1, round(n * tc.val_fraction))
         val_ds = Subset(dataset, perm[:n_val])
         train_ds: SpatialDataset | Subset = Subset(dataset, perm[n_val:])
+        # On the resident path the loader iterates the index view (same length + same
+        # position->full-row mapping), so the shuffle order is preserved exactly.
+        val_ds_loader_src = _IndexView(val_ds) if device_resident else val_ds
         val_loader: DataLoader | None = _make_loader(
-            val_ds,
+            val_ds_loader_src,
             per_gpu_batch,
             False,
-            tc.num_workers,
+            resident_num_workers,
             tc.seed,
-            pin,
+            loader_pin,
             persistent_workers=tc.persistent_workers,
             prefetch_factor=tc.prefetch_factor,
+            collate_fn=resident_collate,
         )
         logger.info("Validation split: %d train / %d val cells", n - n_val, n_val)
     else:
@@ -929,16 +1115,18 @@ def train_model(
             shuffle=True,
             seed=tc.seed,
         )
+    train_ds_loader_src = _IndexView(train_ds) if device_resident else train_ds
     loader = _make_loader(
-        train_ds,
+        train_ds_loader_src,
         per_gpu_batch,
         True,
-        tc.num_workers,
+        resident_num_workers,
         tc.seed,
-        pin,
+        loader_pin,
         sampler=train_sampler,
         persistent_workers=tc.persistent_workers,
         prefetch_factor=tc.prefetch_factor,
+        collate_fn=resident_collate,
     )
 
     sample_codes_np = coord_span = None
@@ -999,7 +1187,7 @@ def train_model(
             train_sampler.set_epoch(ep)  # reshuffle per epoch, consistently across ranks
         tl = tcell = tn = tcp = tnp = 0.0
         processed = 0
-        for bi, (cb, nb, batch_idx) in enumerate(
+        for bi, batch in enumerate(
             tqdm(
                 loader,
                 desc=f"epoch {ep + 1}/{tc.num_epochs}",
@@ -1007,6 +1195,15 @@ def train_model(
                 disable=not is_main_process(),
             )
         ):
+            if device_resident:
+                # The loader yields the seeded batch index tensor only; gather the
+                # features from the GPU-resident tensors (same order as the CPU path).
+                batch_idx = batch
+                gidx = batch_idx.to(device_t)
+                cb = dataset.cell_features[gidx]
+                nb = dataset.neighborhood_features[gidx]
+            else:
+                cb, nb, batch_idx = batch
             if cb.shape[0] < 2:
                 continue  # BatchNorm needs > 1 sample; skip a trailing singleton
             processed += 1
@@ -1118,6 +1315,10 @@ def train_model(
             # released signature (model, loader, device, tc) is used verbatim
             # otherwise (keeps monkeypatch-based tests and external callers working).
             _val_kw = {"count_dataset": dataset} if _count_mode else {}
+            # On the resident path the val loader yields batch indices only; hand the
+            # dataset in so _val_loss gathers features from the GPU-resident tensors.
+            if device_resident:
+                _val_kw["resident_dataset"] = dataset
             avg["val_total"] = _val_loss(core, val_loader, device_t, tc, **_val_kw)
             monitor = avg["val_total"]
         avg["epoch_seconds"] = round(time.perf_counter() - t_epoch_start, 3)
@@ -1240,8 +1441,20 @@ def train_model(
     (checkpoint_dir / "training_losses.json").write_text(json.dumps(losses, indent=2))
 
     core.eval()
-    eval_loader = _make_loader(dataset, effective_batch, False, tc.num_workers, tc.seed, pin)
-    cell_emb, neigh_emb, cell_idx, neigh_idx = _embed(core, eval_loader, device_t)
+    # On the resident path the eval loader is index-only (shuffle=False keeps the
+    # full-dataset order) and _embed gathers features from the GPU-resident tensors.
+    eval_src = _IndexView(dataset) if device_resident else dataset
+    eval_loader = _make_loader(
+        eval_src,
+        effective_batch,
+        False,
+        resident_num_workers,
+        tc.seed,
+        loader_pin,
+        collate_fn=resident_collate,
+    )
+    _embed_kw = {"resident_dataset": dataset} if device_resident else {}
+    cell_emb, neigh_emb, cell_idx, neigh_idx = _embed(core, eval_loader, device_t, **_embed_kw)
     if hasattr(core.cell_vq, "embedding"):
         np.savez_compressed(
             checkpoint_dir / "cell_codebook.npz",
@@ -1276,12 +1489,17 @@ def _val_loss(
     device: torch.device,
     tc: TrainConfig,
     count_dataset: object | None = None,
+    resident_dataset: object | None = None,
 ) -> float:
     """Mean total loss over a validation loader (no grad).
 
     ``count_dataset`` (the full :class:`SpatialDataset`) is passed only for the
     count-recon cell modes so the raw-count target can be indexed by the batch
     index; it is ``None`` on all other paths (released signature).
+
+    ``resident_dataset`` is passed only on the device-resident path; then the loader
+    yields the batch index tensor only and the features are gathered from that
+    dataset's GPU-resident tensors (identical order to the CPU val loader).
     """
     # The count-scale niche target exists only when a DM niche mode is active (which
     # requires a count cell mode, so count_dataset is not None). Index it in the
@@ -1291,7 +1509,14 @@ def _val_loss(
     total = 0.0
     n = 0
     with torch.inference_mode():
-        for cb, nb, bidx in loader:
+        for batch in loader:
+            if resident_dataset is not None:
+                bidx = batch
+                gidx = bidx.to(device)
+                cb = resident_dataset.cell_features[gidx]
+                nb = resident_dataset.neighborhood_features[gidx]
+            else:
+                cb, nb, bidx = batch
             cb, nb = cb.to(device), nb.to(device)
             rt = nct = None
             if count_dataset is not None:
@@ -1311,15 +1536,29 @@ def _val_loss(
 
 
 def _embed(
-    model: HierarchicalVQVAE, loader: DataLoader, device: torch.device
+    model: HierarchicalVQVAE,
+    loader: DataLoader,
+    device: torch.device,
+    resident_dataset: object | None = None,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    """Pass the dataset through the trained model and return embeddings + code indices."""
+    """Pass the dataset through the trained model and return embeddings + code indices.
+
+    ``resident_dataset`` is passed only on the device-resident path; then the loader
+    yields the batch index tensor only (shuffle=False keeps full-dataset order) and
+    the features are gathered from that dataset's GPU-resident tensors.
+    """
     ce: list[np.ndarray] = []
     ne: list[np.ndarray] = []
     ci: list[np.ndarray] = []
     ni: list[np.ndarray] = []
     with torch.inference_mode():
-        for cb, nb, _ in loader:
+        for batch in loader:
+            if resident_dataset is not None:
+                gidx = batch.to(device)
+                cb = resident_dataset.cell_features[gidx]
+                nb = resident_dataset.neighborhood_features[gidx]
+            else:
+                cb, nb, _ = batch
             cb = cb.to(device)
             nb = nb.to(device)
             z_cell = model.cell_encoder(cb)
