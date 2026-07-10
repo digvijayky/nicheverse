@@ -35,19 +35,19 @@ and the registry.
 .. autoclass:: nicheverse.VectorQuantizer
    :members:
    :member-order: bysource
-.. autoclass:: nicheverse.FSQ
+.. autoclass:: nicheverse.models.FSQ
    :members:
    :member-order: bysource
-.. autoclass:: nicheverse.SoftVQ
+.. autoclass:: nicheverse.models.SoftVQ
    :members:
    :member-order: bysource
-.. autoclass:: nicheverse.RotVQ
+.. autoclass:: nicheverse.models.RotVQ
    :members:
    :member-order: bysource
-.. autoclass:: nicheverse.QINCoVQ
+.. autoclass:: nicheverse.models.QINCoVQ
    :members:
    :member-order: bysource
-.. autoclass:: nicheverse.ProductVQ
+.. autoclass:: nicheverse.models.ProductVQ
    :members:
    :member-order: bysource
 .. autoclass:: nicheverse.models.ResidualVQ
@@ -68,20 +68,22 @@ and the registry.
 ```
 
 ```{eval-rst}
-.. autofunction:: nicheverse.build_quantizer
-.. autofunction:: nicheverse.register_quantizer
+.. autofunction:: nicheverse.models.build_quantizer
+.. autofunction:: nicheverse.models.register_quantizer
 ```
 
 ## Encoders
 
 Encoder backbones map each cell's gene vector to a latent, chosen with
 ``ModelConfig.encoder_type`` and configured with ``ModelConfig.encoder_kwargs``.
-All twelve share the builder signature ``(in_dim, out_dim, hidden, dropout, **kwargs)``
+All share the builder signature ``(in_dim, out_dim, hidden, dropout, **kwargs)``
 and map ``(batch, in_dim)`` to ``(batch, out_dim)``.
 
 | ``encoder_type`` | Backbone | ``encoder_kwargs`` |
 | --- | --- | --- |
-| ``mlp`` (default) | Plain MLP: Linear, BatchNorm, ReLU, Dropout | (none) |
+| ``mlp_deep`` (default) | Deep, wide SwiGLU pre-norm residual MLP (no per-gene numerical embedding) | ``ffn_mult``, ``n_blocks`` |
+| ``mlp`` | Plain MLP: Linear, BatchNorm, ReLU, Dropout | (none) |
+| ``mlp_plr`` | MLP with per-gene periodic numerical embeddings and a SwiGLU trunk | ``n_freq``, ``num_emb_dim``, ``n_blocks``, ``freq_init_sigma``, ``ffn_mult`` |
 | ``residual_mlp`` | Pre-activation residual MLP blocks | (none) |
 | ``transformer`` | Gene-patch Transformer | ``patch_size``, ``num_heads``, ``num_layers`` |
 | ``cnn`` | 1D convolutional network over the gene vector | ``channels``, ``kernel_sizes``, ``use_batch_norm`` |
@@ -93,17 +95,18 @@ and map ``(batch, in_dim)`` to ``(batch, out_dim)``.
 | ``set_transformer`` | Set Transformer (ISAB, PMA pooling) over gene-patch tokens | ``patch_size``, ``num_heads``, ``num_inds``, ``num_isab`` |
 | ``perceiver_io`` | Perceiver IO latent cross-attention | ``patch_size``, ``num_heads``, ``num_latents``, ``num_self_layers`` |
 | ``soft_moe`` | Soft Mixture-of-Experts routing | ``patch_size``, ``num_heads``, ``num_experts``, ``slots_per_expert`` |
+| ``ft_transformer`` | FT-Transformer with per-gene feature tokens (compute-prohibitive at cohort scale) | ``num_heads``, ``num_layers`` |
 
 ```{eval-rst}
-.. autofunction:: nicheverse.build_encoder
-.. autofunction:: nicheverse.register_encoder
+.. autofunction:: nicheverse.models.build_encoder
+.. autofunction:: nicheverse.models.register_encoder
 ```
 
 ```{eval-rst}
-.. autoclass:: nicheverse.ResidualMLP
+.. autoclass:: nicheverse.models.ResidualMLP
    :members:
    :member-order: bysource
-.. autoclass:: nicheverse.TransformerEncoder
+.. autoclass:: nicheverse.models.TransformerEncoder
    :members:
    :member-order: bysource
 ```

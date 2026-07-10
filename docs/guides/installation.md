@@ -47,7 +47,7 @@ nicheverse --help
 pytest -q   # if installed from source with the dev extras
 ```
 
-All seven tests should pass in under fifteen seconds.
+The full test suite should pass in well under a minute on CPU.
 
 ## Hardware notes
 

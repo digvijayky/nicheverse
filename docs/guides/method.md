@@ -14,25 +14,25 @@ Default aggregation is inverse-distance weighted mean:
 
 We expose `mean` and `max` aggregations as alternatives but use `weighted_mean` in the manuscript runs.
 
-Two separate MLP encoders operate on the cell features and on the concatenated `(x_i, h_i)`:
+Two separate encoders operate on the cell features and on the concatenated `(x_i, h_i)`. The default backbone is `mlp_deep`, a SwiGLU pre-norm residual MLP (no per-gene numerical embedding), chosen because it gives the healthiest raw codebook on sparse Xenium counts:
 
     z_cell    = CellEncoder(x_i)              in R^{d_c}
     z_neigh   = NeighEncoder([x_i ; h_i])     in R^{d_n}
 
-Each is quantized against its own learned codebook (K_c entries of dimension d_c, K_n entries of dimension d_n) using EMA updates, k-means++ initialization, dead-code reset every 50 batches, and an entropy regularizer that keeps the assignment distribution close to uniform.
+Each is quantized against its own learned codebook (K_c entries of dimension d_c, K_n entries of dimension d_n) using EMA updates, k-means++ initialization, dead-code reset, and an entropy regularizer that keeps the assignment distribution close to uniform. The EMA codebook is updated by the EMA rule rather than the optimizer and is frozen from gradient descent.
 
 A multi-head cross attention block lets the cell representation attend to its quantized niche before reconstruction:
 
     z_cell_attended = CrossAttn(Q=z_cell, K=V=Proj(z_neigh_q))
     z_cell_final    = z_cell_q + 0.5 * z_cell_attended
 
-The two decoders mirror the encoders and reconstruct `x_i` and `[x_i ; h_i]` respectively.
+The two decoders mirror the encoders and reconstruct the cell counts and the neighborhood composition respectively.
 
 Loss:
 
     L = L_cell_recon + L_cell_commit + L_neigh_recon + L_neigh_commit + L_diversity
 
-with commitment cost 0.25 by default. The diversity term penalizes low-entropy code usage.
+with commitment cost 0.25 by default. By default the cell reconstruction term is a negative-binomial NLL on the raw counts (a scVI-style library size taken from the observed total count) plus a Bernoulli detection hurdle weighted by `detection_weight` (default 0.5); there is no MSE on the cell branch. The niche reconstruction term is composition MSE plus a Dirichlet-multinomial on the count-scale aggregated-neighbor composition. These count-native defaults require raw INTEGER counts in `adata.X`; the pure-MSE path (MSE on log1p for the cell branch, composition MSE for the niche branch) is recoverable with `cell_recon="mse"` and `niche_recon="mse"`. The diversity term penalizes low-entropy code usage.
 
 ## Why two codebooks instead of one
 
@@ -44,11 +44,13 @@ The cell code is what most downstream consumers care about: it is the analog of 
 
 ## VQ design choices
 
-EMA updates (decay 0.99) keep the codebook smooth and avoid the gradient noise problems of standard VQ. K-means++ initialization on the first batch lets the codebook start at well separated points rather than uniform random in `[-1, 1]`. The dead code reset replaces any code that drops below 1% of average usage with a perturbed sample from the current batch, which prevents the persistent codebook collapse that the original VQ-VAE paper struggles with. The entropy regularizer pulls toward uniform assignment with a small weight (1.0) so it doesn't override the reconstruction loss but does prevent a few codes from absorbing all the mass.
+EMA updates (decay 0.99) keep the codebook smooth and avoid the gradient noise problems of standard VQ; the EMA codebook is frozen from the optimizer so only the EMA rule moves it. K-means++ initialization on the first batch lets the codebook start at well separated points rather than uniform random in `[-1, 1]`. The dead code reset replaces any code that drops below 1% of average usage with a perturbed sample from the current batch, which prevents the persistent codebook collapse that the original VQ-VAE paper struggles with. The entropy regularizer pulls toward uniform assignment with a small weight (1.0) so it doesn't override the reconstruction loss but does prevent a few codes from absorbing all the mass.
 
 ## Defaults used in the Cancer Cell submission
 
 ```
+encoder_type               = mlp_deep
+quantizer_type             = vq
 cell_num_embeddings        = 256
 cell_embedding_dim         = 64
 neighborhood_num_embeddings = 32
@@ -56,14 +58,17 @@ neighborhood_embedding_dim = 256
 hidden_dims                = (256, 128)
 commitment_cost            = 0.25
 use_cross_attention        = True
+cell_recon                 = nb (+ detection hurdle, detection_weight=0.5)
+niche_recon                = mse_dirmult
+spatial_graph              = knn_radius (radius 50 microns)
 k_neighbors                = 20
 neighborhood_aggregation   = weighted_mean
 batch_size                 = 2048
 learning_rate              = 3e-4
 num_epochs                 = 300
-optimizer                  = Adam
+optimizer                  = AdamW (decoupled selective weight decay 0.01)
 scheduler                  = ReduceLROnPlateau (factor 0.5, patience 5)
-preprocessing              = scanpy normalize_total + log1p
+preprocessing              = scanpy normalize_total + log1p (encoder input); raw counts kept as the NB / Dirichlet-multinomial target
 seed                       = 49
 ```
 

@@ -8,7 +8,7 @@ html_theme.sidebar_secondary.remove: true
 :::::{div} landing-hero
 ::::{div} hero-copy
 <h1 class="hero-title">NICHEVERSE</h1>
-<p class="hero-tagline">Neighborhood-Inferred Cell type HiErarchical annotation + Vector-quantizEd Representations of Spatial Ecotypes</p>
+<p class="hero-tagline">Neighborhood-Inferred Cell type HiErarchical annotation + VEctor-quantized Representations of Spatial Ecotypes</p>
 <p class="hero-lead">A PyTorch world model for tissues: it learns paired discrete codebooks of recurrent cell states and multicellular spatial niches from imaging-based spatial transcriptomics (Xenium, MERFISH, seqFISH, CosMx), and annotates any cohort reproducibly.</p>
 
 ```{button-ref} guides/quickstart
@@ -40,13 +40,13 @@ API reference
 Paired cell-state and spatial-niche codebooks coupled by cross-attention, so cell identity is read in tissue context.
 :::
 :::{grid-item-card} Swappable components
-Encoder registry: `mlp` / `residual_mlp` / `transformer` / `cnn` / `fast_cnn` / `deep_cnn` / `gnn` / `diffusion` / `dit` / `set_transformer` / `perceiver_io` / `soft_moe`. Quantizer registry: `vq` / `fsq` / `soft` / `rot` / `qinco` / `pq`.
+Encoder registry: `mlp_deep` (default) / `mlp` / `mlp_plr` / `residual_mlp` / `transformer` / `cnn` / `fast_cnn` / `deep_cnn` / `gnn` / `diffusion` / `dit` / `set_transformer` / `perceiver_io` / `soft_moe` / `ft_transformer`. Quantizer registry: `vq` (default) / `rvq` / `grvq` / `pq` / `qinco` / `rot` / `soft` / `bsq` / `lfq` / `fsq` / `residual_fsq`.
 :::
 :::{grid-item-card} Spatial-aware
-kNN, radius, Delaunay, and alpha-complex graphs, distance kernels, and opt-in spatial-coherence losses.
+Per-sample graphs (`knn_radius` default at 50 microns, plus kNN, radius, Delaunay, alpha-complex), inverse-distance aggregation, and opt-in spatial-coherence losses.
 :::
 :::{grid-item-card} Count-native
-Negative-binomial and Poisson likelihoods, plus transcript-level subcellular context.
+Default negative-binomial cell likelihood with a detection hurdle and a Dirichlet-multinomial niche composition term on raw counts, plus transcript-level subcellular context.
 :::
 :::{grid-item-card} Reproducible
 Byte-exact reproduction of the published renal cell carcinoma and brain-metastasis model, guarded by a regression test.

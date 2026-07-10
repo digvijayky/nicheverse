@@ -101,8 +101,7 @@ pip install nicheverse-0.1.0.tar.gz
 nicheverse predict \
     --input cohort_preprocessed.h5ad \
     --checkpoint rcc_brm_v4dev_173samples.pt \
-    --output annotated.h5ad \
-    --deterministic
+    --output annotated.h5ad
 nicheverse verify --predicted annotated.h5ad --reference expected_outputs.json
 echo "exit code 0 = bit identical to manuscript, 2 = mismatch"
 ```

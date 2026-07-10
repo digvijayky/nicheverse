@@ -45,6 +45,8 @@ hierarchical_cell_indices.npz       Per cell hard code assignment
 hierarchical_neighborhood_embeddings.npz
 hierarchical_neighborhood_indices.npz
 training_losses.json
+training_runtime.json               Wall time, mean epoch seconds, cells / second, peak GPU memory
+train_config.json                   The TrainConfig used for the run
 adata_with_hierarchical_embeddings.h5ad
 training_losses.pdf
 codebook_usage.pdf
@@ -85,6 +87,9 @@ mc = ModelConfig(
     gene_names=tuple(adata.var_names),
 )
 tc = TrainConfig(num_epochs=300, k_neighbors=20)
+# adata.X must be raw INTEGER counts: the default cell loss is a negative-binomial
+# NLL with a detection hurdle and the default niche loss is a Dirichlet-multinomial,
+# both fit against the raw counts. load_xenium_cohort returns raw counts already.
 model, adata = train_model(adata, "./checkpoint", model_config=mc, train_config=tc)
 
 new = load_xenium_cohort(["./run_D"])

@@ -52,10 +52,10 @@ If you already have a preprocessed AnnData and you want to skip the `preprocess`
 ```
 adata.obsm['spatial'].shape == (adata.n_obs, 2)
 adata.obs['sample_id']    string, used to scope per sample k-NN
-adata.X                   raw counts (will be normalized at train / predict time)
+adata.X                   raw INTEGER counts (normalized for the encoder input at train / predict time; the raw counts are kept as the reconstruction target)
 ```
 
-If your X is already log normalized, pass `normalize=False, log1p=False` to `train_model` or `predict_codes` to skip re normalization.
+The count-native defaults (`cell_recon="nb"`, `niche_recon="mse_dirmult"`) require raw integer counts: passing an already normalized or log matrix raises. If you must train from a normalized matrix, switch to the pure-MSE path (`cell_recon="mse"`, `niche_recon="mse"`) and pass `normalize=False, log1p=False` to `train_model` or `predict_codes` to skip re normalization.
 
 ## Filtering controls
 
@@ -79,6 +79,8 @@ hierarchical_cell_indices.npz      (n_cells,) discrete code 0..K_c-1
 hierarchical_neighborhood_embeddings.npz
 hierarchical_neighborhood_indices.npz
 training_losses.json
+training_runtime.json              wall time, mean epoch seconds, cells / second, peak GPU memory
+train_config.json                  the TrainConfig used for the run
 adata_with_hierarchical_embeddings.h5ad
 training_losses.pdf
 codebook_usage.pdf

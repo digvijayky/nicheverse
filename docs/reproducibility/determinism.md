@@ -67,7 +67,7 @@ Likely cause: cuDNN version mismatch. Compare `env_snapshot.json` between traini
 
 Symptom 3: `verify` reports `cell_sha_match: false` with > 50% disagreement.
 
-Likely cause: the reviewer is running on data that was not normalized the same way. `predict_codes` defaults to `normalize_total + log1p`. If your AnnData is raw counts, leave defaults. If it is already log normalized, pass `--normalize=false --log1p=false`.
+Likely cause: the reviewer is running on data that was not normalized the same way. `predict_codes` defaults to `normalize_total + log1p` on the encoder input. Supply raw integer counts (the released checkpoint and count-native defaults expect raw counts). An already normalized or log matrix is detected and, under the count defaults, raises rather than being silently re-normalized.
 
 Symptom 4: `neighborhood_sha_match: false` but `cell_sha_match: true`.
 

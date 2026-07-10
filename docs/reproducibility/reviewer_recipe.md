@@ -64,8 +64,7 @@ nicheverse predict \
     --input cohort_preprocessed.h5ad \
     --checkpoint rcc_brm_v4dev_173samples.pt \
     --output annotated.h5ad \
-    --deterministic \
-    --device cpu     # or cuda if available
+    --device cpu     # or cuda if available. Determinism (seed 49) is always on for predict.
 ```
 
 Wall time: under 10 minutes on a single A100, under 30 minutes on a 16 core CPU.

@@ -31,17 +31,33 @@ Larger d_n carries more spatial detail. We use d_n = 256 for K_n = 32 (8 dimensi
 
 The radius of "neighborhood". 20 is a good default for Xenium cell densities (one neighbor per 30 to 50 microns); a typical 20 nearest gives roughly an effective radius of 150 microns. For sparser tissues use 30 to 50. For dense epithelia use 10 to 15.
 
+## Spatial graph
+
+`knn_radius` (default) is a k-nearest-neighbor graph whose edges are additionally capped at `radius` microns (default 50), so it keeps a dense local neighborhood in normal tissue but never bridges long gaps in sparse metastasis. The graph is always built per sample: cells from different samples never link, which prevents cross-contamination when slides share a coordinate frame. `knn` (pure k-NN, no cap), `radius`, `delaunay`, and `alpha_complex` are the alternatives.
+
 ## Aggregation
 
-`weighted_mean` (inverse distance) is biologically most defensible: closer cells contribute more to the niche feature. `mean` is simpler and works almost as well. `max` is brittle and we do not recommend it.
+`weighted_mean` (inverse distance) is the default and is biologically most defensible: closer cells contribute more to the niche feature. `mean` is simpler and works almost as well. `max` is brittle and we do not recommend it.
+
+## Encoder
+
+`mlp_deep` (default) is a SwiGLU pre-norm residual MLP with no per-gene numerical embedding. On sparse Xenium counts it gives the healthiest raw codebook. Per-gene numerical embeddings (`mlp_plr` / PLE) degenerate on sparse counts, so prefer the plain MLP family (`mlp`, `mlp_deep`) there. Attention and diffusion backbones (`dit`, `diffusion`) collapse the codebook unless they use permutation-invariant set pooling (`set_transformer`, `perceiver_io`).
+
+## Reconstruction loss
+
+The cell branch defaults to `cell_recon="nb"`: a negative-binomial NLL on the raw counts (scVI-style library from the observed total count) plus a Bernoulli detection hurdle weighted by `detection_weight` (default 0.5). The niche branch defaults to `niche_recon="mse_dirmult"`: composition MSE plus a Dirichlet-multinomial on the count-scale aggregated composition. These count-native defaults require raw INTEGER counts in `adata.X`; a normalized or log matrix raises. To recover the pure-MSE path set `cell_recon="mse"` (with `detection_weight=0`) and `niche_recon="mse"`.
 
 ## Batch size
 
-2048 is a sweet spot for the EMA codebook update on a typical GPU (24 to 80 GB). With batch size below 256 the dead code reset triggers too often and codes become noisy; above 8192 you risk OOM on the cross attention. Halve the batch if you OOM.
+2048 is a sweet spot for the EMA codebook update on a typical GPU (24 to 80 GB). With batch size below 256 the dead code reset triggers too often and codes become noisy; above 8192 you risk OOM on the cross attention. Halve the batch if you OOM. Setting `batch_size="auto"` resolves the batch from the panel size at train time and, by default, scales the learning rate with it.
 
 ## Learning rate
 
-3e-4 with Adam and the `ReduceLROnPlateau` scheduler is robust. Higher rates (1e-3) train faster but more often collapse the codebook. Lower rates (1e-4) sometimes help on small cohorts (under 100K cells).
+3e-4 with AdamW and the `ReduceLROnPlateau` scheduler is robust. AdamW uses decoupled selective weight decay (`weight_decay=0.01`, applied only to Linear and Conv weights; biases, normalization parameters, and bare parameters are excluded). Higher rates (1e-3) train faster but more often collapse the codebook. Lower rates (1e-4) sometimes help on small cohorts (under 100K cells).
+
+## Speed knobs
+
+All are opt-in and accuracy-neutral. `TrainConfig.device_resident=True` moves the feature tensors onto the GPU once and gathers batches there, cutting the per-batch host-to-device copy for a roughly 3 to 15x speedup; it is memory-fit-gated and falls back cleanly to the CPU DataLoader path when the resident tensors would not fit. Per-run timing (total wall time, mean epoch seconds, cells per second, peak GPU memory) is written to `training_runtime.json`.
 
 ## Number of epochs
 

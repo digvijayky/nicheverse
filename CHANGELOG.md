@@ -17,6 +17,27 @@ and a reconciliation pass), plus a dotplot review artifact. Shipped an MCP serve
 (`nicheverse-mcp`) and a Claude Code skill so agents can drive the full workflow.
 Validated the modality-agnostic pipeline end-to-end on Xenium, CosMx, MERFISH, and seqFISH.
 
+Count-native defaults and speed. The default encoder is now `mlp_deep`, a SwiGLU
+pre-norm residual MLP (no per-gene numerical embedding), which gives the healthiest
+raw codebook on sparse Xenium counts; per-gene numerical embeddings (`mlp_plr` / PLE)
+degenerate on sparse counts. The default cell reconstruction is now a negative-binomial
+NLL on the raw counts (scVI-style library from the observed total count) plus a
+Bernoulli detection hurdle (`detection_weight=0.5`), with no MSE on the cell branch
+(`cell_recon="nb"`); the default niche reconstruction is composition MSE plus a
+Dirichlet-multinomial on the count-scale aggregated composition (`niche_recon="mse_dirmult"`).
+These count defaults require raw INTEGER counts in `adata.X` (a normalized or log
+matrix now raises); the pure-MSE path is recoverable with `cell_recon="mse"` +
+`niche_recon="mse"`. `ModelConfig.from_dict` falls back to the old MSE-only path so
+pre-loss-refactor checkpoints still load strictly. The default spatial graph is
+`knn_radius` at radius 50 microns (`k_neighbors=20`, `weighted_mean` aggregation),
+built per sample. The optimizer is AdamW with decoupled selective weight decay (0.01,
+applied only to Linear / Conv weights); the EMA codebook is frozen from the optimizer.
+Added opt-in `TrainConfig.device_resident` (GPU-resident dataset, roughly 3 to 15x
+faster, accuracy-neutral, memory-fit-gated with a CPU fallback), `batch_size="auto"`
+(adapts the batch to the panel size), and per-run `training_runtime.json` metrics.
+The transcript-context and molecule-set default radii moved to 7 microns.
+Synced the documentation site (README, guides, API reference) to these defaults.
+
 All notable changes to nicheverse are documented in this file. The format
 loosely follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)

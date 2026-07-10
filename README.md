@@ -1,6 +1,6 @@
 # NICHEVERSE
 
-*Neighborhood-Inferred Cell type HiErarchical annotation + Vector-quantizEd Representations of Spatial Ecotypes*
+*Neighborhood-Inferred Cell type HiErarchical annotation + VEctor-quantized Representations of Spatial Ecotypes*
 
 A world model for tissues: hierarchical VQ-VAE codebooks of cell states and spatial niches for imaging-based spatial transcriptomics (Xenium, MERFISH, seqFISH, CosMx).
 
@@ -88,19 +88,21 @@ After training, `adata.obs` carries `cell_codebook_idx` (0 to 255) and `neighbor
 
 ## Model and training options
 
-- **Quantizers** (`ModelConfig.quantizer_type`): `vq` (default), `fsq`, `soft`, `rot`, `qinco`, `pq`; registry `nicheverse.models.build_quantizer`.
-- **Encoders** (`ModelConfig.encoder_type`): `mlp` (default), `residual_mlp`, `transformer`; registry `nicheverse.models.build_encoder`.
-- **Reconstruction** (`ModelConfig.recon`): `mse` (default), `nb`, `poisson`.
-- **Spatial graphs / kernels** (`TrainConfig`): `knn` (default), `radius`, `delaunay`, `alpha_complex`; aggregation `weighted_mean` (default), `mean`, `max`, `gaussian`, `inverse_square`.
+- **Encoders** (`ModelConfig.encoder_type`): `mlp_deep` (default; a SwiGLU pre-norm residual MLP), plus `mlp`, `mlp_plr`, `residual_mlp`, `transformer`, `cnn`, `fast_cnn`, `deep_cnn`, `gnn`, `diffusion`, `dit`, `set_transformer`, `perceiver_io`, `soft_moe`, `ft_transformer`; registry `nicheverse.models.build_encoder`. `mlp_deep` is the default because it gives the healthiest raw codebook on sparse Xenium counts; per-gene numerical embeddings (`mlp_plr` / PLE) degenerate on sparse counts.
+- **Quantizers** (`ModelConfig.quantizer_type`): `vq` (default; stabilized EMA codebook with k-means++ init, dead-code reset, and a diversity term, and the EMA codebook is frozen from the optimizer), plus `rvq`, `grvq`, `pq`, `qinco`, `rot`, `soft`, `bsq`, `lfq`, `fsq`, `residual_fsq`; registry `nicheverse.models.build_quantizer`.
+- **Cell reconstruction** (`ModelConfig.cell_recon`): default `nb` is a negative-binomial NLL on the RAW counts (scVI-style library from the observed total count) plus a Bernoulli/BCE detection hurdle (`detection_weight=0.5`); no MSE on the cell branch. Set `cell_recon="mse"` (with `detection_weight=0`) to recover the pure MSE-on-log1p path.
+- **Niche reconstruction** (`ModelConfig.niche_recon`): default `mse_dirmult` is composition MSE plus a Dirichlet-multinomial on the count-scale aggregated-neighbor composition. Set `niche_recon="mse"` for pure composition MSE.
+- **Spatial graphs / kernels** (`TrainConfig`): `knn_radius` (default, radius 50 microns), plus `knn`, `radius`, `delaunay`, `alpha_complex`; aggregation `weighted_mean` (default, inverse distance), `mean`, `max`, `gaussian`, `inverse_square`.
 - **Spatial losses** (opt-in): `laplacian`, `contrastive`, `codebook_consistency`.
-- **Data utilities**: `nicheverse.data.transcript_context` and `nicheverse.training.mae_pretrain`.
+- **Data utilities**: `nicheverse.data.transcript_context` (default radius 7 microns), the subcellular molecule-set featurizer (default radius 7 microns), and `nicheverse.training.mae_pretrain`.
+- **Optimizer**: `AdamW` with decoupled selective weight decay (`weight_decay=0.01`, applied only to Linear / Conv weights; biases, norms, and bare parameters are excluded).
 - **Vectorized neighborhood aggregation** in bounded-memory chunks, replacing the per-cell Python loop, for multi-million-cell cohorts.
-- **Spatial graph backends**: `knn` (default), `radius`, and `delaunay` (`TrainConfig.spatial_graph`).
 - **Cosine-distance codebook** option (`ModelConfig.vq_distance="cosine"`) alongside the default squared-Euclidean assignment.
-- **Training knobs**: optional validation split with early stopping, best-checkpoint saving, gradient clipping, CUDA automatic mixed precision, checkpoint resume, `tqdm` progress, and per-epoch codebook perplexity logging. All are off by default so the released training run is reproduced exactly.
+- **Speed knobs (opt-in, accuracy-neutral)**: `TrainConfig.device_resident=True` keeps the feature tensors GPU-resident (roughly 3 to 15x faster, memory-fit-gated with a clean CPU fallback); `batch_size="auto"` adapts the batch to the panel size; per-run timing is written to `training_runtime.json`.
+- **Training knobs**: optional validation split with early stopping, best-checkpoint saving, gradient clipping, CUDA automatic mixed precision, checkpoint resume, `tqdm` progress, and per-epoch codebook perplexity logging.
 - **Packaging**: hatchling build backend, PyPI-ready metadata, and a Sphinx documentation site.
 
-Defaults are unchanged, so checkpoints and results from 0.1.x reproduce bit-for-bit.
+Pre-loss-refactor checkpoints still load via `ModelConfig.from_dict` backward-compatibility (they fall back to the old MSE-only cell/niche path so their state_dicts load strictly).
 
 ## Multi-GPU training (opt-in DDP)
 
@@ -185,9 +187,9 @@ For each cell i with feature vector x_i and physical coordinates (x, y), we buil
 
     h_i = sum_j w_ij x_j,   w_ij proportional to 1 / d_ij
 
-Both x_i and the concatenation (x_i, h_i) feed two separate MLP encoders. The cell encoder output is quantized against a learned cell codebook of K_c entries; the neighborhood encoder output is quantized against a separate niche codebook of K_n entries. A cross attention layer lets the cell representation attend to its niche before reconstruction. Codebooks are trained with EMA updates, k means++ initialization, and a dead code reset every 50 batches. A diversity term penalizes low entropy code usage.
+Both x_i and the concatenation (x_i, h_i) feed two separate encoders (the default backbone is `mlp_deep`, a SwiGLU pre-norm residual MLP). The cell encoder output is quantized against a learned cell codebook of K_c entries; the neighborhood encoder output is quantized against a separate niche codebook of K_n entries. A cross attention layer lets the cell representation attend to its niche before reconstruction. Codebooks are trained with EMA updates, k means++ initialization, and a dead code reset; the EMA codebook is frozen from the optimizer. A diversity term penalizes low entropy code usage.
 
-Loss is the sum of reconstruction MSE on x_i and on (x_i, h_i), plus the commitment terms from both VQ layers, plus the diversity entropy term. Defaults: K_c = 256, K_n = 32, k_neighbors = 20, cell_embedding_dim = 64, neighborhood_embedding_dim = 256, hidden_dims = (256, 128), Adam lr = 3e-4.
+By default the cell branch is fit with a negative-binomial NLL on the raw counts (scVI-style library from the observed total count) plus a Bernoulli detection hurdle, and the niche branch with composition MSE plus a Dirichlet-multinomial on the count-scale aggregated composition; these count-native defaults require raw INTEGER counts in `adata.X`. The total loss adds the commitment terms from both VQ layers and the diversity entropy term. The pure-MSE path is recoverable with `cell_recon="mse"` + `niche_recon="mse"`. Defaults: K_c = 256, K_n = 32, k_neighbors = 20, cell_embedding_dim = 64, neighborhood_embedding_dim = 256, hidden_dims = (256, 128), optimizer AdamW with decoupled weight decay 0.01, lr = 3e-4.
 
 ## Reproducibility
 
@@ -213,7 +215,7 @@ Set `torch.manual_seed(49)` is applied automatically via `TrainConfig.seed`.
 pytest -q
 ```
 
-The test suite uses tiny synthetic data and verifies forward pass shapes, checkpoint round trip, per sample k-NN isolation, end to end train then predict, and gene panel mismatch detection.
+The test suite uses tiny synthetic data and covers forward pass shapes, every registered encoder and quantizer, checkpoint round trip, per sample k-NN isolation, the count and MSE reconstruction paths, device-resident training, end to end train then predict, and gene panel mismatch detection.
 
 ## License
 
