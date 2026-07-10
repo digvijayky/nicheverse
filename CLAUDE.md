@@ -9,8 +9,9 @@
 - **Make edits to the working tree ONLY, then STOP and report your diff.** Exactly ONE actor
   commits: the human-driven main orchestrator (the top-level Claude session), and only on the
   human's behalf. If you believe a commit is warranted, SAY SO in your report — do not do it.
-- **NEVER push to origin / GitHub.** Pushing happens only when the human explicitly asks, and
-  only the human's main session does it. A background agent must never push under any circumstance.
+- **Only the main orchestrator (top-level Claude session) commits AND pushes; it pushes after
+  every commit** (the human wants `main` mirrored to GitHub continuously). A sub-agent, background
+  agent, or automated tool must NEVER commit or push under any circumstance - it edits and reports.
 - **NEVER create branches.** All work is on `main`; there must be nothing beyond `main` and
   `origin/main` (`git branch -a` to verify). If a branch ever exists, tell the human.
 - Read-only git is fine: `git diff`, `git log`, `git status`, `git show`.
