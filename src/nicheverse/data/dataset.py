@@ -21,7 +21,8 @@ from typing import Any
 
 import numpy as np
 import torch
-from sklearn.neighbors import NearestNeighbors
+
+from ._knn import knn_query, radius_query
 
 try:
     from scipy.spatial import QhullError
@@ -273,10 +274,13 @@ class SpatialDataset(Dataset):
         )
 
     def _knn_graph(self, coords: np.ndarray, n: int) -> tuple[np.ndarray, np.ndarray]:
-        """Plain k-nearest-neighbor graph (also the fallback for degenerate samples)."""
+        """Plain k-nearest-neighbor graph (also the fallback for degenerate samples).
+
+        Uses the exact kNN backend (GPU cuML brute force when available, else the
+        sklearn ball-tree); both return the same neighbor set, self at column 0.
+        """
         k = min(self.k_neighbors + 1, n)
-        nbrs = NearestNeighbors(n_neighbors=k, algorithm="ball_tree").fit(coords)
-        dist, idx = nbrs.kneighbors(coords)
+        dist, idx = knn_query(coords, k)
         return idx, dist
 
     def _neighbor_graph(self, coords: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
@@ -289,23 +293,27 @@ class SpatialDataset(Dataset):
         if self.spatial_graph == "knn":
             return self._knn_graph(coords, n)
         if self.spatial_graph == "radius":
-            nbrs = NearestNeighbors(radius=float(self.radius), algorithm="ball_tree").fit(coords)
-            dist_list, idx_list = nbrs.radius_neighbors(coords, sort_results=True)
+            # Exact fixed-radius query (sklearn ball-tree; cuML has no exact
+            # radius search, so this path stays on CPU). Returns per-cell
+            # neighbor lists sorted by distance, self at distance 0.
+            dist_list, idx_list = radius_query(coords, float(self.radius))
+            dist_list = list(dist_list)
+            idx_list = list(idx_list)
             # Isolated-cell fallback (same rationale as knn_radius below): a cell
             # with no neighbor inside `radius` gets a self-only list, which would
             # aggregate to an all-zeros niche. Inject its single nearest real
-            # neighbor so the niche reflects the closest tissue context. Only
-            # queried for the (typically few) isolated cells, so no cohort-scale
-            # cost. Deterministic: nearest neighbor is a function of coordinates.
+            # neighbor so the niche reflects the closest tissue context.
+            # Deterministic: nearest neighbor is a function of coordinates. The
+            # k=2 kNN is computed once for all cells (exact backend); column 1 is
+            # the nearest non-self cell.
             if n >= 2:
-                nn2 = NearestNeighbors(n_neighbors=2, algorithm="ball_tree").fit(coords)
-                for i in range(n):
-                    real = idx_list[i] != i
-                    if not real.any():
-                        d2, i2 = nn2.kneighbors(coords[i : i + 1])
-                        j = int(i2[0, 1])  # nearest non-self cell
+                isolated = [i for i in range(n) if not (np.asarray(idx_list[i]) != i).any()]
+                if isolated:
+                    d2, i2 = knn_query(coords, 2)  # (n, 2): col1 = nearest non-self
+                    for i in isolated:
+                        j = int(i2[i, 1])
                         idx_list[i] = np.array([i, j])
-                        dist_list[i] = np.array([0.0, float(d2[0, 1])])
+                        dist_list[i] = np.array([0.0, float(d2[i, 1])])
             return self._pad_variable_degree(idx_list, dist_list, n)
         if self.spatial_graph == "knn_radius":
             # bounded-degree kNN pruned to a distance band: keep up to k neighbors
