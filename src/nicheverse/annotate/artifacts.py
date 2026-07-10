@@ -30,6 +30,29 @@ def _sorted_codes(codes: pd.Series) -> list[str]:
     return sorted(codes.astype(str).unique(), key=lambda c: (len(c), c))
 
 
+def _value_fractions(s: pd.Series) -> pd.Series:
+    """Normalized value counts with NaN dropped and ties broken deterministically.
+
+    Real missing values (NaN/None and their ``"nan"``/``"none"`` string spellings)
+    are excluded rather than counted as a spurious category. The result is ordered
+    by descending fraction with ties broken by ascending category name, so the
+    dominant value and any head slice are stable regardless of input row order.
+    """
+    vals = s.astype("object")
+    keep = vals.notna().to_numpy()
+    if keep.any():
+        str_vals = vals[keep].astype(str)
+        keep_str = ~str_vals.str.lower().isin({"nan", "none", "<na>"}).to_numpy()
+        str_vals = str_vals[keep_str]
+    else:
+        str_vals = vals[keep].astype(str)
+    if not len(str_vals):
+        return pd.Series(dtype="float64")
+    vc = str_vals.value_counts(normalize=True)
+    order = sorted(vc.index, key=lambda k: (-float(vc[k]), str(k)))
+    return vc.reindex(order)
+
+
 def code_evidence(
     adata: ad.AnnData,
     code_col: str,
@@ -74,22 +97,25 @@ def code_evidence(
     z = (means - means.mean(0)) / (means.std(0) + 1e-9)
 
     deg = None
-    try:
-        import scanpy as sc
+    if len(uniq) >= 2:  # 1-vs-rest is undefined with a single code (yields NaN log2fc)
+        try:
+            import scanpy as sc
 
-        a2 = ad.AnnData(
-            X=(x.copy() if hasattr(x, "copy") else np.asarray(x)),
-            obs=pd.DataFrame({"_code": pd.Categorical(codes.values)}, index=adata.obs_names)
-        )
-        a2.var_names = adata.var_names
-        chk = a2.X.data[:2000] if sp.issparse(a2.X) else np.asarray(a2.X).ravel()[:2000]
-        if len(chk) and np.allclose(chk, np.round(chk)):  # raw counts -> log-normalize for the DEG test
-            sc.pp.normalize_total(a2)
-            sc.pp.log1p(a2)
-        sc.tl.rank_genes_groups(a2, "_code", method="t-test_overestim_var", n_genes=top_degs)
-        deg = a2.uns["rank_genes_groups"]
-    except Exception:
-        deg = None
+            xin = x.copy() if hasattr(x, "copy") else np.asarray(x)
+            chk = xin.data[:2000] if sp.issparse(xin) else np.asarray(xin).ravel()[:2000]
+            chk = chk[np.isfinite(chk)]
+            a2 = ad.AnnData(
+                X=xin,
+                obs=pd.DataFrame({"_code": pd.Categorical(codes.values)}, index=adata.obs_names)
+            )
+            a2.var_names = adata.var_names
+            if len(chk) and np.allclose(chk, np.round(chk)):  # raw counts -> log-normalize for the DEG test
+                sc.pp.normalize_total(a2)
+                sc.pp.log1p(a2)
+            sc.tl.rank_genes_groups(a2, "_code", method="t-test_overestim_var", n_genes=top_degs)
+            deg = a2.uns["rank_genes_groups"]
+        except Exception:
+            deg = None
 
     deg_names = set(deg["names"].dtype.names) if deg is not None else set()
     out: dict[str, dict] = {}
@@ -104,12 +130,16 @@ def code_evidence(
         }
         if deg is not None and c in deg_names:
             names, lfc, pad = deg["names"][c], deg["logfoldchanges"][c], deg["pvals_adj"][c]
-            ev["top_degs"] = [
-                (str(names[k]), round(float(lfc[k]), 2), float(pad[k])) for k in range(min(top_degs, len(names)))
-            ]
+            degs = []
+            for k in range(min(top_degs, len(names))):
+                lf, pj = float(lfc[k]), float(pad[k])
+                if not (np.isfinite(lf) and np.isfinite(pj)):
+                    continue
+                degs.append((str(names[k]), round(lf, 2), pj))
+            ev["top_degs"] = degs
         for col in extra_cols:
             if col in adata.obs.columns:
-                vc = adata.obs.loc[m, col].astype(str).value_counts(normalize=True)
+                vc = _value_fractions(adata.obs.loc[m, col])
                 ev[f"dist_{col}"] = {str(k): round(float(v), 3) for k, v in vc.head(6).items()}
         out[c] = ev
     return out
@@ -134,7 +164,7 @@ def niche_evidence(
     top_markers [(gene, z)], dist_<col>}}``.
     """
     niches = adata.obs[niche_col].astype(str)
-    cts = adata.obs[celltype_col].astype(str)
+    cts = adata.obs[celltype_col]
     genes = list(map(str, adata.var_names))
     x = adata.X
     xd = x.toarray() if sp.issparse(x) else np.asarray(x)
@@ -145,7 +175,7 @@ def niche_evidence(
     out: dict[str, dict] = {}
     for i, c in enumerate(uniq):
         m = (niches == c).to_numpy()
-        comp = cts[m].value_counts(normalize=True).head(top_compositions)
+        comp = _value_fractions(cts[m]).head(top_compositions)
         order = np.argsort(z[i])[::-1][:top_markers]
         ev = {
             "code": c,
@@ -156,7 +186,7 @@ def niche_evidence(
         }
         for col in extra_cols:
             if col in adata.obs.columns:
-                vc = adata.obs.loc[m, col].astype(str).value_counts(normalize=True)
+                vc = _value_fractions(adata.obs.loc[m, col])
                 ev[f"dist_{col}"] = {str(k): round(float(v), 3) for k, v in vc.head(6).items()}
         out[c] = ev
     return out
@@ -282,10 +312,10 @@ def code_context(
         m = (codes_all == c).to_numpy()
         row: dict = {"n_cells": int(m.sum()), "frac": float(m.mean()) if n_total else 0.0}
         if patient_col and patient_col in adata.obs.columns:
-            row["n_patients"] = int(adata.obs.loc[m, patient_col].astype(str).nunique())
+            row["n_patients"] = int(adata.obs.loc[m, patient_col].dropna().astype(str).nunique())
         for col in context_cols:
             if col in adata.obs.columns:
-                vc = adata.obs.loc[m, col].astype(str).value_counts(normalize=True)
+                vc = _value_fractions(adata.obs.loc[m, col])
                 if len(vc):
                     row[f"{col}_dominant"] = str(vc.index[0])
                     row[f"{col}_dominant_frac"] = round(float(vc.iloc[0]), 4)
