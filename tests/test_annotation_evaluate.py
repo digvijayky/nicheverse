@@ -313,3 +313,216 @@ def test_write_provenance_manifest_makedirs(tmp_path):
     import os
 
     assert os.path.isfile(path)
+
+
+# ---------------------------------------------------------------------------
+# label_match: missing lineage_map + synonyms
+# ---------------------------------------------------------------------------
+
+def test_label_match_without_lineage_map_degrades_to_exact_vs_mismatch():
+    # No lineage_map: exact match still 1.0, but "same broad lineage" is not knowable
+    # so a different immune type falls all the way to 0.0 (documented CL approximation).
+    ev = _evidence([("CD8A", 3.0)])
+    prop = {"code": "0", "label": "CD8 T cell", "key_markers": ["CD8A"]}
+    assert score_code(prop, "CD8 T cell", ev)["label_match"] == 1.0
+    assert score_code(prop, "Macrophage", ev)["label_match"] == 0.0
+    # and granularity is None without a depth map
+    assert score_code(prop, "Macrophage", ev)["granularity"] is None
+
+
+def test_label_match_synonym():
+    ev = _evidence([("CD8A", 3.0)])
+    # proposal names a synonym of the reference -> full match (1.0)
+    prop = {"code": "0", "label": "CTL", "key_markers": ["CD8A"],
+            "synonyms": ["CD8 T cell", "cytotoxic T lymphocyte"]}
+    rec = score_code(prop, "CD8 T cell", ev, lineage_map=LINEAGE_MAP)
+    assert rec["label_match"] == 1.0
+    # an unrelated synonym does not manufacture a match
+    prop2 = {"code": "0", "label": "CTL", "key_markers": ["CD8A"], "synonyms": ["B cell"]}
+    assert score_code(prop2, "Endothelial", ev, lineage_map=LINEAGE_MAP)["label_match"] == 0.0
+
+
+def test_label_match_none_proposed_label():
+    # a missing / empty proposed label against a real reference is a mismatch, not a crash
+    ev = _evidence([("CD8A", 3.0)])
+    assert score_code({"code": "0"}, "CD8 T cell", ev, lineage_map=LINEAGE_MAP)["label_match"] == 0.0
+    assert score_code({"code": "0", "label": None}, "CD8 T cell", ev)["label_match"] == 0.0
+
+
+# ---------------------------------------------------------------------------
+# marker precision / recall degenerate inputs
+# ---------------------------------------------------------------------------
+
+def test_marker_precision_none_when_no_markers_cited():
+    ev = _evidence([("CD8A", 3.0)])
+    prop = {"code": "0", "label": "CD8 T cell"}  # no key_markers
+    rec = score_code(prop, "CD8 T cell", ev, lineage_map=LINEAGE_MAP)
+    assert rec["marker_precision"] is None
+    assert rec["n_proposed_markers"] == 0
+    assert rec["n_absent_markers"] == 0
+
+
+def test_marker_recall_none_when_no_evidence_markers():
+    # evidence has neither top_markers nor top_degs -> recall undefined, no crash
+    ev = {"code": "0"}
+    prop = {"code": "0", "label": "CD8 T cell", "key_markers": ["CD8A"]}
+    rec = score_code(prop, "CD8 T cell", ev, lineage_map=LINEAGE_MAP)
+    assert rec["marker_recall"] is None
+    # every cited marker is absent from an empty enriched set
+    assert rec["marker_precision"] == 0.0
+    assert rec["n_absent_markers"] == 1
+
+
+def test_marker_recall_when_fewer_than_k_markers():
+    # only 2 markers exist but k=5 -> recall denominator is the 2 that exist, not 5
+    ev = _evidence([("CD8A", 3.0), ("CD3D", 2.0)])
+    prop = {"code": "0", "label": "CD8 T cell", "key_markers": ["CD8A", "CD3D"]}
+    rec = score_code(prop, "CD8 T cell", ev, lineage_map=LINEAGE_MAP, k=5)
+    assert rec["marker_recall"] == 1.0
+
+
+# ---------------------------------------------------------------------------
+# calibration edge cases
+# ---------------------------------------------------------------------------
+
+def test_calibration_perfect_predictor_high_spearman():
+    # confidence rank-orders correctness perfectly: every wrong call (label_match 0.0)
+    # sits below every right call (1.0). With a binary label_match the tie structure
+    # caps Spearman below 1.0, but it must still be strongly positive. Using the same
+    # lineage each time (partial 0.5 vs full 1.0) removes ties and drives it to 1.0.
+    ev = _evidence([("CD8A", 3.0)])
+    cards = []
+    for i, (lab, conf) in enumerate(
+        [("Macrophage", 0.1), ("T cell", 0.4), ("CD8 T cell", 0.9)]
+    ):
+        # Macrophage=same immune lineage (0.5) but not exact; T cell=same lineage (0.5);
+        # so make one an outright mismatch to get 3 distinct correctness ranks.
+        ref = {"Macrophage": "Endothelial", "T cell": "Macrophage", "CD8 T cell": "CD8 T cell"}[lab]
+        prop = {"code": str(i), "label": lab, "key_markers": ["CD8A"], "confidence": conf}
+        cards.append(score_code(prop, ref, ev, lineage_map=LINEAGE_MAP))
+    # label_match values: 0.0 (immune vs vascular), 0.5 (same immune lineage), 1.0 (exact)
+    lms = sorted(c["label_match"] for c in cards)
+    assert lms == [0.0, 0.5, 1.0]  # three distinct correctness levels, no ties
+    cal = calibration(cards)
+    assert cal["spearman"] is not None and cal["spearman"] > 0.99
+
+
+def test_calibration_constant_confidence_gives_none():
+    # no variance in confidence -> spearman is undefined -> None (not NaN, no raise)
+    ev = _evidence([("CD8A", 3.0)])
+    cards = []
+    for i in range(4):
+        prop = {"code": str(i), "label": "CD8 T cell", "key_markers": ["CD8A"], "confidence": 0.7}
+        cards.append(score_code(prop, "CD8 T cell", ev, lineage_map=LINEAGE_MAP))
+    cal = calibration(cards)
+    assert cal["spearman"] is None
+    assert cal["n"] == 4
+
+
+def test_calibration_single_bin_and_ties_do_not_raise():
+    ev = _evidence([("CD8A", 3.0)])
+    cards = [
+        score_code({"code": "0", "label": "CD8 T cell", "key_markers": ["CD8A"], "confidence": 0.5},
+                   "CD8 T cell", ev, lineage_map=LINEAGE_MAP),
+        score_code({"code": "1", "label": "Endothelial", "key_markers": ["CD8A"], "confidence": 0.5},
+                   "CD8 T cell", ev, lineage_map=LINEAGE_MAP),
+    ]
+    cal = calibration(cards, n_bins=1)  # single bin + tied confidences
+    assert len(cal["bins"]) == 1
+    assert cal["n"] == 2
+    # constant confidence -> spearman undefined -> None
+    assert cal["spearman"] is None
+
+
+def test_calibration_empty_and_all_none_label_match():
+    assert calibration([])["spearman"] is None
+    ev = _evidence([("CD8A", 3.0)])
+    # confidence present but reference absent -> label_match None -> dropped from corr
+    card = score_code({"code": "0", "label": "CD8 T cell", "confidence": 0.9}, "", ev)
+    cal = calibration([card])
+    assert cal["n_total"] == 1 and cal["n"] == 0 and cal["spearman"] is None
+
+
+# ---------------------------------------------------------------------------
+# scorecard_table / summarize tolerance
+# ---------------------------------------------------------------------------
+
+def test_scorecard_table_tolerates_missing_keys():
+    # a bare record missing most scorecard fields still yields one row with all columns
+    df = scorecard_table([{"code": "0", "proposed_label": "T cell"}])
+    assert df.shape[0] == 1
+    for col in ("label_match", "marker_precision", "granularity", "platform", "absent_markers"):
+        assert col in df.columns
+
+
+def test_summarize_without_platform_or_compartment():
+    ev = _evidence([("CD8A", 3.0)])
+    # records carry no platform/compartment -> "by" is present but empty
+    cards = [
+        score_code({"code": "0", "label": "CD8 T cell", "key_markers": ["CD8A"]},
+                   "CD8 T cell", ev, lineage_map=LINEAGE_MAP),
+        score_code({"code": "1", "label": "Endothelial", "key_markers": ["CD8A"]},
+                   "CD8 T cell", ev, lineage_map=LINEAGE_MAP),
+    ]
+    summ = summarize(cards)
+    assert summ["n"] == 2
+    assert summ["by"] == {}
+
+
+# ---------------------------------------------------------------------------
+# provenance manifest: numpy + non-finite serialization
+# ---------------------------------------------------------------------------
+
+def test_manifest_serializes_numpy_and_nonfinite(tmp_path):
+    ev = _evidence([("CD8A", 3.0)])
+    rec = score_code(
+        {"code": "0", "label": "CD8 T cell", "key_markers": ["CD8A"],
+         "confidence": np.float64(0.9)},  # numpy scalar confidence
+        "CD8 T cell", ev, lineage_map=LINEAGE_MAP,
+    )
+    rec["evidence"] = ev
+    rec["np_array"] = np.array([1, 2, 3])          # numpy array -> JSON list
+    rec["np_int"] = np.int64(7)                    # numpy int -> JSON int
+    rec["np_bool"] = np.bool_(True)                # numpy bool -> JSON bool
+    rec["marker_precision"] = float("nan")         # non-finite -> null
+    rec["some_inf"] = float("inf")                 # non-finite -> null
+    run_meta = {"timestamp": "t", "seed": np.int64(0), "bad": float("nan")}
+
+    path = write_provenance_manifest(str(tmp_path), run_meta, [rec])
+
+    # strict reload: reject the invalid JSON tokens NaN / Infinity outright
+    def _boom(x):
+        raise ValueError(f"non-finite JSON constant: {x}")
+
+    with open(path) as fh:
+        text = fh.read()
+    assert "NaN" not in text and "Infinity" not in text
+    m = json.loads(text, parse_constant=_boom)
+
+    sc = m["scorecards"][0]
+    assert sc["np_array"] == [1, 2, 3]
+    assert sc["np_int"] == 7 and isinstance(sc["np_int"], int)
+    assert sc["np_bool"] is True
+    assert sc["marker_precision"] is None
+    assert sc["some_inf"] is None
+    assert m["run_meta"]["seed"] == 0
+    assert m["run_meta"]["bad"] is None
+
+
+def test_manifest_hash_stable_across_numpy_and_native():
+    from nicheverse.annotate.evaluate import _hash_obj
+
+    assert _hash_obj({"a": np.int64(5), "b": np.array([1, 2])}) == _hash_obj({"a": 5, "b": [1, 2]})
+
+
+def test_manifest_writes_csv_for_nonscorecard_records(tmp_path):
+    # records with no scorecard fields: manifest.summary is None but the CSV still writes
+    import os
+
+    recs = [{"code": "0", "final_label": "T cell", "citations": ["PMID:1"]}]
+    path = write_provenance_manifest(str(tmp_path), {"timestamp": "t"}, recs)
+    with open(path) as fh:
+        m = json.load(fh)
+    assert m["summary"] is None
+    assert m["scorecards"] == []
+    assert os.path.isfile(os.path.join(str(tmp_path), "provenance_scorecards.csv"))

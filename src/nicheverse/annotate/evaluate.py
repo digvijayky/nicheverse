@@ -452,11 +452,53 @@ def scorecard_table(scorecards: list[dict]) -> pd.DataFrame:
 # provenance manifest
 # ---------------------------------------------------------------------------
 
+def _json_sanitize(obj):
+    """Recursively coerce an object to strictly JSON-safe Python.
+
+    Fixes two failure modes of a bare ``json.dump(..., default=str)``:
+
+    * NumPy scalars/arrays: ``np.int64`` / ``np.bool_`` (which do NOT subclass the
+      Python builtins) would serialize to a lossy string, and ``np.ndarray`` would
+      become its ``repr``. Here they are converted to native ``int`` / ``float`` /
+      ``bool`` / ``list`` so they round-trip as real JSON numbers/arrays.
+    * Non-finite floats: ``NaN`` / ``inf`` / ``-inf`` are written by the stdlib as the
+      bare tokens ``NaN`` / ``Infinity``, which are not valid JSON. They are mapped to
+      ``None`` so the manifest is always strict-JSON reloadable.
+
+    Anything not otherwise representable (e.g. a custom object) falls back to ``str``.
+    """
+    if obj is None or isinstance(obj, (bool, int, str)):
+        return obj
+    if isinstance(obj, float):
+        return obj if np.isfinite(obj) else None
+    if isinstance(obj, np.bool_):
+        return bool(obj)
+    if isinstance(obj, np.integer):
+        return int(obj)
+    if isinstance(obj, np.floating):
+        f = float(obj)
+        return f if np.isfinite(f) else None
+    if isinstance(obj, np.ndarray):
+        return [_json_sanitize(x) for x in obj.tolist()]
+    if isinstance(obj, np.generic):  # any other numpy scalar (e.g. datetime64)
+        return _json_sanitize(obj.item())
+    if isinstance(obj, dict):
+        return {str(k): _json_sanitize(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple, set)):
+        return [_json_sanitize(x) for x in obj]
+    return str(obj)
+
+
 def _hash_obj(obj) -> str:
-    """Stable short SHA-256 of any JSON-serializable object (sorted keys)."""
+    """Stable short SHA-256 of any object (JSON-sanitized, sorted keys).
+
+    The object is sanitized first so a numpy-typed value hashes identically to its
+    native-Python equivalent (stable across callers), and non-finite floats never
+    corrupt the digest.
+    """
     try:
-        blob = json.dumps(obj, sort_keys=True, default=str)
-    except TypeError:
+        blob = json.dumps(_json_sanitize(obj), sort_keys=True, allow_nan=False)
+    except (TypeError, ValueError):
         blob = str(obj)
     return hashlib.sha256(blob.encode("utf-8")).hexdigest()[:16]
 
@@ -521,8 +563,10 @@ def write_provenance_manifest(
         "summary": summarize(scorecards) if scorecards else None,
     }
     manifest_path = os.path.abspath(os.path.join(out_dir, "provenance_manifest.json"))
+    # Sanitize first (numpy -> native, NaN/inf -> None) so the file is strict JSON;
+    # allow_nan=False is a belt-and-suspenders guard against any missed non-finite.
     with open(manifest_path, "w") as fh:
-        json.dump(manifest, fh, indent=2, sort_keys=True, default=str)
+        json.dump(_json_sanitize(manifest), fh, indent=2, sort_keys=True, allow_nan=False)
 
     csv_path = os.path.join(out_dir, "provenance_scorecards.csv")
     scorecard_table(scorecards if scorecards else per_code_records).to_csv(csv_path, index=False)
