@@ -34,7 +34,14 @@ def test_predict_codes_bit_stable_across_two_runs(tmp_path):
         neighborhood_num_embeddings=4,
         gene_names=tuple(train_ad.var_names),
     )
-    tc = TrainConfig(num_epochs=2, batch_size=32, k_neighbors=4, log_every=100, deterministic=True)
+    tc = TrainConfig(
+        num_epochs=2,
+        batch_size=32,
+        k_neighbors=4,
+        log_every=100,
+        deterministic=True,
+        device_resident=False,
+    )
     train_model(train_ad, tmp_path, model_config=mc, train_config=tc)
 
     pred_ad = _toy_adata(seed=99)

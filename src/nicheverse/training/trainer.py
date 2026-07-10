@@ -268,28 +268,36 @@ class TrainConfig:
         DataLoader ``prefetch_factor`` (only applies when ``num_workers > 0``).
         ``None`` (default) uses the PyTorch default (2). Verified accuracy neutral.
     device_resident
-        Opt-in GPU-resident dataset that eliminates the per-batch host->device
-        copy. ``False`` (default) keeps the released CPU-DataLoader path exactly
-        (byte-identical). When ``True`` and the resident tensors fit in GPU memory
-        (see :func:`_device_resident_fits`), the feature tensors
+        GPU-resident dataset that eliminates the per-batch host->device copy.
+        Now default ON (automatic): the trainer uses the GPU-resident path
+        whenever a CUDA GPU is present, DDP is off, and the dataset fits the
+        GPU's free-memory budget (see :func:`_device_resident_fits`); otherwise
+        it transparently falls back to the CPU DataLoader. Set ``False`` to force
+        the released CPU-DataLoader path. When active, the feature tensors
         (``cell_features``, ``neighborhood_features`` and, in the count modes,
         ``recon_target`` / ``niche_count_target``) are moved to the GPU ONCE after
         dataset construction; the DataLoader then yields only the seeded batch
         INDEX tensor and the features are gathered on the GPU inside the loop
         (``cb = cell_features_gpu[idx]``). This is accuracy neutral: the SAME
         seeded shuffle/BatchSampler produces the SAME batch indices in the SAME
-        order as the CPU path, so for a fixed seed the per-batch loss is identical
-        (to floating-point tolerance). Requires CUDA; on CPU it is a no-op
-        (falls back to the CPU path). The fit-check is additive: the resident tensors
-        plus a fixed ~8 GiB working-set margin must fit under
-        ``device_resident_mem_fraction`` (default ``0.9``) of the memory budget, where
-        the budget is the FREE GPU memory (``torch.cuda.mem_get_info``) when queryable,
-        else the device total. If they do not fit (wide panels, e.g. CosMx 21731 genes
-        or a big merged Xenium), a clear message is logged and the normal CPU DataLoader
-        path is used instead (never OOMs silently). Because the resident tensors cannot
-        be forked to DataLoader workers, ``num_workers`` is forced to ``0`` when this
-        path is active (logged). Not currently combined with DDP: under DDP this flag is
-        ignored (logged) and the CPU path is used.
+        order as the CPU path, so for a fixed seed the per-batch loss is
+        equivalent to floating-point tolerance. Requires CUDA; on CPU it is a
+        no-op (falls back to the CPU path). The fit-check is additive: the
+        resident tensors plus a fixed ~8 GiB working-set margin must fit under
+        ``device_resident_mem_fraction`` (default ``0.9``) of the memory budget,
+        where the budget is the FREE GPU memory (``torch.cuda.mem_get_info``) when
+        queryable, else the device total. If they do not fit (wide panels, e.g.
+        CosMx 21731 genes or a big merged Xenium), a clear message is logged and
+        the normal CPU DataLoader path is used instead (never OOMs silently).
+        Because the resident tensors cannot be forked to DataLoader workers,
+        ``num_workers`` is forced to ``0`` when this path is active (logged). Not
+        currently combined with DDP: under DDP this flag is ignored (logged) and
+        the CPU path is used.
+
+        Caveat: strictly byte-identical reproduction of a released checkpoint
+        should pass ``device_resident=False``. The on-GPU gather shifts
+        floating-point accumulation by ~1e-5 (accuracy neutral, but not
+        bit-identical to the CPU-DataLoader run that produced the release).
     device_resident_mem_fraction
         Fraction of the GPU memory budget the resident tensors + working margin may
         occupy in the ``device_resident`` fit-check. ``0.9`` (default). Lower it to be
@@ -340,7 +348,7 @@ class TrainConfig:
     pin_memory: bool | None = None
     persistent_workers: bool | None = None
     prefetch_factor: int | None = None
-    device_resident: bool = False
+    device_resident: bool = True
     device_resident_mem_fraction: float = 0.9
 
 
@@ -1040,8 +1048,9 @@ def train_model(
     )
 
     # ------------------------------------------------------------------
-    # Opt-in GPU-resident dataset (device_resident). Default OFF -> the whole block
-    # below is skipped and the released CPU-DataLoader path is byte-identical.
+    # GPU-resident dataset (device_resident). Default ON: when tc.device_resident is
+    # False the whole block below is skipped and the released CPU-DataLoader path is
+    # byte-identical. When True (default), activate below only if it fits (else fall back).
     #
     # When ON, and CUDA is available, and it is not a DDP run, and the resident
     # tensors fit under mem_fraction of GPU memory (with a safety margin), move the

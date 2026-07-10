@@ -1,11 +1,11 @@
-"""Tests for the opt-in GPU-resident dataset speedup (device_resident).
+"""Tests for the GPU-resident dataset speedup (device_resident, default ON).
 
-Covers: (1) flag OFF is the byte-identical released path with no attribute leak,
-(2) the memory-fit decision helper, (3) the _IndexView / _collate_index shuffle
-order preservation, and (4) a skipif-gated GPU numerical-equivalence test that
-trains with device_resident True vs False under the same seed and asserts the loss
-trajectory matches. The GPU test SKIPS on a CPU pytest node (expected); a human runs
-it on a GPU node to confirm equivalence before adopting the flag.
+Covers: (1) flag defaults ON, and the explicit-OFF path is the byte-identical
+released path with no attribute leak, (2) the memory-fit decision helper, (3) the
+_IndexView / _collate_index shuffle order preservation, and (4) a skipif-gated GPU
+numerical-equivalence test that trains with device_resident True vs False under the
+same seed and asserts the loss trajectory matches. The GPU test SKIPS on a CPU
+pytest node (expected); a human runs it on a GPU node to confirm equivalence.
 """
 
 from __future__ import annotations
@@ -55,17 +55,19 @@ def _mc(a):
 
 
 # ----------------------------------------------------------------------------
-# (1) Flag defaults OFF and does not leak device-resident attributes.
+# (1) Flag defaults ON; the explicit-OFF path stays CPU and leaks no attributes.
 # ----------------------------------------------------------------------------
-def test_device_resident_defaults_off():
-    assert TrainConfig().device_resident is False
+def test_device_resident_defaults_on():
+    assert TrainConfig().device_resident is True
 
 
 def test_flag_off_dataset_stays_cpu_no_attr_leak(tmp_path):
-    """With device_resident=False (default) the run is the released CPU path: the
+    """With device_resident=False (explicit) the run is the released CPU path: the
     feature tensors stay on CPU and no device-resident attribute is added."""
     a = _toy_adata(n=120, g=16, seed=0)
-    tc = TrainConfig(num_epochs=2, batch_size=32, k_neighbors=4, log_every=100)
+    tc = TrainConfig(
+        num_epochs=2, batch_size=32, k_neighbors=4, log_every=100, device_resident=False
+    )
     model, _ = train_model(a, tmp_path, model_config=_mc(a), train_config=tc)
     # train_config.json records device_resident False (serialized default).
     cfg = json.loads((tmp_path / "train_config.json").read_text())
@@ -75,10 +77,12 @@ def test_flag_off_dataset_stays_cpu_no_attr_leak(tmp_path):
 
 
 def test_flag_off_loss_matches_prior_default(tmp_path):
-    """The default path loss trajectory is deterministic and reproduces run-to-run
-    (guards that adding the flag did not perturb the released path)."""
+    """The released CPU path (device_resident=False) loss trajectory is deterministic
+    and reproduces run-to-run (guards that the flag did not perturb the released path)."""
     a = _toy_adata(n=120, g=16, seed=0)
-    tc = TrainConfig(num_epochs=2, batch_size=32, k_neighbors=4, log_every=100)
+    tc = TrainConfig(
+        num_epochs=2, batch_size=32, k_neighbors=4, log_every=100, device_resident=False
+    )
     train_model(a.copy(), tmp_path / "r1", model_config=_mc(a), train_config=tc)
     train_model(a.copy(), tmp_path / "r2", model_config=_mc(a), train_config=tc)
     l1 = json.loads((tmp_path / "r1" / "training_losses.json").read_text())

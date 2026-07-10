@@ -92,6 +92,9 @@ def test_best_val_checkpoint_is_exported_not_last(tmp_path, monkeypatch):
         save_best=True,
         normalize=True,
         log1p=True,
+        # Released CPU val-loop path: fake_val_loss uses the CPU-path _val_loss
+        # signature (no resident_dataset kwarg), so pin the flag off on a GPU node.
+        device_resident=False,
     )
     core, out = Trainer(tc).fit(a, tmp_path, model_config=_mc(a))
 
