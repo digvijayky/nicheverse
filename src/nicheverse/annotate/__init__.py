@@ -23,15 +23,20 @@ from .context import (
     NichePrior,
     ProjectContext,
 )
+from .evaluate import calibration, score_code, scorecard_table, write_provenance_manifest
+from .harness import AnnotationResult, annotate_codebook
 from .literature import biorxiv_search, literature_for_markers, pubmed_search
 from .plots import code_dotplot
 from .providers import PROVIDERS, call_llm
+from .verify import apply_lab_rules, check_citations, gate, marker_presence, validate_vocabulary
 
 __all__ = [
     "AnnotationConfig",
     "annotate_codes",
     "annotate_niches",
     "attach_labels",
+    "annotate_codebook",
+    "AnnotationResult",
     "code_evidence",
     "cluster_codes",
     "code_context",
@@ -44,6 +49,15 @@ __all__ = [
     "NichePrior",
     "ANNOTATION_RULES",
     "IMST_PLATFORMS",
+    "gate",
+    "marker_presence",
+    "check_citations",
+    "apply_lab_rules",
+    "validate_vocabulary",
+    "score_code",
+    "calibration",
+    "scorecard_table",
+    "write_provenance_manifest",
     "pubmed_search",
     "biorxiv_search",
     "literature_for_markers",
