@@ -206,3 +206,108 @@ def test_invalid_schedule_rejected(tmp_path):
     a = _toy_adata()
     with pytest.raises(ValueError, match="lr_schedule"):
         Trainer(TrainConfig(lr_schedule="bad")).fit(a, tmp_path, model_config=_mc(a))
+
+
+# --------------------------------------------------------------------------- #
+# Default-on training metrics + end-of-training training-curves PDF.
+# --------------------------------------------------------------------------- #
+
+import csv  # noqa: E402
+
+from nicheverse.training import metrics as _metrics  # noqa: E402
+
+
+def _short_tc(**kw):
+    base = dict(num_epochs=3, batch_size=32, k_neighbors=5, log_every=100)
+    base.update(kw)
+    return TrainConfig(**base)
+
+
+def test_codebook_usage_stats_uniform_vs_collapsed():
+    # Uniform usage: all K codes active, Gini ~0, perplexity == K.
+    uni = _metrics.codebook_usage_stats(np.full(8, 10))
+    assert uni["active"] == 8
+    assert uni["active_frac"] == 1.0
+    assert uni["gini"] < 1e-6
+    assert abs(uni["perplexity"] - 8) < 1e-6
+    assert abs(uni["entropy_norm"] - 1.0) < 1e-6
+    # Collapsed onto one code: 1 active, Gini high, perplexity ~1.
+    col = _metrics.codebook_usage_stats(np.array([100, 0, 0, 0, 0, 0, 0, 0]))
+    assert col["active"] == 1
+    assert col["gini"] > 0.8
+    assert col["perplexity"] < 1.01
+    # Empty histogram degrades to zeros, no crash.
+    z = _metrics.codebook_usage_stats(np.zeros(8))
+    assert z["active"] == 0 and z["perplexity"] == 0.0
+
+
+def test_train_writes_metrics_csv_with_expected_columns(tmp_path):
+    a = _toy_adata()
+    Trainer(_short_tc()).fit(a, tmp_path, model_config=_mc(a))
+    csv_path = Path(tmp_path) / "training_metrics.csv"
+    assert csv_path.exists(), "training_metrics.csv was not written"
+    with open(csv_path) as fh:
+        rows = list(csv.DictReader(fh))
+    assert len(rows) == 3, rows
+    expected = {
+        "epoch", "total", "cell", "neighborhood", "cell_recon", "niche_recon",
+        "cell_vq", "niche_vq", "cell_perplexity", "neighborhood_perplexity",
+        "cell_active_codes", "neighborhood_active_codes", "cell_usage_gini",
+        "neighborhood_usage_gini", "learning_rate", "grad_norm",
+        "epoch_seconds", "cells_per_second",
+    }
+    assert expected.issubset(set(rows[0].keys())), expected - set(rows[0].keys())
+    # Every recorded per-epoch metric is finite.
+    for r in rows:
+        for k in expected:
+            v = r[k]
+            if v == "":
+                continue
+            assert np.isfinite(float(v)), (k, v)
+    # Active-code counts stay within [0, K] for both codebooks (K=8 cell, K=4 niche).
+    for r in rows:
+        assert 0 <= float(r["cell_active_codes"]) <= 8
+        assert 0 <= float(r["neighborhood_active_codes"]) <= 4
+        assert 0.0 <= float(r["cell_usage_gini"]) <= 1.0
+
+
+def test_train_writes_training_curves_pdf(tmp_path):
+    a = _toy_adata()
+    Trainer(_short_tc()).fit(a, tmp_path, model_config=_mc(a))
+    pdf_path = Path(tmp_path) / "training_curves.pdf"
+    assert pdf_path.exists(), "training_curves.pdf was not written"
+    head = pdf_path.read_bytes()[:5]
+    assert head.startswith(b"%PDF"), head
+
+
+def test_training_losses_json_carries_new_metrics(tmp_path):
+    a = _toy_adata()
+    Trainer(_short_tc()).fit(a, tmp_path, model_config=_mc(a))
+    losses = json.loads((Path(tmp_path) / "training_losses.json").read_text())
+    assert len(losses) == 3
+    for e in losses:
+        for k in ("epoch", "cell_recon", "niche_recon", "learning_rate",
+                  "grad_norm", "cell_active_codes", "cell_usage_gini"):
+            assert k in e, k
+            assert np.isfinite(float(e[k]))
+
+
+def test_plotting_failure_does_not_crash_training(tmp_path, monkeypatch):
+    # Force the curve plotter to raise; training must still finish and write all
+    # other artifacts (the plot is wrapped in try/except in the trainer).
+    import nicheverse.training.trainer as _trainer
+
+    def _boom(*_a, **_k):
+        raise RuntimeError("forced plotting failure")
+
+    monkeypatch.setattr(_trainer, "plot_training_curves", _boom)
+    a = _toy_adata()
+    model, out = Trainer(_short_tc()).fit(a, tmp_path, model_config=_mc(a))
+    assert model is not None
+    # Training completed: checkpoint, losses json, and metrics csv all present even
+    # though plotting failed; the PDF is absent.
+    assert (Path(tmp_path) / "hierarchical_vqvae_checkpoint.pt").exists()
+    assert (Path(tmp_path) / "training_metrics.csv").exists()
+    assert not (Path(tmp_path) / "training_curves.pdf").exists()
+    losses = json.loads((Path(tmp_path) / "training_losses.json").read_text())
+    assert len(losses) == 3

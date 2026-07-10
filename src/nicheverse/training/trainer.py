@@ -40,8 +40,25 @@ from ..losses import (
 )
 from ..models import HierarchicalVQVAE, ModelConfig, save_checkpoint
 from ..utils import seed_everything, write_env_snapshot
+from .metrics import (
+    codebook_usage_stats,
+    plot_training_curves,
+    total_grad_norm,
+    write_metrics_csv,
+)
 
 logger = logging.getLogger(__name__)
+
+
+def _fmt(v, spec: str = ".0f") -> str:
+    """Format a possibly-None metric for the one-line epoch summary ('NA' if None)."""
+    if v is None:
+        return "NA"
+    try:
+        return format(float(v), spec)
+    except (TypeError, ValueError):  # pragma: no cover - defensive
+        return "NA"
+
 
 try:  # tqdm is a declared dependency; degrade gracefully if unavailable.
     from tqdm.auto import tqdm
@@ -263,13 +280,20 @@ class TrainConfig:
         seeded shuffle/BatchSampler produces the SAME batch indices in the SAME
         order as the CPU path, so for a fixed seed the per-batch loss is identical
         (to floating-point tolerance). Requires CUDA; on CPU it is a no-op
-        (falls back to the CPU path). If the resident tensors plus a safety margin
-        do not fit under ``mem_fraction`` of the GPU (wide panels, e.g. CosMx
-        21731 genes or a big merged Xenium), a clear message is logged and the
-        normal CPU DataLoader path is used instead (never OOMs silently). Because
-        the resident tensors cannot be forked to DataLoader workers, ``num_workers``
-        is forced to ``0`` when this path is active (logged). Not currently combined
-        with DDP: under DDP this flag is ignored (logged) and the CPU path is used.
+        (falls back to the CPU path). The fit-check is additive: the resident tensors
+        plus a fixed ~8 GiB working-set margin must fit under
+        ``device_resident_mem_fraction`` (default ``0.9``) of the memory budget, where
+        the budget is the FREE GPU memory (``torch.cuda.mem_get_info``) when queryable,
+        else the device total. If they do not fit (wide panels, e.g. CosMx 21731 genes
+        or a big merged Xenium), a clear message is logged and the normal CPU DataLoader
+        path is used instead (never OOMs silently). Because the resident tensors cannot
+        be forked to DataLoader workers, ``num_workers`` is forced to ``0`` when this
+        path is active (logged). Not currently combined with DDP: under DDP this flag is
+        ignored (logged) and the CPU path is used.
+    device_resident_mem_fraction
+        Fraction of the GPU memory budget the resident tensors + working margin may
+        occupy in the ``device_resident`` fit-check. ``0.9`` (default). Lower it to be
+        more conservative on a shared card.
 
     Notes on ``num_workers``. ``num_workers=0`` (the default) is byte-identical
     to the released training run. ``pin_memory`` and ``prefetch_factor`` are
@@ -317,6 +341,7 @@ class TrainConfig:
     persistent_workers: bool | None = None
     prefetch_factor: int | None = None
     device_resident: bool = False
+    device_resident_mem_fraction: float = 0.9
 
 
 def _device_resident_bytes(
@@ -347,24 +372,37 @@ def _device_resident_bytes(
     return total
 
 
+RESIDENT_WORKING_MARGIN_BYTES = 8 * 1024**3  # ~8 GiB fixed working-set reserve.
+
+
 def _device_resident_fits(
     resident_bytes: int,
     total_gpu_bytes: int,
-    mem_fraction: float = 0.5,
-    safety_factor: float = 1.5,
+    mem_fraction: float = 0.9,
+    working_margin_bytes: int = RESIDENT_WORKING_MARGIN_BYTES,
 ) -> bool:
-    """Decide whether the resident tensors fit alongside model+activations+grads.
+    """Decide whether the resident tensors fit alongside the transient working set.
 
-    Returns ``True`` iff ``resident_bytes * safety_factor <= mem_fraction *
-    total_gpu_bytes``. The ``safety_factor`` (default 1.5x) reserves headroom for
-    the model parameters, forward activations, and gradients; ``mem_fraction``
-    (default 0.5) keeps the whole footprint to at most half of total GPU memory.
-    A non-positive ``total_gpu_bytes`` (unknown budget) returns ``False`` so the
-    caller falls back to the CPU path rather than risk an OOM.
+    Additive model: the resident feature tensors plus a fixed ``working_margin_bytes``
+    reserve (default ~8 GiB, well above the measured ~1.9 GB working set -- it covers
+    the model parameters, forward activations, gradients, the gathered per-batch
+    tensors, and allocator fragmentation) must fit under ``mem_fraction`` (default
+    ``0.9``) of the memory budget:
+
+    ``resident_bytes + working_margin_bytes <= mem_fraction * total_gpu_bytes``
+
+    ``total_gpu_bytes`` is a BUDGET, not necessarily the card's total capacity: the
+    caller passes the FREE memory (``torch.cuda.mem_get_info()[0]``) when available so
+    a shared card is respected, else the device total (exclusive ``--gres=gpu:1``).
+    The previous multiplicative ``resident * 1.5 <= 0.5 * total`` rule was far too
+    conservative -- it reserved ~1.5x the resident size AND capped usage at half the
+    card, so the RCC 38.6 GiB working set fell back on an 80 GB A100 whose real peak
+    (~43 GB) fits with headroom. A non-positive budget (unknown) returns ``False`` so
+    the caller falls back to the CPU path rather than risk an OOM.
     """
     if total_gpu_bytes <= 0:
         return False
-    return float(resident_bytes) * float(safety_factor) <= float(mem_fraction) * float(
+    return float(resident_bytes) + float(working_margin_bytes) <= float(mem_fraction) * float(
         total_gpu_bytes
     )
 
@@ -1030,16 +1068,24 @@ def train_model(
             )
         else:
             resident_bytes = _device_resident_bytes(dataset, _count_mode, _niche_dirmult_mode)
-            total_gpu_bytes = int(torch.cuda.get_device_properties(device_t).total_memory)
-            if _device_resident_fits(resident_bytes, total_gpu_bytes):
+            # Budget = FREE GPU memory when queryable (respects a shared card), else the
+            # device total (exclusive --gres=gpu:1). mem_get_info returns (free, total).
+            try:
+                budget_bytes = int(torch.cuda.mem_get_info(device_t)[0])
+            except Exception:  # pragma: no cover - older torch / odd driver
+                budget_bytes = int(torch.cuda.get_device_properties(device_t).total_memory)
+            _mf = float(tc.device_resident_mem_fraction)
+            if _device_resident_fits(resident_bytes, budget_bytes, mem_fraction=_mf):
                 device_resident = True
             else:
                 logger.info(
                     "device_resident requested but the resident tensors do not fit: %.2f GB "
-                    "x 1.5 safety > 0.5 x %.2f GB total GPU memory; falling back to the CPU "
+                    "resident + %.1f GB margin > %.2f x %.2f GB budget; falling back to the CPU "
                     "DataLoader path.",
                     resident_bytes / (1024**3),
-                    total_gpu_bytes / (1024**3),
+                    RESIDENT_WORKING_MARGIN_BYTES / (1024**3),
+                    _mf,
+                    budget_bytes / (1024**3),
                 )
     if device_resident:
         # Move the resident tensors onto the GPU ONCE. Indexing is in the full-dataset
@@ -1179,6 +1225,10 @@ def train_model(
         torch.cuda.reset_peak_memory_stats(device_t)
     t_train_start = time.perf_counter()
     epochs_run = 0
+    # Codebook sizes for the per-epoch usage histograms (active codes / entropy /
+    # Gini). Read once from the model config; hierarchical VQ uses these exact K.
+    cell_K = int(getattr(model_config, "cell_num_embeddings", 0) or 0)
+    neigh_K = int(getattr(model_config, "neighborhood_num_embeddings", 0) or 0)
     for ep in range(tc.num_epochs):
         epochs_run += 1
         t_epoch_start = time.perf_counter()
@@ -1186,6 +1236,13 @@ def train_model(
         if train_sampler is not None:
             train_sampler.set_epoch(ep)  # reshuffle per epoch, consistently across ranks
         tl = tcell = tn = tcp = tnp = 0.0
+        # Split recon vs VQ so the standard per-component curves are recorded, plus
+        # the mean gradient norm. These are observational only (not in the loss).
+        tcrec = tnrec = tcvq = tnvq = tgn = 0.0
+        # Per-code assignment histograms over the epoch -> active codes / usage
+        # entropy / Gini. Sized to the codebooks; skipped if K is unknown (0).
+        cell_hist = np.zeros(cell_K, dtype=np.int64) if cell_K > 0 else None
+        neigh_hist = np.zeros(neigh_K, dtype=np.int64) if neigh_K > 0 else None
         processed = 0
         for bi, batch in enumerate(
             tqdm(
@@ -1247,9 +1304,18 @@ def train_model(
                         z_reg, coords_b, k=tc.spatial_loss_k
                     )
             scaler.scale(loss).backward()
+            gnorm = 0.0
             if tc.grad_clip is not None:
                 scaler.unscale_(optim)
-                torch.nn.utils.clip_grad_norm_(core.parameters(), tc.grad_clip)
+                # clip_grad_norm_ returns the pre-clip total norm; reuse it (no
+                # second pass) so grad-norm logging is free when clipping is on.
+                gnorm = float(torch.nn.utils.clip_grad_norm_(core.parameters(), tc.grad_clip))
+            else:
+                # Observational only: cheap total grad norm on the raw grads. When
+                # AMP is active the grads are scaled, so unscale a temporary copy for
+                # a true-magnitude norm without touching the (unchanged) update path.
+                _scale = float(scaler.get_scale()) if (tc.amp and device_t.type == "cuda") else 1.0
+                gnorm = total_grad_norm(core.parameters()) / max(_scale, 1e-12)
             scaler.step(optim)
             scaler.update()
             lv = float(loss.item())
@@ -1257,8 +1323,26 @@ def train_model(
                 tl += lv
                 tcell += float((cell_recon + cvq).item())
                 tn += float((neigh_recon + nvq).item())
+                tcrec += float(cell_recon.item())
+                tnrec += float(neigh_recon.item())
+                tcvq += float(cvq.item())
+                tnvq += float(nvq.item())
                 tcp += float(cp.item())
                 tnp += float(np_.item())
+                if math.isfinite(gnorm):
+                    tgn += gnorm
+                # Accumulate per-code assignment histograms (active codes / entropy /
+                # Gini). _ci / _ni are hard code indices, shape (B*T, 1); cheap bincount.
+                if cell_hist is not None:
+                    _ch = np.bincount(
+                        _ci.detach().reshape(-1).cpu().numpy(), minlength=cell_K
+                    )
+                    cell_hist[: _ch.size] += _ch[:cell_K]
+                if neigh_hist is not None:
+                    _nh = np.bincount(
+                        _ni.detach().reshape(-1).cpu().numpy(), minlength=neigh_K
+                    )
+                    neigh_hist[: _nh.size] += _nh[:neigh_K]
             else:
                 logger.warning(
                     "epoch %d batch %d: non-finite loss skipped from the logged average",
@@ -1321,18 +1405,62 @@ def train_model(
                 _val_kw["resident_dataset"] = dataset
             avg["val_total"] = _val_loss(core, val_loader, device_t, tc, **_val_kw)
             monitor = avg["val_total"]
-        avg["epoch_seconds"] = round(time.perf_counter() - t_epoch_start, 3)
+        _ep_sec = time.perf_counter() - t_epoch_start
+        avg["epoch_seconds"] = round(_ep_sec, 3)
+        # Standard observational metrics (not in the loss). The DDP all-reduce above
+        # only covers total/cell/neigh/perp; these per-component / usage / optimizer
+        # diagnostics are recorded from rank-0's shard (files are rank-0 only).
+        avg["epoch"] = ep + 1
+        avg["cell_recon"] = tcrec / nb_
+        avg["niche_recon"] = tnrec / nb_
+        avg["cell_vq"] = tcvq / nb_
+        avg["niche_vq"] = tnvq / nb_
+        avg["learning_rate"] = float(optim.param_groups[0]["lr"])
+        avg["grad_norm"] = tgn / nb_
+        avg["cells_per_second"] = (
+            round(len(dataset) / _ep_sec, 2) if _ep_sec > 0 else None
+        )
+        if cell_hist is not None:
+            _cs = codebook_usage_stats(cell_hist)
+            avg["cell_active_codes"] = _cs["active"]
+            avg["cell_usage_gini"] = _cs["gini"]
+            avg["cell_usage_entropy_norm"] = _cs["entropy_norm"]
+        if neigh_hist is not None:
+            _ns = codebook_usage_stats(neigh_hist)
+            avg["neighborhood_active_codes"] = _ns["active"]
+            avg["neighborhood_usage_gini"] = _ns["gini"]
+            avg["neighborhood_usage_entropy_norm"] = _ns["entropy_norm"]
         losses.append(avg)
         sched.step(monitor) if _sched_needs_monitor else sched.step()
-        logger.info(
-            "epoch %d avg_total=%.4f cell=%.4f neigh=%.4f%s cell_perp=%.1f",
-            ep + 1,
-            avg["total"],
-            avg["cell"],
-            avg["neighborhood"],
-            f" val={avg['val_total']:.4f}" if val_loader is not None else "",
-            avg["cell_perplexity"],
+        # One concise, always-visible summary line per epoch. Emitted via the module
+        # logger (INFO) AND printed to stdout on rank 0 so the standard metrics show
+        # up in the run log even when the logger is otherwise unconfigured/silent.
+        _summary = (
+            "epoch %d/%d | total=%.4f cell=%.4f neigh=%.4f%s | "
+            "perp c/n=%.1f/%.1f | active c/n=%s/%s | gini c/n=%s/%s | "
+            "lr=%.2e gnorm=%.2f | %.1fs %s cells/s"
+            % (
+                ep + 1,
+                tc.num_epochs,
+                avg["total"],
+                avg["cell"],
+                avg["neighborhood"],
+                f" val={avg['val_total']:.4f}" if val_loader is not None else "",
+                avg["cell_perplexity"],
+                avg["neighborhood_perplexity"],
+                _fmt(avg.get("cell_active_codes")),
+                _fmt(avg.get("neighborhood_active_codes")),
+                _fmt(avg.get("cell_usage_gini"), ".2f"),
+                _fmt(avg.get("neighborhood_usage_gini"), ".2f"),
+                avg["learning_rate"],
+                avg["grad_norm"],
+                _ep_sec,
+                _fmt(avg.get("cells_per_second"), ".0f"),
+            )
         )
+        logger.info(_summary)
+        if is_main_process():
+            print("[nicheverse] " + _summary, flush=True)
         if monitor < best_loss - 1e-6:
             best_loss, best_epoch, no_improve = monitor, ep, 0
             if tc.save_best and val_loader is not None and is_main_process():
@@ -1438,7 +1566,21 @@ def train_model(
 
     ckpt_path = checkpoint_dir / "hierarchical_vqvae_checkpoint.pt"
     save_checkpoint(core, ckpt_path)
+    # training_losses.json now carries the full per-epoch metric dicts (loss
+    # components, codebook usage, lr, grad norm, throughput). Also emit a tidy CSV
+    # (one row per epoch) and a compact training-curves PDF. Both are best-effort:
+    # a CSV/plotting failure logs a warning but never aborts the finished run.
     (checkpoint_dir / "training_losses.json").write_text(json.dumps(losses, indent=2))
+    try:
+        write_metrics_csv(losses, checkpoint_dir / "training_metrics.csv")
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.warning("Could not write training_metrics.csv: %s", exc)
+    try:
+        out_pdf = plot_training_curves(losses, checkpoint_dir / "training_curves.pdf")
+        if out_pdf is not None:
+            logger.info("Wrote training curves: %s", out_pdf)
+    except Exception as exc:
+        logger.warning("Could not plot training_curves.pdf (training unaffected): %s", exc)
 
     core.eval()
     # On the resident path the eval loader is index-only (shuffle=False keeps the

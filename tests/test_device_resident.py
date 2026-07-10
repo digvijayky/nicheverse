@@ -90,14 +90,26 @@ def test_flag_off_loss_matches_prior_default(tmp_path):
 # ----------------------------------------------------------------------------
 # (2) Memory-fit decision helper.
 # ----------------------------------------------------------------------------
-def test_fit_check_true_when_small_budget_large():
-    # 10 bytes * 1.5 safety = 15 <= 0.5 * 100 = 50 -> fits.
-    assert _device_resident_fits(10, 100) is True
+_GIB = 1024**3
+
+
+def test_fit_check_true_when_small_resident_large_budget():
+    # Additive model: 2 GiB resident + 8 GiB margin = 10 GiB <= 0.9 * 80 GiB = 72 GiB.
+    assert _device_resident_fits(2 * _GIB, 80 * _GIB) is True
+
+
+def test_fit_check_rcc_scale_fits_on_80gb_a100():
+    # The exact RCC case: 38.6 GiB float32 working set on an 80 GB A100.
+    # 38.6 + 8 = 46.6 GiB <= 0.9 * 80 = 72 GiB -> now FITS (was a fallback before).
+    resident = int(38.6 * _GIB)
+    assert _device_resident_fits(resident, 80 * _GIB) is True
+    # An H200 (143 GB) obviously still fits.
+    assert _device_resident_fits(resident, 143 * _GIB) is True
 
 
 def test_fit_check_false_when_over_budget():
-    # 40 * 1.5 = 60 > 0.5 * 100 = 50 -> does not fit.
-    assert _device_resident_fits(40, 100) is False
+    # A genuinely too-large panel: 68 GiB resident + 8 = 76 > 0.9 * 80 = 72 -> falls back.
+    assert _device_resident_fits(68 * _GIB, 80 * _GIB) is False
 
 
 def test_fit_check_false_when_budget_unknown():
@@ -105,14 +117,21 @@ def test_fit_check_false_when_budget_unknown():
     assert _device_resident_fits(5, 0) is False
 
 
+def test_fit_check_mem_fraction_tunable():
+    # 40 GiB resident + 8 = 48 GiB. At 0.9*80=72 it fits; at 0.5*80=40 it does not.
+    resident = 40 * _GIB
+    assert _device_resident_fits(resident, 80 * _GIB, mem_fraction=0.9) is True
+    assert _device_resident_fits(resident, 80 * _GIB, mem_fraction=0.5) is False
+
+
 def test_fit_check_wide_panel_tiny_gpu_falls_back():
     """A CosMx-scale panel (21731 genes) on a small GPU budget must NOT fit."""
     a = _toy_adata(n=1000, g=200, seed=1)
     ds = SpatialDataset.from_anndata(a, sample_col="sample_id", k_neighbors=4)
     rb = _device_resident_bytes(ds, count_mode=False, niche_dirmult_mode=False)
-    # Real resident bytes for this toy fit an 8 GB budget...
-    assert _device_resident_fits(rb, 8 * 1024**3) is True
-    # ...but a 1 MB budget cannot hold it -> fall back.
+    # Real resident bytes for this toy fit an 80 GB budget (dominated by the 8 GiB margin)...
+    assert _device_resident_fits(rb, 80 * _GIB) is True
+    # ...but a 1 MB budget cannot hold the 8 GiB margin -> fall back.
     assert _device_resident_fits(rb, 1024**2) is False
 
 
