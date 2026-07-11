@@ -2,9 +2,9 @@ cff-version: 1.2.0
 message: "If you use this software, please cite it"
 title: "NICHEVERSE"
 authors:
-  - family-names: "Krishnamoorthy Yarlagadda"
+  - family-names: "Yarlagadda"
     given-names: "Digvijay"
 repository-code: "https://github.com/digvijayky/nicheverse"
 license: MIT
 version: "0.2.0"
-date-released: "YYYY-MM-DD"
+date-released: "2026-07-11"

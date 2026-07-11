@@ -1,5 +1,5 @@
 /* ============================================================================
-   NICHEVERSE docs — Beautiful Biology (beautifulbiology.org) visual language.
+   NICHEVERSE docs - Beautiful Biology (beautifulbiology.org) visual language.
    Clean white paper, dark charcoal ink, all-sans (Inter), imagery-forward,
    generous whitespace, one restrained teal accent used only for links/CTA/hover.
    Overrides the pydata-sphinx-theme tokens; keeps sidebars + autodoc working.
@@ -197,7 +197,7 @@ nav.bd-links li.current > a { color: var(--nv-accent) !important; font-weight: 6
 /* content width */
 .bd-main .bd-content .bd-article-container { max-width: var(--nv-maxw); }
 
-/* ---- Code (light, subtle — keeps the clean-white BB feel) ------------------ */
+/* ---- Code (light, subtle - keeps the clean-white BB feel) ------------------ */
 div.highlight, .highlight pre, pre {
   background: var(--nv-alt) !important;
   border: 1px solid var(--nv-line);
@@ -226,7 +226,7 @@ html[data-theme="dark"] .highlight pre { background: #16191d !important; }
   border: 1px solid var(--nv-line);
 }
 
-/* ---- Autodoc signatures (dl/dt/dd) — clean data block ---------------------- */
+/* ---- Autodoc signatures (dl/dt/dd) - clean data block ---------------------- */
 dl.py > dt, dl.py dt.sig, dl.cpp > dt, dl.c > dt {
   background: var(--nv-alt);
   border: 1px solid var(--nv-line);
@@ -275,7 +275,7 @@ table.autosummary td:first-child {
 table.autosummary td p { margin-bottom: 0; }
 
 /* ============================================================================
-   HOMEPAGE — BB hero, feature grid, gallery preview
+   HOMEPAGE - BB hero, feature grid, gallery preview
    ============================================================================ */
 
 /* Hero (must render sans, never serif) */
@@ -557,7 +557,7 @@ table.autosummary td p { margin-bottom: 0; }
 .bb-caption b { font-weight: 600; }
 
 /* ============================================================================
-   MOTION — scroll-reveal, hero crossfade, drifting marquee (BB feel)
+   MOTION - scroll-reveal, hero crossfade, drifting marquee (BB feel)
    ============================================================================ */
 
 /* ---- Scroll-reveal (driven by bb-motion.js) -------------------------------- */

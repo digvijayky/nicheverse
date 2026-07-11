@@ -5,6 +5,10 @@ loosely follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the
 project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 starting from 1.0.0.
 
+## [Unreleased]
+
+No unreleased changes yet.
+
 ## [0.2.0] - 2026-07
 
 Sophistication, packaging, and documentation release. The reference RCC + BrM
@@ -83,7 +87,7 @@ Synced the documentation site (README, guides, API reference) to these defaults.
 
 ### Changed
 1. `__version__` is now read from installed package metadata (single source of truth).
-2. Optimizer is `AdamW` (`weight_decay=0.0` default reduces to the prior Adam behavior).
+2. Optimizer is `AdamW` with decoupled selective weight decay (default `weight_decay=0.01`, applied to Linear and Conv weights only; set 0.0 to recover plain Adam).
 3. Inference paths use `torch.inference_mode()`.
 4. `VectorQuantizer._kmeans_init`: when the batch is smaller than the codebook, seed every slot from the batch (with small noise) instead of leaving the tail at the uniform random init.
 5. `VectorQuantizer` softmax for the diversity term now divides by `diversity_temperature` (default 1.0; previous behavior preserved).

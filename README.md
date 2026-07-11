@@ -229,7 +229,7 @@ If you use NICHEVERSE in your work, please cite it. A manuscript is in preparati
 ```bibtex
 @article{nicheverse2026,
   title   = {NICHEVERSE: hierarchical spatial tokenization of cell states and multicellular niches},
-  author  = {Krishnamoorthy Yarlagadda, Digvijay and colleagues},
+  author  = {Yarlagadda, Digvijay and others},
   year    = {2026},
   note    = {manuscript in preparation}
 }
