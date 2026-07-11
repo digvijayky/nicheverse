@@ -328,7 +328,9 @@ class TrainConfig:
         occupy in the ``device_resident`` fit-check. ``0.9`` (default). Lower it to be
         more conservative on a shared card.
 
-    Notes on ``num_workers``. ``num_workers=0`` (the default) is byte-identical
+    Notes
+    -----
+    ``num_workers=0`` (the default) is byte-identical
     to the released training run. ``pin_memory`` and ``prefetch_factor`` are
     verified to leave the loss trajectory byte-identical. ``num_workers > 0`` is a
     throughput knob for I/O-bound cohorts (large on-disk data); on small in-memory

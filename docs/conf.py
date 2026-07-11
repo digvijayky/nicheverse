@@ -126,5 +126,8 @@ nitpick_ignore_regex = [
     ("py:.*", r"nicheverse\.(data\.(SpatialDataset|transcript_context)|utils\.seed_everything|annotate)"),
     ("py:func", r".*(annotate_codes|auto_batch_size)"),
     ("py:class", r"(optional|default=.*|anndata\..*AnnData|pandas\..*DataFrame)"),
+    ("py:class", r"(AnnData|Path|DataFrame|ModelConfig|TrainConfig)"),
+    ("py:mod", r"nicheverse(\.\w+)?"),
+    ("py:class", r"nicheverse\.models\.(ModelConfig|VectorQuantizer)"),
     ("py:data", r"typing\.(Union|Any|Optional)"),
 ]
