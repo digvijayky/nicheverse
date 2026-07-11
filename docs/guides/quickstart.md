@@ -71,7 +71,6 @@ After predict, `new_annotated.h5ad` has `obs['cell_codebook_idx']` (0..K_c-1), `
 The CLI is a thin wrapper around the Python API:
 
 ```python
-import scanpy as sc
 from nicheverse import (
     load_xenium_cohort, train_model, predict_codes,
     ModelConfig, TrainConfig, seed_everything,

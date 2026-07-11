@@ -3,7 +3,7 @@
 [![Docs](https://img.shields.io/readthedocs/nicheverse)](https://nicheverse.readthedocs.io)
 [![PyPI](https://img.shields.io/pypi/v/nicheverse)](https://pypi.org/project/nicheverse)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/digvijayky/nicheverse/blob/main/LICENSE)
-[![CI](https://img.shields.io/github/actions/workflow/status/digvijayky/nicheverse/ci.yml?label=CI)](https://github.com/digvijayky/nicheverse/actions)
+[![CI](https://img.shields.io/github/actions/workflow/status/digvijayky/nicheverse/test.yaml?label=CI)](https://github.com/digvijayky/nicheverse/actions)
 
 *Neighborhood-Inferred Cell type HiErarchical annotation + VEctor-quantized Representations of Spatial Ecotypes*
 
