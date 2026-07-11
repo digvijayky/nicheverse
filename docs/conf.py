@@ -131,3 +131,12 @@ nitpick_ignore_regex = [
     ("py:class", r"nicheverse\.models\.(ModelConfig|VectorQuantizer)"),
     ("py:data", r"typing\.(Union|Any|Optional)"),
 ]
+
+# -- linkcheck ---------------------------------------------------------------
+# External anchor fragments (notably the PyTorch docs) drift and are not worth
+# failing on; and the GitHub issues URL 404s only while the repo is private (it
+# resolves on public release).
+linkcheck_anchors = False
+linkcheck_ignore = [
+    r"https://github\.com/digvijayky/nicheverse/issues",
+]

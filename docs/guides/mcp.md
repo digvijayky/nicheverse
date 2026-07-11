@@ -1,6 +1,6 @@
 # MCP server (Claude Code / Codex tools)
 
-`nicheverse` ships an [MCP](https://modelcontextprotocol.io/) server so agents
+`nicheverse` ships an [MCP](https://modelcontextprotocol.io/docs/getting-started/intro) server so agents
 (Claude Code, Codex) can call the annotation and inference API as tools. The
 server runs over stdio and lives in `nicheverse.mcp_server`.
 
