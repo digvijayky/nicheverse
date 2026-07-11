@@ -57,7 +57,9 @@ neighborhood_num_embeddings = 32
 neighborhood_embedding_dim = 256
 hidden_dims                = (256, 128)
 commitment_cost            = 0.25
-use_cross_attention        = True
+use_cross_attention        = True (one-directional, cell reads niche)
+cross_attention_heads      = 4
+cross_attention_weight     = 0.5
 cell_recon                 = nb (+ detection hurdle, detection_weight=0.5)
 niche_recon                = mse_dirmult
 spatial_graph              = knn_radius (radius 50 microns)
@@ -80,4 +82,4 @@ If many codes go unused after 300 epochs, lower K_c. If perplexity is close to K
 
 ## Computational complexity
 
-Training cost is dominated by the per-sample k-NN graph at startup (O(n log n) per sample) and the per-epoch forward + backward pass (O(n) per epoch). For the 173 sample cohort: k-NN graph 4 minutes, training 25 minutes per epoch on one A100. Inference cost is identical to one epoch's forward pass.
+Training cost is dominated by the per-sample k-NN graph at startup (O(n log n) per sample) and the per-epoch forward + backward pass (O(n) per epoch). For the 173 sample cohort at the b32k reference configuration, the per-sample graph is built once before training and each epoch's forward plus backward pass runs in about 17 seconds on one A100 (about 330,000 cells per second), so 300 epochs complete in about 1.4 hours (1:25:48 measured) at a peak GPU memory of about 43 GB. Inference cost is close to one epoch's forward pass.
