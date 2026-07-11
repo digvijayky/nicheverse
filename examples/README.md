@@ -47,7 +47,7 @@ from nicheverse import ModelConfig, TrainConfig
 
 adata = nv.read_spatial("your_data.h5ad", sample_col="sample_id")
 mc = ModelConfig(input_dim=adata.n_vars, gene_names=tuple(adata.var_names),
-                 encoder_type="mlp_plr")           # recommended default encoder
+                 encoder_type="mlp_deep")          # recommended default encoder
 model, adata = nv.train_model(adata, "checkpoint/", model_config=mc,
                               train_config=TrainConfig(num_epochs=300))
 ```
@@ -101,19 +101,25 @@ annotated = predict_codes(
 
 ## Which encoder / representation should I use?
 
-The recommended defaults below reflect an internal 26-variant benchmark on RCC
-Xenium (cell codebook usage evenness and annotation confidence).
+The recommendations below reflect an internal 26-variant benchmark on RCC
+Xenium (cell codebook usage evenness and annotation confidence). The default and
+recommended starting encoder is `mlp_deep`.
 
 | input representation | recommended encoder | quantizer | notes |
 |---|---|---|---|
-| segmented expression (default) | `mlp_plr` (also `mlp_deep`) | `vq` | plain `mlp` is a baseline only |
-| transcript context (segmentation-free molecular field concatenated to counts) | `mlp_plr` | `vq` | radius 7 um; input dim doubles |
+| segmented expression (default) | `mlp_deep` (default) | `vq` | `mlp_plr` is an alternative on diverse gene-rich cohorts; plain `mlp` is a baseline |
+| transcript context (segmentation-free molecular field concatenated to counts) | `mlp_deep` | `vq` | radius 7 um; input dim doubles |
 | molecule set (subcellular transcript point cloud) | `MoleculeSetVQVAE` (Set-Transformer) | `vq` | pool with concat[masked max, masked mean, PMA] |
 
 Benchmark takeaways worth knowing:
 
-- MLP-family encoders (`mlp_plr`, `mlp_deep`, `mlp`) + the default `vq` give the
+- MLP-family encoders (`mlp_deep`, `mlp`, `mlp_plr`) + the default `vq` give the
   healthiest, most even cell codebook. **RVQ underperforms VQ.**
+- `mlp_deep` is the default and the safest starting point. `mlp_plr` (per-gene PLE)
+  can fill a fuller codebook on diverse, gene-rich cohorts (for example the MERFISH
+  retina demo), but it over-parameterizes and degenerates on sparse Xenium panels and
+  on tiny datasets (seqFISH 225 cells, CosMx 21k genes), where plain `mlp` or
+  `mlp_deep` is correct.
 - Plain attention / diffusion encoders (`dit`, `diffusion`) **collapse the cell
   codebook** unless they use permutation-invariant set pooling; `set_transformer`
   and `perceiver_io` stay healthy.
@@ -152,7 +158,7 @@ cell_num_embeddings         256      neighborhood_num_embeddings   32
 cell_embedding_dim          64       neighborhood_embedding_dim    256
 spatial_graph               knn_radius   radius                    50.0 um
 k_neighbors                 20       neighborhood_aggregation      weighted_mean
-encoder_type                mlp_plr  quantizer_type                vq
+encoder_type                mlp_deep quantizer_type                vq
 transcript_context radius   7.0 um   molecule-set gather radius    7.0 um
 ```
 
@@ -170,8 +176,8 @@ python examples/apply_codes.py         # train on 80%, assign codes to the held-
 
 | notebook | what it shows |
 |---|---|
-| `notebooks/01_quickstart.ipynb` | load the real Xenium core, train `mlp_plr` + `vq`, load the codes, per-code top-marker table, code-usage bar chart |
-| `notebooks/02_transcript_context.ipynb` | compute `transcript_context` (radius 7 um) from a transcripts table, concat to counts, train `mlp_plr` |
+| `notebooks/01_quickstart.ipynb` | load the real MERFISH retina cohort, train `mlp_deep` + `vq`, load the codes, per-code top-marker table, code-usage bar chart |
+| `notebooks/02_transcript_context.ipynb` | compute `transcript_context` (radius 7 um) from a transcripts table, concat to counts, train `mlp_deep` |
 | `notebooks/03_molecule_set.ipynb` | the subcellular molecule-set (point-cloud) representation with `MoleculeSetVQVAE` |
 | `notebooks/04_apply_to_new_data.ipynb` | load a trained checkpoint and assign codes to held-out cells with `predict_codes` |
 
@@ -184,7 +190,7 @@ conventions and the right encoder / codebook size change across platforms.
 | notebook | platform | real dataset | encoder / codebook | why |
 |---|---|---|---|---|
 | `notebooks/platforms/xenium.ipynb` | 10x Xenium | RCC tissue core, 7,824 cells x 366 genes, 1 sample | `mlp` / 64 | a single small homogeneous core; `mlp_plr` over-parameterizes and 256 codes exceed its diversity, so use `mlp` + 64 codes. Also demos `transcript_context` from the bundled molecule table |
-| `notebooks/platforms/merfish.ipynb` | Vizgen MERFISH | mouse retina, 113,385 cells x 368 genes, 4 samples | `mlp_plr` / 256 | diverse cohort where the default `mlp_plr` fills a full codebook (about 197/256 in 30 demo epochs) |
+| `notebooks/platforms/merfish.ipynb` | Vizgen MERFISH | mouse retina, 113,385 cells x 368 genes, 4 samples | `mlp_plr` / 256 | diverse gene-rich cohort where `mlp_plr` fills a full codebook (about 197/256 in 30 demo epochs); the library default `mlp_deep` also works well here |
 | `notebooks/platforms/cosmx.ipynb` | NanoString CosMx WTx | human pancreas, 48,944 cells x 21,731 genes (a real spatial window is cropped for the fast demo) | `mlp` / 256 | on a ~21.7k-gene panel `mlp_plr` collapses the codebook, plain `mlp` stays even (about 255/256); pixel coordinates converted to microns |
 | `notebooks/platforms/seqfish.ipynb` | seqFISH+ | NIH/3T3 fibroblasts, 225 cells x 10,000 genes, 17 FOVs | `mlp` / 64 | 225 cells cannot fill 256 codes and `mlp_plr` collapses to 1 code, so lower the codebook to 64 and use `mlp` (about 61/64) |
 
@@ -207,7 +213,8 @@ Nothing is simulated or randomly subsampled.
 | `xenium_rcc_core_molecule_sets/` | per-cell subcellular molecule-set shards (radius 7 um) | `03_molecule_set` |
 
 The MERFISH retina is diverse (many neural cell types across four samples), so the
-recommended `mlp_plr` encoder learns a full, even cell codebook there. The single
+`mlp_plr` encoder learns a full, even cell codebook there (the default `mlp_deep`
+also works well). The single
 RCC core is fairly homogeneous, so it exercises fewer cell codes; it is used for the
 transcript-context and molecule-set notebooks because it ships with its matched
 molecule table. The RCC cell-by-gene counts and centroids were aggregated from the

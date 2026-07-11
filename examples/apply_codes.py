@@ -39,7 +39,7 @@ def main() -> None:
     mc = ModelConfig(
         input_dim=train_ad.n_vars,
         gene_names=tuple(train_ad.var_names.astype(str)),
-        encoder_type="mlp_plr",
+        encoder_type="mlp_deep",
         cell_num_embeddings=256,
         neighborhood_num_embeddings=32,
     )

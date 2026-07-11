@@ -8,8 +8,9 @@ short verification of the codes written back to the AnnData.
     python examples/train_expression.py
 
 Real cohort runs use num_epochs ~300; this demo uses a handful of epochs so it
-finishes in a couple of minutes. The recommended encoder is 'mlp_plr' (it won the
-internal 26-variant benchmark).
+finishes in a couple of minutes. The recommended default encoder is 'mlp_deep'.
+On sparse Xenium counts like this panel, per-gene numerical embeddings ('mlp_plr')
+degenerate, so the simple MLP encoders are preferred.
 
 Note: this bundled example is a single, fairly homogeneous tumor core, so only a
 few cell codes are exercised; how many codes get used grows with the biological
@@ -40,7 +41,7 @@ def main() -> None:
     mc = ModelConfig(
         input_dim=adata.n_vars,
         gene_names=tuple(adata.var_names.astype(str)),
-        encoder_type="mlp_plr",   # recommended default encoder
+        encoder_type="mlp_deep",  # recommended default encoder
         quantizer_type="vq",      # recommended default quantizer
         cell_num_embeddings=256,
         neighborhood_num_embeddings=32,
