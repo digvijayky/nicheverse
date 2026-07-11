@@ -1,6 +1,6 @@
 # Running the released checkpoint as a reviewer
 
-This is the one page recipe distributed with the manuscript. It walks a reviewer from an empty machine to a `verify: PASS` result in roughly 30 minutes on a single CPU node.
+This is the one page recipe distributed with the manuscript. It walks a reviewer from an empty machine to a `verify: PASS` result in roughly 30 minutes on a single CPU node. The released artifact is the b32k checkpoint (the 0.2.0 default configuration: batch size 32768, seed 9, spatial graph `knn_radius` at radius 50 microns, k_neighbors 20), which produces the reference RCC + BrM results reported in the manuscript.
 
 ## What you need
 
@@ -20,7 +20,7 @@ The reproducibility bundle, downloadable from Zenodo at the DOI printed in the m
 release/
   README.md
   requirements-frozen.txt
-  nicheverse-0.1.0.tar.gz
+  nicheverse-0.2.0.tar.gz
   rcc_brm_v4dev_173samples.pt
   cohort_preprocessed.h5ad
   expected_outputs.json
@@ -45,7 +45,7 @@ python -m venv ./repro_env
 source ./repro_env/bin/activate
 pip install --upgrade pip
 pip install -r requirements-frozen.txt
-pip install nicheverse-0.1.0.tar.gz
+pip install nicheverse-0.2.0.tar.gz
 ```
 
 ## Step 3: confirm the install

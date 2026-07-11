@@ -1,10 +1,12 @@
-"""Regression anchor: the package reproduces the production RCC v4 codes exactly.
+"""Regression anchor: the package reproduces the b32k reference RCC codes exactly.
 
-This encodes the reproducibility contract that was proven at refactor time:
-running the package on a real sample from the 173-sample RCC/BrM cohort yields
-cell-code and neighborhood-code assignments that are byte-for-byte identical
-(100% per-cell match, SHA256-equal) to the codes stored by the original
-``annotforxenium_model_for_rcc_brm_v4_dev.py`` production run.
+This encodes the reproducibility contract for the b32k checkpoint (the 0.2.0
+default configuration behind the Cancer Cell RCC + BrM results): batch size
+32768, seed 9, spatial graph ``knn_radius`` at radius 50 microns, k_neighbors 20,
+weighted_mean aggregation. Running the package on a real sample from the
+173-sample RCC/BrM cohort yields cell-code and neighborhood-code assignments that
+are byte-for-byte identical (100% per-cell match, SHA256-equal) to the codes
+stored in the b32k checkpoint's annotated AnnData.
 
 It is opt-in so the fast unit suite is unaffected: it only runs when
 ``NICHEVERSE_RUN_RCC_REPRO=1`` is set, ``NICHEVERSE_RCC_CKPT_DIR`` points at the
@@ -38,7 +40,7 @@ pytestmark = pytest.mark.skipif(
     reason="set NICHEVERSE_RUN_RCC_REPRO=1 and NICHEVERSE_RCC_CKPT_DIR=<production checkpoint dir> to run",
 )
 
-# Production architecture (matches the legacy bare-state-dict checkpoint).
+# b32k reference architecture (matches the checkpoint's train_config.json).
 _RCC_CFG = dict(
     hidden_dims=(256, 128),
     cell_embedding_dim=64,
@@ -50,7 +52,7 @@ _RCC_CFG = dict(
 )
 
 
-def test_reproduces_rcc_v4_codes_sha_exact():
+def test_reproduces_rcc_b32k_codes_sha_exact():
     import anndata as ad
     import scipy.sparse as sp
 
@@ -58,7 +60,7 @@ def test_reproduces_rcc_v4_codes_sha_exact():
     from nicheverse.training import predict_codes
     from nicheverse.utils import seed_everything, sha256_array
 
-    seed_everything(49, deterministic=True)
+    seed_everything(9, deterministic=True)
     backed = ad.read_h5ad(_ADATA, backed="r")
     gene_names = tuple(map(str, backed.var_names))
     col = "sample_id" if "sample_id" in backed.obs.columns else "sample"
@@ -86,13 +88,14 @@ def test_reproduces_rcc_v4_codes_sha_exact():
         sample_col=col,
         k_neighbors=20,
         neighborhood_aggregation="weighted_mean",
-        spatial_graph="knn",  # production v4 used plain knn (predate the knn_radius default)
-        batch_size=2048,
+        spatial_graph="knn_radius",  # b32k reference graph (radius 50 um cap)
+        radius=50.0,
+        batch_size=32768,
         normalize=False,
         log1p=False,
         device="cpu",
         return_embeddings=False,
-        seed=49,
+        seed=9,
         deterministic=True,
     )
     pred_cell = out.obs["cell_codebook_idx"].to_numpy().astype(np.int64)

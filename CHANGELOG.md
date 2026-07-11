@@ -7,9 +7,12 @@ starting from 1.0.0.
 
 ## [0.2.0] - 2026-07
 
-Sophistication, packaging, and documentation release. All new behavior is
-opt-in; the 0.1.x default training path (and released checkpoint) reproduces
-bit-for-bit.
+Sophistication, packaging, and documentation release. The reference RCC + BrM
+results reported in the Cancer Cell manuscript are produced by the current 0.2.0
+default configuration (the b32k checkpoint: batch size 32768, seed 9, spatial
+graph `knn_radius` at radius 50 microns, k_neighbors 20, learning rate 3e-4, 300
+epochs, `mlp_deep` encoder, `vq` quantizer, `weighted_mean` aggregation). New
+behavior beyond these defaults is opt-in.
 
 Refactored to a PyTorch / deep-learning-library layout; removed the old
 `pp` / `tl` / `pl` / `io` namespaces in favor of `nicheverse.models`,
@@ -17,7 +20,7 @@ Refactored to a PyTorch / deep-learning-library layout; removed the old
 `Trainer` and `build_encoder` / `build_quantizer` registries. Added opt-in
 quantizers (FSQ, SoftVQ, RotVQ, QINCo, Product VQ), encoders (residual MLP,
 transformer), NB/Poisson reconstruction, distance kernels, spatial losses,
-warmup-cosine scheduling, transcript-level context, and MAE pretraining. All defaults reproduce the published production model bit-for-bit.
+warmup-cosine scheduling, transcript-level context, and MAE pretraining. The 0.2.0 defaults are the reference configuration behind the manuscript's b32k checkpoint.
 
 Added a literature-grounded annotation module (`nicheverse.annotate`): per-code
 marker and DEG evidence, LLM labeling of cell states and spatial niches via Claude,
@@ -99,6 +102,8 @@ Synced the documentation site (README, guides, API reference) to these defaults.
 
 ## [0.1.0] - 2026
 
-Initial release accompanying the Cancer Cell submission. Hierarchical VQ-VAE
-with cell codebook (K_c = 256) and neighborhood codebook (K_n = 32) trained on
-173 Xenium samples (5.66M cells) of the RCC + BrM cohort.
+Initial public release. Hierarchical VQ-VAE with cell codebook (K_c = 256) and
+neighborhood codebook (K_n = 32) trained on 173 Xenium samples (5.66M cells) of
+the RCC + BrM cohort. The reference results reported in the Cancer Cell
+manuscript are produced by the 0.2.0 default configuration (the b32k checkpoint);
+see the [0.2.0] entry.

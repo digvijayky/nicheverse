@@ -1,6 +1,6 @@
 # Producing a frozen reproducibility bundle
 
-To accompany a manuscript submission, you should ship a single artifact that lets a reviewer reproduce every code assignment we report.
+To accompany a manuscript submission, you should ship a single artifact that lets a reviewer reproduce every code assignment we report. The reference results come from the b32k checkpoint (the 0.2.0 default configuration: batch size 32768, seed 9, spatial graph `knn_radius` at radius 50 microns, k_neighbors 20).
 
 ## What the bundle must contain
 
@@ -8,7 +8,7 @@ To accompany a manuscript submission, you should ship a single artifact that let
 release/
   README.md                              one-page recipe pointing at the rest
   requirements-frozen.txt                exact dep versions
-  nicheverse-0.1.0.tar.gz            source distribution
+  nicheverse-0.2.0.tar.gz            source distribution
   rcc_brm_v4dev_173samples.pt            self-describing checkpoint (config + gene_names embedded)
   rcc_brm_v4dev_173samples.json          plain text config snapshot
   cohort_preprocessed.h5ad               input AnnData (raw counts, sample_id, spatial)
@@ -97,7 +97,7 @@ cd release && sha256sum * | tee SHA256SUMS
 #!/usr/bin/env bash
 set -euo pipefail
 pip install -r requirements-frozen.txt
-pip install nicheverse-0.1.0.tar.gz
+pip install nicheverse-0.2.0.tar.gz
 nicheverse predict \
     --input cohort_preprocessed.h5ad \
     --checkpoint rcc_brm_v4dev_173samples.pt \

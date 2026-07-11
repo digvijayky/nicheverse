@@ -26,11 +26,14 @@ pip install -e ".[dev]"
 
 ## Pinned environment for reproducibility
 
-For exact reproduction of the manuscript results, install the frozen environment:
+For exact reproduction of the manuscript results, install the frozen environment.
+The manuscript reference results come from the 0.2.0 default configuration (the
+b32k checkpoint), which is the current release; pin to the release matching the
+reproducibility bundle:
 
 ```bash
 pip install -r requirements-frozen.txt
-pip install nicheverse==0.1.0
+pip install nicheverse==0.2.0
 ```
 
 `requirements-frozen.txt` ships in the source distribution and the Zenodo bundle.
@@ -51,4 +54,4 @@ The full test suite should pass in well under a minute on CPU.
 
 ## Hardware notes
 
-Training the 173 sample cohort (5.66M cells, 366 genes) takes roughly 25 minutes per epoch on a single NVIDIA A100 with batch size 2048; 300 epochs run in roughly five hours. Inference (predict) on the same cohort takes under 10 minutes on the same GPU and roughly 90 minutes on a 32 core CPU. RAM use peaks around 40 GB during k-NN graph construction; you can reduce this by pre splitting the cohort by sample and concatenating outputs.
+Training the 173 sample cohort (5.66M cells, 366 genes) at the b32k reference configuration (batch size 32768, seed 9, spatial graph `knn_radius` at radius 50 microns, k_neighbors 20) takes a few minutes per epoch on a single NVIDIA A100; 300 epochs run in a few hours. Inference (predict) on the same cohort takes under 10 minutes on the same GPU and roughly 90 minutes on a 32 core CPU. RAM use peaks around 40 GB during k-NN graph construction; you can reduce this by pre splitting the cohort by sample and concatenating outputs.
