@@ -7,12 +7,15 @@ cell-code and neighborhood-code assignments that are byte-for-byte identical
 ``annotforxenium_model_for_rcc_brm_v4_dev.py`` production run.
 
 It is opt-in so the fast unit suite is unaffected: it only runs when
-``NICHEVERSE_RUN_RCC_REPRO=1`` is set AND the production checkpoint + adata are
-present (they are large and live outside the repo). Point it at a different
-checkpoint dir with ``NICHEVERSE_RCC_CKPT_DIR``. Re-run after every refactor
-milestone (on a compute node, it loads a multi-GB backed AnnData)::
+``NICHEVERSE_RUN_RCC_REPRO=1`` is set, ``NICHEVERSE_RCC_CKPT_DIR`` points at the
+production checkpoint directory, AND the checkpoint + adata are present (they are
+large and live outside the repo). There is no default path; the test is skipped
+unless ``NICHEVERSE_RCC_CKPT_DIR`` is set. Re-run after every refactor milestone
+(on a compute node, it loads a multi-GB backed AnnData)::
 
-    NICHEVERSE_RUN_RCC_REPRO=1 pytest tests/test_reproduction_rcc.py -q
+    NICHEVERSE_RUN_RCC_REPRO=1 \\
+        NICHEVERSE_RCC_CKPT_DIR=/path/to/production/checkpoint/dir \\
+        pytest tests/test_reproduction_rcc.py -q
 """
 
 from __future__ import annotations
@@ -23,19 +26,16 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-_CKPT_DIR = Path(
-    os.environ.get(
-        "NICHEVERSE_RCC_CKPT_DIR",
-        "/data1/lesliec/vijay/spatial_transcriptomicsg/my_work_Gosabopos/checkpointsg/"
-        "annotforxenium_model_rcc_brm_v4_2026_06_11_173samples_hp_256cell_32neigh",
-    )
-)
-_PT = _CKPT_DIR / "hierarchical_vqvae_checkpoint.pt"
-_ADATA = _CKPT_DIR / "adata_with_hierarchical_embeddings.h5ad"
+_CKPT_ENV = os.environ.get("NICHEVERSE_RCC_CKPT_DIR")
+_CKPT_DIR = Path(_CKPT_ENV) if _CKPT_ENV else None
+_PT = _CKPT_DIR / "hierarchical_vqvae_checkpoint.pt" if _CKPT_DIR else None
+_ADATA = _CKPT_DIR / "adata_with_hierarchical_embeddings.h5ad" if _CKPT_DIR else None
 
 pytestmark = pytest.mark.skipif(
-    os.environ.get("NICHEVERSE_RUN_RCC_REPRO") != "1" or not (_PT.exists() and _ADATA.exists()),
-    reason="set NICHEVERSE_RUN_RCC_REPRO=1 with the production RCC checkpoint present to run",
+    os.environ.get("NICHEVERSE_RUN_RCC_REPRO") != "1"
+    or _CKPT_DIR is None
+    or not (_PT.exists() and _ADATA.exists()),
+    reason="set NICHEVERSE_RUN_RCC_REPRO=1 and NICHEVERSE_RCC_CKPT_DIR=<production checkpoint dir> to run",
 )
 
 # Production architecture (matches the legacy bare-state-dict checkpoint).
@@ -86,6 +86,7 @@ def test_reproduces_rcc_v4_codes_sha_exact():
         sample_col=col,
         k_neighbors=20,
         neighborhood_aggregation="weighted_mean",
+        spatial_graph="knn",  # production v4 used plain knn (predate the knn_radius default)
         batch_size=2048,
         normalize=False,
         log1p=False,

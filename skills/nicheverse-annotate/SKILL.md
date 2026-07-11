@@ -19,7 +19,7 @@ that is **grounded in the code's own expression evidence** (top markers by z-sco
 DEGs, and metadata distributions) plus **primary literature** (PubMed / bioRxiv). This mirrors a
 manual codebook-review pipeline: no label rests on training-data familiarity alone.
 
-Environment python: `/home/yarlagad/conda_envs/annotforimst/bin/python` (has `nicheverse`
+Environment python: `/path/to/your/env/bin/python` (an environment that has `nicheverse`
 installed). The LLM/network features need the `nicheverse[llm]` extra (`anthropic`, `openai`,
 `requests`).
 
@@ -180,7 +180,7 @@ verify before trusting a call:
 h5ad. Always use the env python.
 
 ```bash
-/home/yarlagad/conda_envs/annotforimst/bin/python \
+/path/to/your/env/bin/python \
   skills/nicheverse-annotate/scripts/annotate_codebook.py \
     --adata /path/to/adata.h5ad \
     --code-col cell_codebook_idx \

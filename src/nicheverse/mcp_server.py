@@ -8,7 +8,7 @@ raw matrices.
 Register with::
 
     claude mcp add nicheverse -- \
-        /home/yarlagad/conda_envs/annotforimst/bin/python -m nicheverse.mcp_server
+        /path/to/your/env/bin/python -m nicheverse.mcp_server
 """
 
 from __future__ import annotations

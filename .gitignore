@@ -30,3 +30,8 @@ notebooks/runs/
 !examples/data/**
 !examples/data/*.h5ad
 !examples/data/xenium_rcc_core_molecule_sets/*.npz
+
+# Internal orchestrator/policy files (kept local, not shipped public)
+CLAUDE.md
+AGENTS.md
+REVIEW_REPORT.md
