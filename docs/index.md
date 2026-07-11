@@ -43,7 +43,7 @@ Paired cell-state and spatial-niche codebooks coupled by cross-attention, so cel
 Encoder registry: `mlp_deep` (default) / `mlp` / `mlp_plr` / `residual_mlp` / `transformer` / `cnn` / `fast_cnn` / `deep_cnn` / `gnn` / `diffusion` / `dit` / `set_transformer` / `perceiver_io` / `soft_moe` / `ft_transformer`. Quantizer registry: `vq` (default) / `rvq` / `grvq` / `pq` / `qinco` / `rot` / `soft` / `bsq` / `lfq` / `fsq` / `residual_fsq`.
 :::
 :::{grid-item-card} Spatial-aware
-Per-sample graphs (`knn_radius` default at 50 microns, plus kNN, radius, Delaunay, alpha-complex), inverse-distance aggregation, and opt-in spatial-coherence losses.
+Per-sample graphs (`knn`, `knn_radius` default at 50 microns, `radius`, `delaunay`, `alpha_complex`, `gabriel`, `rng`), inverse-distance aggregation, and opt-in spatial-coherence losses.
 :::
 :::{grid-item-card} Count-native
 Default negative-binomial cell likelihood with a detection hurdle and a Dirichlet-multinomial niche composition term on raw counts, plus transcript-level subcellular context.

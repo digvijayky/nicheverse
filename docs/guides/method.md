@@ -63,13 +63,13 @@ niche_recon                = mse_dirmult
 spatial_graph              = knn_radius (radius 50 microns)
 k_neighbors                = 20
 neighborhood_aggregation   = weighted_mean
-batch_size                 = 2048
+batch_size                 = 32768
 learning_rate              = 3e-4
 num_epochs                 = 300
 optimizer                  = AdamW (decoupled selective weight decay 0.01)
 scheduler                  = ReduceLROnPlateau (factor 0.5, patience 5)
 preprocessing              = scanpy normalize_total + log1p (encoder input); raw counts kept as the NB / Dirichlet-multinomial target
-seed                       = 49
+seed                       = 9
 ```
 
 ## Choosing K_c and K_n

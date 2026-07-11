@@ -33,7 +33,7 @@ The radius of "neighborhood". 20 is a good default for Xenium cell densities (on
 
 ## Spatial graph
 
-`knn_radius` (default) is a k-nearest-neighbor graph whose edges are additionally capped at `radius` microns (default 50), so it keeps a dense local neighborhood in normal tissue but never bridges long gaps in sparse metastasis. The graph is always built per sample: cells from different samples never link, which prevents cross-contamination when slides share a coordinate frame. `knn` (pure k-NN, no cap), `radius`, `delaunay`, and `alpha_complex` are the alternatives.
+`knn_radius` (default) is a k-nearest-neighbor graph whose edges are additionally capped at `radius` microns (default 50), so it keeps a dense local neighborhood in normal tissue but never bridges long gaps in sparse metastasis. The graph is always built per sample: cells from different samples never link, which prevents cross-contamination when slides share a coordinate frame. `knn` (pure k-NN, no cap), `radius`, `delaunay`, `alpha_complex`, `gabriel`, and `rng` are the alternatives.
 
 ## Aggregation
 
@@ -77,7 +77,7 @@ On by default. Turn off via `--no-cross-attention` if you want a "pure" cell cod
 
 ## Random seed
 
-Default 49. Different seeds produce different codebooks because k-means++ initialization is stochastic. To explore robustness, train three independent seeds and check that hierarchical clustering of the resulting codebooks recovers the same coarse structure.
+Default 9. Different seeds produce different codebooks because k-means++ initialization is stochastic. To explore robustness, train three independent seeds and check that hierarchical clustering of the resulting codebooks recovers the same coarse structure.
 
 ## Quick recipe table
 

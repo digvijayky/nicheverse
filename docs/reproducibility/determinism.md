@@ -15,7 +15,7 @@ on the same hardware (matching CUDA capability, matching cuDNN major version) an
 
 ## What controls determinism
 
-`predict_codes` calls `seed_everything(seed=49, deterministic=True)` before any computation. That helper:
+`predict_codes` calls `seed_everything(seed=9, deterministic=True)` before any computation. That helper:
 
 1. Sets `PYTHONHASHSEED`, `random.seed`, `np.random.seed`, `torch.manual_seed`, `torch.cuda.manual_seed_all`.
 2. Sets `torch.backends.cudnn.deterministic = True` and `torch.backends.cudnn.benchmark = False`.

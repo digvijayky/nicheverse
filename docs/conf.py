@@ -78,6 +78,7 @@ intersphinx_mapping = {
     "anndata": ("https://anndata.readthedocs.io/en/stable/", None),
     "scanpy": ("https://scanpy.readthedocs.io/en/stable/", None),
     "torch": ("https://pytorch.org/docs/stable/", None),
+    "pandas": ("https://pandas.pydata.org/docs/", None),
 }
 
 # -- HTML output -------------------------------------------------------------
@@ -86,13 +87,14 @@ html_title = "NICHEVERSE"
 html_static_path = ["_static"]
 html_css_files = ["custom.css"]
 html_js_files = ["force-dark.js", "gallery.js", "bb-motion.js"]
-# Canonical URL for the GitHub Pages deploy (harmless locally).
-html_baseurl = "https://nicheverse.github.io/"
+# Canonical URL for the published docs (harmless locally).
+html_baseurl = "https://nicheverse.readthedocs.io/en/latest/"
+# pydata-sphinx-theme reads the default light/dark mode from html_context.
+html_context = {"default_mode": "dark"}
 html_theme_options = {
     "github_url": "https://github.com/digvijayky/nicheverse",
     "show_prev_next": False,
     "navbar_align": "left",
-    "default_mode": "dark",
     "header_links_before_dropdown": 3,
     "navbar_end": ["theme-switcher", "navbar-icon-links"],
     "logo": {"text": "NICHEVERSE"},
@@ -115,3 +117,14 @@ ogp_use_first_image = True
 # -- Silence expected cross-reference noise ----------------------------------
 nitpicky = False
 suppress_warnings = ["mystnb.unknown_mime_type"]
+# Cross-references to private/internal symbols and un-mapped external types that
+# autodoc emits from type hints and docstrings. These render as plain text and do
+# not affect the site; ignored so a strict (``-n``) build is clean.
+nitpick_ignore_regex = [
+    ("py:.*", r".*(_VQDelegate|_QUANTIZERS|_ENCODERS|_VQDual|_device_resident_fits)"),
+    ("py:class", r".*VectorQuantizer"),
+    ("py:.*", r"nicheverse\.(data\.(SpatialDataset|transcript_context)|utils\.seed_everything|annotate)"),
+    ("py:func", r".*(annotate_codes|auto_batch_size)"),
+    ("py:class", r"(optional|default=.*|anndata\..*AnnData|pandas\..*DataFrame)"),
+    ("py:data", r"typing\.(Union|Any|Optional)"),
+]

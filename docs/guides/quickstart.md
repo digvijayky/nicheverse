@@ -77,7 +77,7 @@ from nicheverse import (
     ModelConfig, TrainConfig, seed_everything,
 )
 
-seed_everything(49)
+seed_everything(9)
 adata = load_xenium_cohort(["./run_A", "./run_B", "./run_C"])
 
 mc = ModelConfig(

@@ -29,7 +29,7 @@ summary (paths, counts, top rows), never raw matrices.
 
 ```bash
 claude mcp add nicheverse -- \
-  /home/yarlagad/conda_envs/annotforimst/bin/python -m nicheverse.mcp_server
+  /path/to/your/env/bin/python -m nicheverse.mcp_server
 ```
 
 Use the interpreter that has `nicheverse` installed. After the `--`, everything
@@ -42,7 +42,7 @@ Add an entry under `[mcp_servers]` in `~/.codex/config.toml`:
 
 ```toml
 [mcp_servers.nicheverse]
-command = "/home/yarlagad/conda_envs/annotforimst/bin/python"
+command = "/path/to/your/env/bin/python"
 args = ["-m", "nicheverse.mcp_server"]
 ```
 
@@ -52,7 +52,7 @@ as `command = "nicheverse-mcp"` with no `args` once the package is on `PATH`.)
 ## Quick manual check
 
 ```bash
-/home/yarlagad/conda_envs/annotforimst/bin/python -m nicheverse.mcp_server
+/path/to/your/env/bin/python -m nicheverse.mcp_server
 ```
 
 The process waits on stdio for a client; Ctrl-C to exit. For an import check:

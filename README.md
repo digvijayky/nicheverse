@@ -1,5 +1,10 @@
 # NICHEVERSE
 
+[![Docs](https://img.shields.io/readthedocs/nicheverse)](https://nicheverse.readthedocs.io)
+[![PyPI](https://img.shields.io/pypi/v/nicheverse)](https://pypi.org/project/nicheverse)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/digvijayky/nicheverse/blob/main/LICENSE)
+[![CI](https://img.shields.io/github/actions/workflow/status/digvijayky/nicheverse/ci.yml?label=CI)](https://github.com/digvijayky/nicheverse/actions)
+
 *Neighborhood-Inferred Cell type HiErarchical annotation + VEctor-quantized Representations of Spatial Ecotypes*
 
 A world model for tissues: hierarchical VQ-VAE codebooks of cell states and spatial niches for imaging-based spatial transcriptomics (Xenium, MERFISH, seqFISH, CosMx).
@@ -8,7 +13,7 @@ Trains a two-codebook model (a cell codebook and a tissue neighborhood codebook)
 
 Originally developed for the renal cell carcinoma plus brain metastasis cohort described in our Cancer Cell submission, the package runs on any Xenium output and was used to discover 256 cell states and 32 niches across 173 samples (5.66 million cells).
 
-A PyTorch package, laid out like a deep-learning library: the model, encoders, and quantizers live in `nicheverse.models`; the spatial dataset, neighbor featurizer, and Xenium I/O in `nicheverse.data`; the `Trainer` and inference in `nicheverse.training`; figures in `nicheverse.plotting`. It runs on any imaging spatial-transcriptomics data loaded into [AnnData](https://anndata.readthedocs.io/): a Xenium reader is built in, and MERFISH, CosMx, seqFISH, or any cell-by-gene matrix with coordinates loads via `read_spatial` / `SpatialDataset.from_anndata`. Encoders and quantizers are swappable through `build_encoder` / `build_quantizer` registries.
+A PyTorch package, laid out like a deep-learning library: the model, encoders, and quantizers live in `nicheverse.models`; the spatial dataset, neighbor featurizer, and Xenium I/O in `nicheverse.data`; the `Trainer` and inference in `nicheverse.training`; figures in `nicheverse.plotting`. It runs on any imaging spatial-transcriptomics data loaded into [AnnData](https://anndata.readthedocs.io/): a Xenium reader is built in, and MERFISH, CosMx, seqFISH, or any cell-by-gene matrix with coordinates loads via `read_spatial` / `SpatialDataset.from_anndata`. Encoders and quantizers are swappable through the `nicheverse.models.build_encoder` / `nicheverse.models.build_quantizer` registries.
 
 ## Install
 
@@ -92,8 +97,8 @@ After training, `adata.obs` carries `cell_codebook_idx` (0 to 255) and `neighbor
 - **Quantizers** (`ModelConfig.quantizer_type`): `vq` (default; stabilized EMA codebook with k-means++ init, dead-code reset, and a diversity term, and the EMA codebook is frozen from the optimizer), plus `rvq`, `grvq`, `pq`, `qinco`, `rot`, `soft`, `bsq`, `lfq`, `fsq`, `residual_fsq`; registry `nicheverse.models.build_quantizer`.
 - **Cell reconstruction** (`ModelConfig.cell_recon`): default `nb` is a negative-binomial NLL on the RAW counts (scVI-style library from the observed total count) plus a Bernoulli/BCE detection hurdle (`detection_weight=0.5`); no MSE on the cell branch. Set `cell_recon="mse"` (with `detection_weight=0`) to recover the pure MSE-on-log1p path.
 - **Niche reconstruction** (`ModelConfig.niche_recon`): default `mse_dirmult` is composition MSE plus a Dirichlet-multinomial on the count-scale aggregated-neighbor composition. Set `niche_recon="mse"` for pure composition MSE.
-- **Spatial graphs / kernels** (`TrainConfig`): `knn_radius` (default, radius 50 microns), plus `knn`, `radius`, `delaunay`, `alpha_complex`; aggregation `weighted_mean` (default, inverse distance), `mean`, `max`, `gaussian`, `inverse_square`.
-- **Spatial losses** (opt-in): `laplacian`, `contrastive`, `codebook_consistency`.
+- **Spatial graphs / kernels** (`TrainConfig`): `knn`, `knn_radius` (default, radius 50 microns), `radius`, `delaunay`, `alpha_complex`, `gabriel`, `rng`; aggregation `weighted_mean` (default, inverse distance), `mean`, `max`, `gaussian`, `inverse_square`.
+- **Spatial losses** (opt-in): `laplacian`, `contrastive`, `codebook_consistency`, `graph_tv`.
 - **Data utilities**: `nicheverse.data.transcript_context` (default radius 7 microns), the subcellular molecule-set featurizer (default radius 7 microns), and `nicheverse.training.mae_pretrain`.
 - **Optimizer**: `AdamW` with decoupled selective weight decay (`weight_decay=0.01`, applied only to Linear / Conv weights; biases, norms, and bare parameters are excluded).
 - **Vectorized neighborhood aggregation** in bounded-memory chunks, replacing the per-cell Python loop, for multi-million-cell cohorts.
@@ -207,7 +212,7 @@ nicheverse train \
     --k-neighbors 20
 ```
 
-Set `torch.manual_seed(49)` is applied automatically via `TrainConfig.seed`.
+Set `torch.manual_seed(9)` is applied automatically via `TrainConfig.seed`.
 
 ## Testing
 
@@ -216,6 +221,21 @@ pytest -q
 ```
 
 The test suite uses tiny synthetic data and covers forward pass shapes, every registered encoder and quantizer, checkpoint round trip, per sample k-NN isolation, the count and MSE reconstruction paths, device-resident training, end to end train then predict, and gene panel mismatch detection.
+
+## Citation
+
+If you use NICHEVERSE in your work, please cite it. A manuscript is in preparation; in the meantime you can cite the software:
+
+```bibtex
+@article{nicheverse2026,
+  title   = {NICHEVERSE: hierarchical spatial tokenization of cell states and multicellular niches},
+  author  = {Krishnamoorthy Yarlagadda, Digvijay and colleagues},
+  year    = {2026},
+  note    = {manuscript in preparation}
+}
+```
+
+Full documentation lives at [nicheverse.readthedocs.io](https://nicheverse.readthedocs.io). Contributions are welcome, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 

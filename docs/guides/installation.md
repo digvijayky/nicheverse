@@ -37,7 +37,7 @@ pip install nicheverse==0.1.0
 
 ## GPU setup
 
-CUDA is auto detected at runtime. If you want to force CPU on a GPU machine, pass `--device cpu` to the CLI or `device="cpu"` to the Python API. The default seed is 49 and determinism is on; on GPU we set `torch.backends.cudnn.deterministic=True` and `CUBLAS_WORKSPACE_CONFIG=:4096:8` to enable bit identical runs across invocations on the same hardware.
+CUDA is auto detected at runtime. If you want to force CPU on a GPU machine, pass `--device cpu` to the CLI or `device="cpu"` to the Python API. The default seed is 9 and determinism is on; on GPU we set `torch.backends.cudnn.deterministic=True` and `CUBLAS_WORKSPACE_CONFIG=:4096:8` to enable bit identical runs across invocations on the same hardware.
 
 ## Verifying the install
 
