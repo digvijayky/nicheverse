@@ -196,9 +196,11 @@ class TrainConfig:
     neighborhood_aggregation
         One of ``{"mean", "weighted_mean", "max", "gaussian", "inverse_square"}``.
     spatial_graph
-        Spatial graph backend: ``{"knn", "radius", "delaunay", "alpha_complex"}``.
+        Spatial graph backend: ``{"knn", "knn_radius" (default), "radius",
+        "delaunay", "alpha_complex", "gabriel", "rng"}``.
     radius
-        Radius in microns for ``spatial_graph="radius"``.
+        Radius in microns for the radius-capped graphs
+        (``spatial_graph="knn_radius"`` or ``"radius"``). Default ``50.0``.
     bandwidth
         Gaussian kernel bandwidth in microns for
         ``neighborhood_aggregation="gaussian"``.

@@ -70,6 +70,24 @@ def _add_train(sp: argparse._SubParsersAction) -> None:
     p.add_argument("--neighborhood-codebook-size", type=int, default=32)
     p.add_argument("--neighborhood-codebook-embdim", type=int, default=256)
     p.add_argument("--k-neighbors", type=int, default=20)
+    p.add_argument(
+        "--spatial-graph",
+        default="knn_radius",
+        help="Neighborhood graph backend: knn, knn_radius (default), radius, "
+        "delaunay, alpha_complex, gabriel, rng",
+    )
+    p.add_argument(
+        "--radius",
+        type=float,
+        default=50.0,
+        help="Radius in microns for radius-based graphs (knn_radius / radius)",
+    )
+    p.add_argument(
+        "--aggregation",
+        default="weighted_mean",
+        help="Neighborhood aggregation: mean, weighted_mean (default), max, "
+        "gaussian, inverse_square",
+    )
     p.add_argument("--batch-size", type=int, default=2048)
     p.add_argument("--lr", type=float, default=3e-4)
     p.add_argument("--seed", type=int, default=9)
@@ -89,7 +107,29 @@ def _add_predict(sp: argparse._SubParsersAction) -> None:
     p.add_argument("--checkpoint", required=True, help="Path to .pt checkpoint")
     p.add_argument("--output", required=True, help="Output .h5ad with codes attached")
     p.add_argument("--sample-col", default="sample_id")
-    p.add_argument("--k-neighbors", type=int, default=20)
+    p.add_argument(
+        "--k-neighbors",
+        type=int,
+        default=None,
+        help="Neighbors per cell. Default: inherit from the checkpoint's train_config.json",
+    )
+    p.add_argument(
+        "--spatial-graph",
+        default=None,
+        help="Neighborhood graph backend. Default: inherit from the checkpoint's "
+        "train_config.json (knn, knn_radius, radius, delaunay, alpha_complex, gabriel, rng)",
+    )
+    p.add_argument(
+        "--radius",
+        type=float,
+        default=None,
+        help="Radius in microns for radius-based graphs. Default: inherit from the checkpoint",
+    )
+    p.add_argument(
+        "--aggregation",
+        default=None,
+        help="Neighborhood aggregation. Default: inherit from the checkpoint's train_config.json",
+    )
     p.add_argument("--batch-size", type=int, default=2048)
     p.add_argument("--seed", type=int, default=9)
     p.add_argument("--device", default=None)
@@ -219,6 +259,9 @@ def _run_train(args: argparse.Namespace) -> int:
         batch_size=args.batch_size,
         learning_rate=args.lr,
         k_neighbors=args.k_neighbors,
+        spatial_graph=args.spatial_graph,
+        radius=args.radius,
+        neighborhood_aggregation=args.aggregation,
         seed=args.seed,
     )
     _model, adata = train_model(
@@ -314,13 +357,21 @@ def _run_verify(args: argparse.Namespace) -> int:
 
 
 def _run_predict(args: argparse.Namespace) -> int:
+    from .training.predict import _INHERIT
+
     adata = ad.read_h5ad(args.input)
+    # None from argparse means "not passed" -> inherit from the checkpoint's
+    # train_config.json. radius has _INHERIT as its inherit sentinel because an
+    # explicit None is a valid radius (graphs that take no radius).
     annotated = predict_codes(
         adata,
         args.checkpoint,
         output_path=args.output,
         sample_col=args.sample_col,
         k_neighbors=args.k_neighbors,
+        spatial_graph=args.spatial_graph,
+        radius=_INHERIT if args.radius is None else args.radius,
+        neighborhood_aggregation=args.aggregation,
         batch_size=args.batch_size,
         device=args.device,
         seed=args.seed,

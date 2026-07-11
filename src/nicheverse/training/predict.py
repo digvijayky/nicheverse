@@ -11,6 +11,8 @@ import scipy.sparse as sp
 import torch
 from torch.utils.data import DataLoader
 
+import json
+
 from ..data import SpatialDataset
 from ..data.xenium import attach_codes_to_adata
 from ..models import HierarchicalVQVAE, ModelConfig, load_checkpoint
@@ -18,6 +20,67 @@ from ..utils import seed_everything
 from .trainer import _preprocess
 
 logger = logging.getLogger(__name__)
+
+# Sentinel meaning "not passed" so that an explicit ``radius=None`` (valid for
+# graphs like plain knn) can be told apart from an un-passed argument.
+_INHERIT = object()
+
+# Fallback defaults used only when a key is absent from a checkpoint's
+# train_config.json (e.g. very old checkpoints). Kept in sync with TrainConfig.
+_GRAPH_DEFAULTS = {
+    "spatial_graph": "knn_radius",
+    "radius": 50.0,
+    "k_neighbors": 20,
+    "neighborhood_aggregation": "weighted_mean",
+}
+
+
+def _load_train_graph_config(checkpoint: str | Path | HierarchicalVQVAE) -> dict:
+    """Read the neighborhood-graph settings saved next to a checkpoint.
+
+    The trainer writes ``train_config.json`` into the checkpoint directory with
+    ``spatial_graph``, ``radius``, ``k_neighbors`` and ``neighborhood_aggregation``.
+    Given a ``.pt`` checkpoint path, look for that JSON in the same directory.
+
+    Returns an empty dict if the checkpoint is an in-memory model or the JSON is
+    absent/unreadable; callers then fall back to :data:`_GRAPH_DEFAULTS`.
+    """
+    if isinstance(checkpoint, HierarchicalVQVAE):
+        return {}
+    cfg_path = Path(checkpoint).parent / "train_config.json"
+    if not cfg_path.exists():
+        return {}
+    try:
+        return json.loads(cfg_path.read_text())
+    except (OSError, ValueError) as exc:
+        logger.warning("Could not read %s (%s); falling back to graph defaults.", cfg_path, exc)
+        return {}
+
+
+def _resolve_graph_arg(name: str, passed, train_cfg: dict, sentinel=None):
+    """Resolve one graph argument, preferring an explicit value, then the
+    checkpoint's train_config, then the package default (with a logged warning).
+
+    ``passed`` equal to ``sentinel`` means the caller did not pass the argument
+    (so inherit); any other value is honored. For ``radius`` the sentinel is
+    :data:`_INHERIT` (not ``None``) so an explicit ``radius=None`` (valid for
+    graphs that take no radius) is distinguishable from an un-passed argument.
+    """
+    if passed is not sentinel:
+        return passed
+    if name in train_cfg:
+        logger.info(
+            "predict: inheriting %s=%r from checkpoint train_config.json", name, train_cfg[name]
+        )
+        return train_cfg[name]
+    default = _GRAPH_DEFAULTS[name]
+    logger.warning(
+        "predict: %s not passed and not found in checkpoint train_config.json; "
+        "falling back to default %r. Neighborhood codes may not match training.",
+        name,
+        default,
+    )
+    return default
 
 
 def _align_genes_to_checkpoint(adata: ad.AnnData, gene_names: tuple[str, ...]) -> ad.AnnData:
@@ -86,10 +149,10 @@ def predict_codes(
     checkpoint: str | Path | HierarchicalVQVAE,
     output_path: str | Path | None = None,
     sample_col: str = "sample_id",
-    k_neighbors: int = 20,
-    neighborhood_aggregation: str = "weighted_mean",
-    spatial_graph: str = "knn",
-    radius: float | None = None,
+    k_neighbors: int | None = None,
+    neighborhood_aggregation: str | None = None,
+    spatial_graph: str | None = None,
+    radius: float | None = _INHERIT,
     bandwidth: float | None = None,
     batch_size: int = 2048,
     normalize: bool = True,
@@ -118,14 +181,26 @@ def predict_codes(
     sample_col
         Column in ``adata.obs`` used to partition cells for per-sample k-NN.
     k_neighbors
-        Neighbors per cell. Must match the training-time value for the
-        neighborhood codebook to behave as intended.
+        Neighbors per cell. ``None`` (default) inherits the training-time value
+        from the checkpoint's ``train_config.json`` so the neighborhood codebook
+        behaves as intended; pass an int to override.
     neighborhood_aggregation
         One of ``{"mean", "weighted_mean", "max", "gaussian", "inverse_square"}``.
-        Must match the training-time value.
+        ``None`` (default) inherits the training-time value from the checkpoint.
+    spatial_graph
+        Spatial-graph backend. ``None`` (default) inherits the training-time
+        value from the checkpoint (e.g. ``"knn_radius"``); pass a string to
+        override. Building the neighborhood graph with a different backend than
+        training silently produces mismatched niche codes, so inheriting is the
+        safe default.
+    radius
+        Radius in microns for radius-based graphs. Left un-passed it inherits
+        the training-time value from the checkpoint; pass an explicit value
+        (including ``None`` for graphs that take no radius) to override.
     bandwidth
         Gaussian kernel bandwidth in microns; must match training when
-        ``neighborhood_aggregation="gaussian"``.
+        ``neighborhood_aggregation="gaussian"``. ``None`` inherits the
+        training-time value from the checkpoint.
     batch_size
         Inference mini-batch size.
     normalize, log1p
@@ -162,6 +237,19 @@ def predict_codes(
         if device
         else torch.device("cuda" if torch.cuda.is_available() else "cpu")
     )
+    # Resolve the neighborhood-graph settings before loading the model so a
+    # mismatch is caught early. Explicitly-passed values override; otherwise
+    # inherit from the checkpoint's train_config.json (falling back to defaults).
+    train_cfg = _load_train_graph_config(checkpoint)
+    spatial_graph = _resolve_graph_arg("spatial_graph", spatial_graph, train_cfg, sentinel=None)
+    radius = _resolve_graph_arg("radius", radius, train_cfg, sentinel=_INHERIT)
+    k_neighbors = _resolve_graph_arg("k_neighbors", k_neighbors, train_cfg, sentinel=None)
+    neighborhood_aggregation = _resolve_graph_arg(
+        "neighborhood_aggregation", neighborhood_aggregation, train_cfg, sentinel=None
+    )
+    if bandwidth is None and train_cfg.get("bandwidth") is not None:
+        bandwidth = train_cfg["bandwidth"]
+
     if isinstance(checkpoint, HierarchicalVQVAE):
         model = checkpoint.to(device_t)
     else:
