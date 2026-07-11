@@ -172,7 +172,7 @@ python examples/train_expression.py   # train on the bundled Xenium core, verify
 python examples/apply_codes.py         # train on 80%, assign codes to the held-out 20%
 ```
 
-## Notebooks (tested end to end)
+## Notebooks (runnable templates)
 
 | notebook | what it shows |
 |---|---|
@@ -183,8 +183,10 @@ python examples/apply_codes.py         # train on 80%, assign codes to the held-
 
 ### Platform-specific notebooks
 
-`notebooks/platforms/` holds one end-to-end example per imaging platform, each on
-that platform's **real** data, executed with outputs saved. They show how the input
+`notebooks/platforms/` holds one template per imaging platform. Outputs are cleared,
+so run them yourself. The MERFISH and Xenium notebooks run out of the box on the
+datasets bundled in `examples/data/`; the CosMx and seqFISH notebooks point at
+placeholder paths for you to supply your own AnnData. They show how the input
 conventions and the right encoder / codebook size change across platforms.
 
 | notebook | platform | real dataset | encoder / codebook | why |
@@ -202,7 +204,9 @@ otherwise the notebook trains on segmented counts.
 
 ## Example datasets (real, bundled)
 
-`examples/data/` ships two real datasets so every notebook runs out of the box.
+`examples/data/` ships two real datasets (a MERFISH retina cohort and a Xenium RCC
+core), so the top-level notebooks and the MERFISH and Xenium platform notebooks run
+out of the box; the CosMx and seqFISH notebooks need you to supply your own AnnData.
 Nothing is simulated or randomly subsampled.
 
 | file | contents | used by |
