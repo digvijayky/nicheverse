@@ -169,7 +169,7 @@ class TrainConfig:
         measured at ~45 GB resident on an 80 GB A100, so it fits the
         ``device_resident`` path with headroom; the power-of-two floor logic in
         :func:`auto_batch_size` and the ``device_resident`` fit-check both hold for
-        32768. Pass a smaller int (e.g. 2048) to reproduce the released trajectory.
+        32768. The default 32768 is the released b32k trajectory; pass a smaller int (e.g. 2048) only for small-GPU or quick runs.
     scale_lr_with_batch
         When ``batch_size="auto"`` and this is ``True`` (default), scale the
         learning rate by ``sqrt(effective_batch / 2048)`` so a larger resolved

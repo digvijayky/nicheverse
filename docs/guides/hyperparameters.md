@@ -49,7 +49,7 @@ The cell branch defaults to `cell_recon="nb"`: a negative-binomial NLL on the ra
 
 ## Batch size
 
-2048 is a sweet spot for the EMA codebook update on a typical GPU (24 to 80 GB). With batch size below 256 the dead code reset triggers too often and codes become noisy; above 8192 you risk OOM on the cross attention. Halve the batch if you OOM. Setting `batch_size="auto"` resolves the batch from the panel size at train time and, by default, scales the learning rate with it.
+The default is 32768, the batch the released b32k reference used (about 45 GB resident on an 80 GB A100, so it fits the device-resident path with headroom). Large batches sharpen the gradient estimate and hardware utilization at cohort scale; pair a very large batch with `lr_schedule='warmup_cosine'`. On a smaller GPU, lower the batch (for example 2048 to 8192) and halve it again if you hit out of memory. With batch below 256 the dead code reset triggers too often and codes become noisy. Setting `batch_size="auto"` resolves the batch from the panel size at train time and, by default, scales the learning rate with it.
 
 ## Learning rate
 
@@ -85,6 +85,6 @@ Default 9. Different seeds produce different codebooks because k-means++ initial
 Cohort size      K_c   d_c   K_n   d_n   k_neigh   epochs   batch
 < 100K           64    32    16    64    15        200      512
 100K to 1M       128   64    16    128   20        300      1024
-1M to 5M         256   64    32    256   20        300      2048
-> 5M             256   64    32    256   20        300      2048
+1M to 5M         256   64    32    256   20        300      16384
+> 5M             256   64    32    256   20        300      32768
 ```

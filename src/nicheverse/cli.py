@@ -88,7 +88,7 @@ def _add_train(sp: argparse._SubParsersAction) -> None:
         help="Neighborhood aggregation: mean, weighted_mean (default), max, "
         "gaussian, inverse_square",
     )
-    p.add_argument("--batch-size", type=int, default=2048)
+    p.add_argument("--batch-size", type=int, default=32768)
     p.add_argument("--lr", type=float, default=3e-4)
     p.add_argument("--seed", type=int, default=9)
     p.add_argument("--sample-col", default="sample_id")

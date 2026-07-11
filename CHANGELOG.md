@@ -53,11 +53,11 @@ Synced the documentation site (README, guides, API reference) to these defaults.
 ### Added
 1. A namespaced convenience API, alongside the flat
    backward-compatible entry points.
-2. AnnData key registry: `Keys` and `anndata_keys()` (`_constants.py`).
+2. AnnData key registry: `Keys` and `anndata_keys()` (`constants.py`).
 3. `spatial_neighbors(adata, ...)` writes aggregated neighborhood features to `obsm`.
 4. Vectorized, bounded-memory (`agg_chunk`) neighborhood aggregation replacing the per-cell
    Python loop; scales to multi-million-cell cohorts.
-5. Spatial graph backends `knn` (default), `radius`, and `delaunay` (`SpatialDataset.spatial_graph`,
+5. Spatial graph backends `knn`, `knn_radius` (default), `radius`, `delaunay`, `alpha_complex`, `gabriel`, and `rng` (`SpatialDataset.spatial_graph`,
    `TrainConfig.spatial_graph`, `predict_codes(spatial_graph=...)`).
 6. Cosine-distance codebook assignment (`ModelConfig.vq_distance="cosine"`; default `"l2"`).
 7. `HierarchicalVQVAE.encode()` (indices-only inference) and `HierarchicalVQVAE.from_checkpoint()`.
