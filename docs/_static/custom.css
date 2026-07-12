@@ -723,3 +723,60 @@ button:focus-visible,
   /* marquee stays a single scrollable row, just shorter */
   .bb-marquee img { height: 128px; }
 }
+
+/* ============================================================================
+   GALLERY - data-driven controls: search box, site dropdown, category badges
+   ========================================================================= */
+.bb-search {
+  font-family: var(--nv-sans);
+  font-size: 0.9rem;
+  color: var(--nv-ink);
+  background: var(--nv-paper);
+  border: 1px solid var(--nv-line);
+  border-radius: 999px;
+  padding: 0.4rem 0.95rem;
+  min-width: 16rem;
+  flex: 1 1 16rem;
+  transition: border-color 0.15s ease;
+}
+.bb-search:focus { outline: none; border-color: var(--nv-accent); }
+.bb-search::placeholder { color: var(--nv-mut); }
+
+.bb-select {
+  font-family: var(--nv-sans);
+  font-size: 0.85rem;
+  color: var(--nv-ink);
+  background: var(--nv-paper);
+  border: 1px solid var(--nv-line);
+  border-radius: 999px;
+  padding: 0.36rem 0.9rem;
+  cursor: pointer;
+}
+.bb-select:focus { outline: none; border-color: var(--nv-accent); }
+
+.bb-badges { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-bottom: 0.35rem; }
+.bb-badge {
+  font-family: var(--nv-sans);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--nv-mut);
+  background: var(--nv-alt);
+  border: 1px solid var(--nv-line);
+  border-radius: 999px;
+  padding: 0.1rem 0.5rem;
+  white-space: nowrap;
+}
+.bb-badge.bb-cat-Cancer { color: #fff; background: #c0392b; border-color: #c0392b; }
+.bb-badge.bb-cat-Normal { color: #fff; background: var(--nv-accent); border-color: var(--nv-accent); }
+.bb-badge.bb-cat-Developmental { color: #fff; background: #7d3c98; border-color: #7d3c98; }
+.bb-badge.bb-cat-Disease { color: #fff; background: #b9770e; border-color: #b9770e; }
+
+.bb-noimg {
+  display: flex; align-items: center; justify-content: center;
+  width: 100%; height: 100%; min-height: 140px;
+  color: var(--nv-mut); font-family: var(--nv-sans); font-size: 0.8rem;
+  background: var(--nv-alt);
+}
+.bb-tile.is-hidden { display: none; }

@@ -1,72 +1,120 @@
-// NICHEVERSE explore-collection gallery: filter chips, column toggle, live count.
+// NICHEVERSE gallery: data-driven cards from gallery_data.json with category filter,
+// site dropdown, free-text search (site + cell type), column toggle, live count.
 // Vanilla JS, no dependencies. Safe on pages without the gallery markup.
 (function () {
   "use strict";
 
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+    });
+  }
+
+  function fmtCells(n) {
+    if (n == null) return "";
+    if (n >= 1e6) return (n / 1e6).toFixed(n >= 1e7 ? 0 : 1) + "M";
+    if (n >= 1e3) return Math.round(n / 1e3) + "k";
+    return String(n);
+  }
+
+  function card(d) {
+    var badges =
+      '<span class="bb-badge bb-cat-' + esc(d.category) + '">' + esc(d.category) + "</span>" +
+      '<span class="bb-badge">' + esc(d.site) + "</span>" +
+      '<span class="bb-badge">' + esc(d.platform) + "</span>";
+    var meta =
+      fmtCells(d.n_cells) + " cells" +
+      (d.n_samples > 1 ? " · " + d.n_samples + " samples" : "") +
+      (d.n_celltypes ? " · " + d.n_celltypes + " cell types" : "");
+    var img = d.thumb
+      ? '<img src="../_static/' + esc(d.thumb) + '" alt="' + esc(d.title) + '" loading="lazy">'
+      : '<span class="bb-noimg">no preview</span>';
+    var search = [d.id, d.title, d.site, d.condition, d.organism, d.platform,
+                  (d.cell_types || []).join(" ")].join(" ").toLowerCase();
+    return (
+      '<figure class="bb-tile" data-category="' + esc(d.category) + '" data-site="' + esc(d.site) +
+      '" data-search="' + esc(search) + '">' +
+      '<span class="bb-frame">' + img + "</span>" +
+      '<figcaption class="bb-caption">' +
+      '<span class="bb-badges">' + badges + "</span>" +
+      "<b>" + esc(d.title) + "</b>" +
+      '<span class="bb-sub">' + esc(d.condition || "") + "</span>" +
+      '<span class="bb-sub">' + esc(meta) + "</span>" +
+      "</figcaption></figure>"
+    );
+  }
+
   function init() {
     var grid = document.getElementById("bb-grid");
+    if (!grid) return;
+    var src = grid.getAttribute("data-gallery-src");
     var chipBox = document.getElementById("bb-chips");
+    var siteSel = document.getElementById("bb-site");
+    var searchEl = document.getElementById("bb-search");
     var viewBox = document.getElementById("bb-viewtoggle");
     var countEl = document.getElementById("bb-count");
-    if (!grid) return;
 
-    var tiles = Array.prototype.slice.call(grid.querySelectorAll(".bb-tile"));
+    var active = { category: "all", site: "all", q: "" };
 
-    // active filter can be "all", a kind (cell/niche), or a site (primary/metastasis/brain)
-    var active = { type: "all", value: "all" };
+    function tiles() { return Array.prototype.slice.call(grid.querySelectorAll(".bb-tile")); }
 
-    function matches(tile) {
-      if (active.type === "all") return true;
-      if (active.type === "kind") return tile.getAttribute("data-kind") === active.value;
-      if (active.type === "site") return tile.getAttribute("data-site") === active.value;
+    function matches(t) {
+      if (active.category !== "all" && t.getAttribute("data-category") !== active.category) return false;
+      if (active.site !== "all" && t.getAttribute("data-site") !== active.site) return false;
+      if (active.q && t.getAttribute("data-search").indexOf(active.q) === -1) return false;
       return true;
     }
 
     function apply() {
       var shown = 0;
-      tiles.forEach(function (tile) {
-        if (matches(tile)) {
-          tile.classList.remove("is-hidden");
-          shown += 1;
-        } else {
-          tile.classList.add("is-hidden");
-        }
+      tiles().forEach(function (t) {
+        var ok = matches(t);
+        t.classList.toggle("is-hidden", !ok);
+        if (ok) shown += 1;
       });
-      if (countEl) {
-        countEl.innerHTML = "<b>" + shown + "</b> " + (shown === 1 ? "map" : "maps");
+      if (countEl) countEl.innerHTML = "<b>" + shown + "</b> " + (shown === 1 ? "dataset" : "datasets");
+    }
+
+    function wire() {
+      if (chipBox) {
+        chipBox.addEventListener("click", function (e) {
+          var b = e.target.closest(".bb-chip"); if (!b) return;
+          active.category = b.getAttribute("data-filter");
+          chipBox.querySelectorAll(".bb-chip").forEach(function (c) { c.classList.toggle("is-active", c === b); });
+          apply();
+        });
+      }
+      if (siteSel) siteSel.addEventListener("change", function () { active.site = siteSel.value; apply(); });
+      if (searchEl) searchEl.addEventListener("input", function () { active.q = searchEl.value.trim().toLowerCase(); apply(); });
+      if (viewBox) {
+        viewBox.addEventListener("click", function (e) {
+          var b = e.target.closest(".bb-view"); if (!b) return;
+          grid.setAttribute("data-cols", b.getAttribute("data-cols"));
+          viewBox.querySelectorAll(".bb-view").forEach(function (v) { v.classList.toggle("is-active", v === b); });
+        });
       }
     }
 
-    if (chipBox) {
-      chipBox.addEventListener("click", function (e) {
-        var btn = e.target.closest(".bb-chip");
-        if (!btn) return;
-        active = { type: btn.getAttribute("data-type"), value: btn.getAttribute("data-filter") };
-        chipBox.querySelectorAll(".bb-chip").forEach(function (c) {
-          c.classList.toggle("is-active", c === btn);
-        });
-        apply();
-      });
+    function render(data) {
+      grid.innerHTML = data.map(card).join("");
+      if (siteSel) {
+        var seen = {}, sites = [];
+        data.forEach(function (d) { if (!seen[d.site]) { seen[d.site] = 1; sites.push(d.site); } });
+        sites.sort();
+        siteSel.innerHTML = '<option value="all">All sites</option>' +
+          sites.map(function (s) { return '<option value="' + esc(s) + '">' + esc(s) + "</option>"; }).join("");
+      }
+      wire();
+      apply();
     }
 
-    if (viewBox) {
-      viewBox.addEventListener("click", function (e) {
-        var btn = e.target.closest(".bb-view");
-        if (!btn) return;
-        var cols = btn.getAttribute("data-cols");
-        grid.setAttribute("data-cols", cols);
-        viewBox.querySelectorAll(".bb-view").forEach(function (v) {
-          v.classList.toggle("is-active", v === btn);
-        });
-      });
+    if (src) {
+      fetch(src).then(function (r) { return r.json(); }).then(render).catch(function () { wire(); apply(); });
+    } else {
+      wire(); apply();  // static markup fallback
     }
-
-    apply();
   }
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
-  } else {
-    init();
-  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+  else init();
 })();
