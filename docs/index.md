@@ -27,8 +27,7 @@ API reference
 ::::
 
 ::::{div} hero-media
-<div class="hero-anim"><img class="ha-cell" src="_static/gallery/0069490_primary1_core15_cell.png" alt="cell-state codes"><img class="ha-niche" src="_static/gallery/0069490_primary1_core15_niche.png" alt="spatial-niche codes"><span class="ha-cap"><b class="c1">256 cell states</b><b class="c2">32 spatial niches</b></span></div>
-<span class="hero-media-cap">The model resolves the same renal cell carcinoma core into cell states, then spatial niches</span>
+<figure class="hero-shot"><img src="_static/gallery/sweep/pub_tonsil.png" alt="A reactive human tonsil resolved into cell-state lineages on nuclear boundaries"><figcaption>A reactive human tonsil, every nucleus painted by its learned cell-state lineage, one of 100+ datasets the frozen model reads</figcaption></figure>
 ::::
 :::::
 
@@ -80,25 +79,26 @@ annotated = nv.predict_codes(
 ```
 
 {.reveal}
-## Spatial niches, learned
+## One model, every tissue
 
-Niche codes rendered on nuclear boundaries across renal cell carcinoma contexts. See the [full gallery](guides/gallery).
+The released checkpoint, run unchanged across 100+ published datasets spanning every accessible platform: Xenium, CosMx, MERFISH, seqFISH, RIBOmap, EEL-FISH. Each tile is one dataset's whole section, every cell colored by the lineage of its learned cell-state code.
 
-::::{grid} 1 3 3 3
-:gutter: 3
-:class-container: nv-gallery reveal
+```{raw} html
+<div class="nv-showcase reveal">
+  <figure class="nv-shot nv-shot--wide"><img src="_static/gallery/overview_all.png" alt="Every rendered dataset, whole-section nucleus-boundary maps" loading="lazy"><figcaption>Every rendered dataset</figcaption></figure>
+  <div class="nv-shot-row">
+    <figure class="nv-shot"><img src="_static/gallery/overview_cancer.png" alt="Cancer datasets" loading="lazy"><figcaption>Cancer</figcaption></figure>
+    <figure class="nv-shot"><img src="_static/gallery/overview_normal.png" alt="Normal datasets" loading="lazy"><figcaption>Normal</figcaption></figure>
+  </div>
+</div>
+```
 
-:::{grid-item-card} Primary RCC
-![Primary RCC niches](/_static/gallery/0069490_primary1_core15_niche.png)
-:::
-:::{grid-item-card} Metastasis
-![RCC metastasis niches](/_static/gallery/0069489_metastases_core14_niche.png)
-:::
-:::{grid-item-card} Brain metastasis
-![Brain metastasis niches](/_static/gallery/S20_15120_untreated_niche.png)
-:::
-
-::::
+```{button-ref} guides/gallery
+:ref-type: doc
+:color: primary
+:class: hero-btn
+Browse all datasets
+```
 
 ```{toctree}
 :hidden:

@@ -947,3 +947,29 @@ button:focus-visible,
 .gx .gx-spectrum-cap { color: var(--gx-dim); font-size: 0.72rem; margin: 0.55rem 0 1.8rem; max-width: none; }
 .gx .gx-method { color: var(--gx-dim); font-size: 0.82rem; line-height: 1.55; margin-top: 1.8rem; max-width: 44rem; }
 .gx .gx-overview .gx-h3 { margin-top: 0.2rem; }
+
+/* homepage: black-bg specimen hero + collage showcase (replaces white-bg images) */
+.hero-shot { margin: 0; }
+.hero-shot img { width: 100%; height: auto; display: block; border-radius: 14px; background: #000; border: 1px solid var(--nv-line); box-shadow: 0 12px 44px rgba(0,0,0,.32); }
+.hero-shot figcaption { font-size: .82rem; color: var(--nv-mut); margin-top: .55rem; line-height: 1.45; }
+html[data-theme="dark"] .hero-shot img { border-color: #20242b; }
+.nv-showcase { margin: 1.1rem 0 1.6rem; }
+.nv-shot { margin: 0 0 1rem; }
+.nv-shot img { width: 100%; height: auto; display: block; border-radius: 12px; background: #000; border: 1px solid var(--nv-line); }
+.nv-shot figcaption { font-size: .78rem; color: var(--nv-mut); margin-top: .35rem; text-align: center; }
+.nv-shot-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width: 640px){ .nv-shot-row { grid-template-columns: 1fr; } }
+
+/* gallery: plates are clickable to open large */
+.gx .bb-tile { cursor: zoom-in; }
+.gx .bb-frame::before { content: "\2922"; position: absolute; top: .55rem; right: .6rem; z-index: 2; font-size: .82rem; color: rgba(255,255,255,.6); background: rgba(0,0,0,.42); width: 1.45rem; height: 1.45rem; border-radius: 5px; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity .18s ease; }
+.gx .bb-tile:hover .bb-frame::before { opacity: 1; }
+
+/* lightbox */
+.gx-lightbox { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; background: rgba(3,4,6,.94); padding: 2.5vmin; -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
+.gx-lightbox[hidden] { display: none; }
+.gx-lb-fig { margin: 0; max-width: 94vw; max-height: 92vh; display: flex; flex-direction: column; align-items: center; }
+.gx-lb-fig img { max-width: 94vw; max-height: 86vh; width: auto; height: auto; border-radius: 10px; background: #000; box-shadow: 0 24px 90px rgba(0,0,0,.6); }
+.gx-lb-fig figcaption { color: #e9ecef; font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: .85rem; margin-top: .75rem; text-align: center; }
+.gx-lb-close { position: fixed; top: 1.1rem; right: 1.4rem; z-index: 1001; width: 2.4rem; height: 2.4rem; border: none; border-radius: 50%; background: rgba(255,255,255,.1); color: #fff; font-size: 1.6rem; line-height: 1; cursor: pointer; }
+.gx-lb-close:hover { background: rgba(255,255,255,.2); }

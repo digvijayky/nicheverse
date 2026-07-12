@@ -87,6 +87,28 @@
 
     var active = { category: "all", site: "all", platform: "all", q: "" };
 
+    // lightbox: click a plate to open its map large
+    var lb = document.getElementById("gx-lightbox");
+    var lbImg = document.getElementById("gx-lb-img");
+    var lbCap = document.getElementById("gx-lb-cap");
+    var lbClose = document.getElementById("gx-lb-close");
+    function openLB(tile) {
+      var img = tile.querySelector("img"); if (!img || !lb) return;
+      lbImg.src = img.src; lbImg.alt = img.alt || "";
+      var t = tile.querySelector(".bb-caption b"); var s = tile.querySelector(".bb-stat");
+      lbCap.textContent = (t ? t.textContent : "") + (s ? "  ·  " + s.textContent : "");
+      lb.hidden = false; document.body.style.overflow = "hidden";
+    }
+    function closeLB() { if (!lb) return; lb.hidden = true; lbImg.src = ""; document.body.style.overflow = ""; }
+    if (lb) {
+      grid.addEventListener("click", function (e) {
+        var tile = e.target.closest(".bb-tile"); if (tile) openLB(tile);
+      });
+      lbClose.addEventListener("click", closeLB);
+      lb.addEventListener("click", function (e) { if (e.target === lb) closeLB(); });
+      document.addEventListener("keydown", function (e) { if (!lb.hidden && e.key === "Escape") closeLB(); });
+    }
+
     function tiles() { return Array.prototype.slice.call(grid.querySelectorAll(".bb-tile")); }
 
     function matches(t) {
