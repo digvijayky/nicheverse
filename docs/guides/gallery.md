@@ -18,13 +18,30 @@
 ```
 
 ```{raw} html
+<div class="bb-overview reveal">
+  <h2>Overview at a glance</h2>
+  <p class="bb-explore-lead">Every rendered dataset, one frozen model, grouped by category. Each tile is a
+  whole-section nucleus-boundary map colored by cell-type lineage.</p>
+  <figure class="bb-overview-fig">
+    <img src="../_static/gallery/overview_all.png" alt="All datasets overview collage" loading="lazy">
+    <figcaption>All datasets</figcaption>
+  </figure>
+  <div class="bb-overview-row">
+    <figure class="bb-overview-fig"><img src="../_static/gallery/overview_cancer.png" alt="Cancer datasets" loading="lazy"><figcaption>Cancer</figcaption></figure>
+    <figure class="bb-overview-fig"><img src="../_static/gallery/overview_normal.png" alt="Normal datasets" loading="lazy"><figcaption>Normal</figcaption></figure>
+  </div>
+</div>
+```
+
+```{raw} html
 <div class="bb-explore">
 
   <div class="bb-explore-header reveal">
     <h2>Explore the collection</h2>
     <p class="bb-explore-lead">The same frozen NICHEVERSE model, run across published imaging-based spatial
     transcriptomics datasets from every accessible platform (Xenium, CosMx, MERFISH, seqFISH, RIBOmap,
-    EEL-FISH) and tissue. Each map paints one dataset's cells at their nuclear centroids, colored by the
+    EEL-FISH) and tissue. Each map paints one dataset's cells as filled nucleus boundary polygons (or, where
+    segmentation boundaries are unavailable, nuclear transcripts) on a black background, colored by the
     lineage annotation of their learned cell-state code. Filter by cancer, normal, developmental, or disease,
     pick a tissue site, or search by site or cell type.</p>
   </div>

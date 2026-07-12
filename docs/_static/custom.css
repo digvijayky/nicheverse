@@ -780,3 +780,13 @@ button:focus-visible,
   background: var(--nv-alt);
 }
 .bb-tile.is-hidden { display: none; }
+
+/* gallery category-overview collages */
+.bb-overview { margin: 2rem 0 2.5rem; text-align: center; }
+.bb-overview h2 { margin-bottom: .3rem; }
+.bb-overview-fig { margin: .8rem auto; max-width: 100%; }
+.bb-overview-fig img { max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 2px 14px rgba(0,0,0,.35); background:#000; }
+.bb-overview-fig figcaption { font-size: .85rem; opacity: .7; margin-top: .25rem; }
+.bb-overview-row { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+.bb-overview-row .bb-overview-fig { flex: 1 1 340px; max-width: 48%; }
+@media (max-width: 700px){ .bb-overview-row .bb-overview-fig { max-width: 100%; } }
