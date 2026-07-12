@@ -1,23 +1,6 @@
 # Gallery
 
 ```{raw} html
-<div class="bb-marquee reveal" aria-hidden="true">
-  <div class="bb-marquee-track">
-    <img src="../_static/gallery/0069490_primary1_core15_cell.png" alt="">
-    <img src="../_static/gallery/0069490_primary1_core15_niche.png" alt="">
-    <img src="../_static/gallery/0069489_metastases_core14_cell.png" alt="">
-    <img src="../_static/gallery/0069489_metastases_core14_niche.png" alt="">
-    <img src="../_static/gallery/S20_15120_untreated_cell.png" alt="">
-    <img src="../_static/gallery/S20_15120_untreated_niche.png" alt="">
-    <img src="../_static/gallery/0069490_primary1_core15_cell.png" alt="">
-    <img src="../_static/gallery/0069489_metastases_core14_cell.png" alt="">
-    <img src="../_static/gallery/S20_15120_untreated_cell.png" alt="">
-    <img src="../_static/gallery/0069490_primary1_core15_niche.png" alt="">
-  </div>
-</div>
-```
-
-```{raw} html
 <div class="bb-overview reveal">
   <h2>Overview at a glance</h2>
   <p class="bb-explore-lead">Every rendered dataset, one frozen model, grouped by category. Each tile is a
@@ -69,13 +52,14 @@
 
     <div class="bb-viewtoggle" id="bb-viewtoggle" role="group" aria-label="Columns">
       <span class="bb-vlabel">View</span>
-      <button class="bb-view" data-cols="2" aria-label="Two columns">2</button>
-      <button class="bb-view is-active" data-cols="3" aria-label="Three columns">3</button>
+      <button class="bb-view" data-cols="1" aria-label="One column">1</button>
+      <button class="bb-view is-active" data-cols="2" aria-label="Two columns">2</button>
+      <button class="bb-view" data-cols="3" aria-label="Three columns">3</button>
       <button class="bb-view" data-cols="4" aria-label="Four columns">4</button>
     </div>
   </div>
 
-  <div class="bb-grid" id="bb-grid" data-cols="3" data-gallery-src="../_static/gallery_data.json"></div>
+  <div class="bb-grid" id="bb-grid" data-cols="2" data-gallery-src="../_static/gallery_data.json"></div>
 
   <p class="bb-explore-lead" style="margin-top:1.8rem">Each map is produced by loading the released checkpoint,
   running <code>nicheverse.predict_codes</code> on the dataset, annotating every cell-state code with a

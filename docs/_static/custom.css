@@ -518,6 +518,7 @@ table.autosummary td p { margin-bottom: 0; }
   gap: 22px;
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
+.bb-grid[data-cols="1"] { grid-template-columns: minmax(0, 820px); justify-content: center; }
 .bb-grid[data-cols="2"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .bb-grid[data-cols="3"] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .bb-grid[data-cols="4"] { grid-template-columns: repeat(4, minmax(0, 1fr)); }
@@ -532,6 +533,7 @@ table.autosummary td p { margin-bottom: 0; }
   border-radius: var(--nv-radius);
   box-shadow: var(--nv-shadow-soft);
   transition: box-shadow 0.18s ease;
+  background: #000;
 }
 .bb-tile:hover .bb-frame { box-shadow: var(--nv-shadow); }
 .bb-tile img {
