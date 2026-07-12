@@ -31,31 +31,47 @@
     return p || "Other";
   }
 
-  function card(d) {
+  function plateNo(idx) { var s = String(idx + 1); while (s.length < 3) s = "0" + s; return "PLATE " + s; }
+
+  function card(d, idx) {
     var badges =
       '<span class="bb-badge bb-cat-' + esc(d.category) + '">' + esc(d.category) + "</span>" +
       '<span class="bb-badge">' + esc(d.site) + "</span>" +
-      '<span class="bb-badge">' + esc(d.platform) + "</span>";
-    var meta =
-      fmtCells(d.n_cells) + " cells" +
-      (d.n_samples > 1 ? " · " + d.n_samples + " samples" : "") +
-      (d.n_celltypes ? " · " + d.n_celltypes + " cell types" : "");
+      '<span class="bb-badge">' + esc(platformFamily(d.platform)) + "</span>";
+    var stat = [fmtCells(d.n_cells) + " cells",
+                (d.n_celltypes ? d.n_celltypes + " cell types" : ""),
+                (d.n_samples > 1 ? d.n_samples + " samples" : "")]
+      .filter(Boolean).join("  ·  ");
     var img = d.thumb
       ? '<img src="../_static/' + esc(d.thumb) + '" alt="' + esc(d.title) + '" loading="lazy">'
-      : '<span class="bb-noimg">no preview</span>';
+      : '<span class="bb-noimg">map rendering&hellip;</span>';
     var search = [d.id, d.title, d.site, d.condition, d.organism, d.platform,
                   (d.cell_types || []).join(" ")].join(" ").toLowerCase();
     return (
       '<figure class="bb-tile" data-category="' + esc(d.category) + '" data-site="' + esc(d.site) +
       '" data-platform="' + esc(platformFamily(d.platform)) + '" data-search="' + esc(search) + '">' +
-      '<span class="bb-frame">' + img + "</span>" +
+      '<span class="bb-frame"><span class="bb-plate">' + plateNo(idx) + "</span>" + img + "</span>" +
       '<figcaption class="bb-caption">' +
       '<span class="bb-badges">' + badges + "</span>" +
       "<b>" + esc(d.title) + "</b>" +
-      '<span class="bb-sub">' + esc(d.condition || "") + "</span>" +
-      '<span class="bb-sub">' + esc(meta) + "</span>" +
+      '<span class="bb-sub">' + esc(d.condition || d.organism || "") + "</span>" +
+      '<span class="bb-stat">' + esc(stat) + "</span>" +
       "</figcaption></figure>"
     );
+  }
+
+  function updateStats(data) {
+    var set = function (id, v) { var el = document.getElementById(id); if (el) el.textContent = v; };
+    var sites = {}, plats = {}, cells = 0;
+    data.forEach(function (d) {
+      if (d.site) sites[d.site] = 1;
+      plats[platformFamily(d.platform)] = 1;
+      cells += d.n_cells || 0;
+    });
+    set("gx-n-datasets", data.length);
+    set("gx-n-sites", Object.keys(sites).length);
+    set("gx-n-plat", Object.keys(plats).length);
+    set("gx-n-cells", fmtCells(cells));
   }
 
   function init() {
@@ -88,7 +104,7 @@
         t.classList.toggle("is-hidden", !ok);
         if (ok) shown += 1;
       });
-      if (countEl) countEl.innerHTML = "<b>" + shown + "</b> " + (shown === 1 ? "dataset" : "datasets");
+      if (countEl) countEl.innerHTML = "<b>" + shown + "</b> " + (shown === 1 ? "plate" : "plates");
     }
 
     function wire() {
@@ -113,7 +129,8 @@
     }
 
     function render(data) {
-      grid.innerHTML = data.map(card).join("");
+      grid.innerHTML = data.map(function (d, i) { return card(d, i); }).join("");
+      updateStats(data);
       if (siteSel) {
         var seen = {}, sites = [];
         data.forEach(function (d) { if (!seen[d.site]) { seen[d.site] = 1; sites.push(d.site); } });
