@@ -10,6 +10,7 @@
   "n_cells": 225906,
   "n_genes": 477,
   "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 25,
   "n_niches": 11,
   "cell_types": [
@@ -40,6 +41,7 @@
   "n_cells": 40887,
   "n_genes": 319,
   "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 30,
   "n_niches": 26,
   "cell_types": [
@@ -64,6 +66,7 @@
   "n_cells": 816769,
   "n_genes": 480,
   "n_samples": 0,
+  "n_true_samples": 1,
   "n_celltypes": 13,
   "n_niches": 6,
   "cell_types": [
@@ -94,6 +97,7 @@
   "n_cells": 74132,
   "n_genes": 243,
   "n_samples": 0,
+  "n_true_samples": 1,
   "n_celltypes": 25,
   "n_niches": 8,
   "cell_types": [
@@ -122,6 +126,7 @@
   "n_cells": 152451,
   "n_genes": 18942,
   "n_samples": 0,
+  "n_true_samples": 108,
   "n_celltypes": 14,
   "n_niches": 5,
   "cell_types": [
@@ -153,6 +158,7 @@
   "n_cells": 167780,
   "n_genes": 313,
   "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 30,
   "n_niches": 32,
   "cell_types": [
@@ -181,6 +187,7 @@
   "n_cells": 699110,
   "n_genes": 5101,
   "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 31,
   "n_niches": 10,
   "cell_types": [
@@ -211,6 +218,7 @@
   "n_cells": 254480,
   "n_genes": 280,
   "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 10,
   "n_niches": 9,
   "cell_types": [
@@ -238,6 +246,7 @@
   "n_cells": 375529,
   "n_genes": 280,
   "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 10,
   "n_niches": 8,
   "cell_types": [
@@ -265,6 +274,7 @@
   "n_cells": 209467,
   "n_genes": 280,
   "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 11,
   "n_niches": 9,
   "cell_types": [
@@ -293,6 +303,7 @@
   "n_cells": 358519,
   "n_genes": 280,
   "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 11,
   "n_niches": 9,
   "cell_types": [
@@ -321,6 +332,7 @@
   "n_cells": 380739,
   "n_genes": 280,
   "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 10,
   "n_niches": 9,
   "cell_types": [
@@ -348,6 +360,7 @@
   "n_cells": 301854,
   "n_genes": 280,
   "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 11,
   "n_niches": 8,
   "cell_types": [
@@ -376,6 +389,7 @@
   "n_cells": 150145,
   "n_genes": 280,
   "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 10,
   "n_niches": 8,
   "cell_types": [
@@ -403,6 +417,7 @@
   "n_cells": 373150,
   "n_genes": 280,
   "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 10,
   "n_niches": 6,
   "cell_types": [
@@ -430,6 +445,7 @@
   "n_cells": 308531,
   "n_genes": 280,
   "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 11,
   "n_niches": 7,
   "cell_types": [
@@ -458,6 +474,7 @@
   "n_cells": 201955,
   "n_genes": 280,
   "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 11,
   "n_niches": 8,
   "cell_types": [
@@ -486,6 +503,7 @@
   "n_cells": 335709,
   "n_genes": 280,
   "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 10,
   "n_niches": 8,
   "cell_types": [
@@ -513,6 +531,7 @@
   "n_cells": 192898,
   "n_genes": 280,
   "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 10,
   "n_niches": 7,
   "cell_types": [
@@ -540,6 +559,7 @@
   "n_cells": 574852,
   "n_genes": 280,
   "n_samples": 0,
+  "n_true_samples": 1,
   "n_celltypes": 96,
   "n_niches": 30,
   "cell_types": [
@@ -561,7 +581,8 @@
   "condition": "Invasive ductal carcinoma",
   "n_cells": 576963,
   "n_genes": 380,
-  "n_samples": 0,
+  "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 10,
   "n_niches": 7,
   "cell_types": [
@@ -576,7 +597,7 @@
    "Pericyte/Mural",
    "T/NK"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/pub_breast_idc_addon.png"
  },
  {
   "id": "pub_breast_idc_big1",
@@ -588,7 +609,8 @@
   "condition": "Invasive ductal carcinoma",
   "n_cells": 892966,
   "n_genes": 280,
-  "n_samples": 0,
+  "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 9,
   "n_niches": 6,
   "cell_types": [
@@ -602,7 +624,7 @@
    "Pericyte/Mural",
    "T/NK"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/pub_breast_idc_big1.png"
  },
  {
   "id": "pub_breast_idc_big2",
@@ -614,7 +636,8 @@
   "condition": "Invasive ductal carcinoma",
   "n_cells": 885523,
   "n_genes": 280,
-  "n_samples": 0,
+  "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 9,
   "n_niches": 7,
   "cell_types": [
@@ -628,7 +651,7 @@
    "Pericyte/Mural",
    "T/NK"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/pub_breast_idc_big2.png"
  },
  {
   "id": "pub_breast_ilc",
@@ -641,6 +664,7 @@
   "n_cells": 356746,
   "n_genes": 280,
   "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 45,
   "n_niches": 32,
   "cell_types": [
@@ -669,7 +693,8 @@
   "condition": "Invasive lobular carcinoma",
   "n_cells": 365604,
   "n_genes": 380,
-  "n_samples": 0,
+  "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 10,
   "n_niches": 5,
   "cell_types": [
@@ -684,7 +709,7 @@
    "Pericyte/Mural",
    "T/NK"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/pub_breast_ilc_addon.png"
  },
  {
   "id": "pub_breast_rep2",
@@ -697,6 +722,7 @@
   "n_cells": 118752,
   "n_genes": 313,
   "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 41,
   "n_niches": 32,
   "cell_types": [
@@ -725,6 +751,7 @@
   "n_cells": 840387,
   "n_genes": 5101,
   "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 72,
   "n_niches": 32,
   "cell_types": [
@@ -748,6 +775,7 @@
   "n_cells": 587115,
   "n_genes": 425,
   "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 127,
   "n_niches": 32,
   "cell_types": [
@@ -769,6 +797,7 @@
   "n_cells": 647524,
   "n_genes": 325,
   "n_samples": 0,
+  "n_true_samples": 1,
   "n_celltypes": 10,
   "n_niches": 4,
   "cell_types": [
@@ -796,6 +825,7 @@
   "n_cells": 388175,
   "n_genes": 480,
   "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 54,
   "n_niches": 31,
   "cell_types": [
@@ -826,6 +856,7 @@
   "n_cells": 436787,
   "n_genes": 20378,
   "n_samples": 0,
+  "n_true_samples": 393,
   "n_celltypes": 67,
   "n_niches": 28,
   "cell_types": [
@@ -854,6 +885,7 @@
   "n_cells": 56510,
   "n_genes": 377,
   "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 24,
   "n_niches": 6,
   "cell_types": [
@@ -882,6 +914,7 @@
   "n_cells": 500000,
   "n_genes": 366,
   "n_samples": 0,
+  "n_true_samples": 114,
   "n_celltypes": 253,
   "n_niches": 31,
   "cell_types": [
@@ -909,6 +942,7 @@
   "n_cells": 465534,
   "n_genes": 405,
   "n_samples": 0,
+  "n_true_samples": 1,
   "n_celltypes": 195,
   "n_niches": 32,
   "cell_types": [
@@ -936,6 +970,7 @@
   "n_cells": 369399,
   "n_genes": 400,
   "n_samples": 0,
+  "n_true_samples": 1,
   "n_celltypes": 8,
   "n_niches": 6,
   "cell_types": [
@@ -961,6 +996,7 @@
   "n_cells": 283525,
   "n_genes": 400,
   "n_samples": 0,
+  "n_true_samples": 1,
   "n_celltypes": 10,
   "n_niches": 6,
   "cell_types": [
@@ -988,6 +1024,7 @@
   "n_cells": 61404,
   "n_genes": 400,
   "n_samples": 0,
+  "n_true_samples": 1,
   "n_celltypes": 240,
   "n_niches": 31,
   "cell_types": [
@@ -1013,6 +1050,7 @@
   "n_cells": 162628,
   "n_genes": 474,
   "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 33,
   "n_niches": 23,
   "cell_types": [
@@ -1034,6 +1072,7 @@
   "n_cells": 278328,
   "n_genes": 5001,
   "n_samples": 0,
+  "n_true_samples": 1,
   "n_celltypes": 16,
   "n_niches": 11,
   "cell_types": [
@@ -1066,7 +1105,8 @@
   "condition": "Lung cancer",
   "n_cells": 161000,
   "n_genes": 480,
-  "n_samples": 0,
+  "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 13,
   "n_niches": 9,
   "cell_types": [
@@ -1084,7 +1124,7 @@
    "Pericyte/Mural",
    "T/NK"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/pub_lung_addon.png"
  },
  {
   "id": "pub_lung_ca_v3",
@@ -1096,7 +1136,8 @@
   "condition": "Lung cancer",
   "n_cells": 278659,
   "n_genes": 289,
-  "n_samples": 0,
+  "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 11,
   "n_niches": 9,
   "cell_types": [
@@ -1112,7 +1153,7 @@
    "Pericyte/Mural",
    "T/NK"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/pub_lung_ca_v3.png"
  },
  {
   "id": "pub_lung_cancer",
@@ -1125,6 +1166,7 @@
   "n_cells": 162254,
   "n_genes": 377,
   "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 64,
   "n_niches": 30,
   "cell_types": [
@@ -1148,6 +1190,7 @@
   "n_cells": 150365,
   "n_genes": 377,
   "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 36,
   "n_niches": 32,
   "cell_types": [
@@ -1169,7 +1212,8 @@
   "condition": "Lung cancer",
   "n_cells": 531165,
   "n_genes": 392,
-  "n_samples": 0,
+  "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 14,
   "n_niches": 9,
   "cell_types": [
@@ -1188,7 +1232,7 @@
    "Pericyte/Mural",
    "T/NK"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/pub_lung_preview_ca.png"
  },
  {
   "id": "pub_nsclc",
@@ -1201,6 +1245,7 @@
   "n_cells": 91972,
   "n_genes": 960,
   "n_samples": 0,
+  "n_true_samples": 1,
   "n_celltypes": 38,
   "n_niches": 32,
   "cell_types": [
@@ -1227,6 +1272,7 @@
   "n_cells": 407124,
   "n_genes": 5101,
   "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 140,
   "n_niches": 31,
   "cell_types": [
@@ -1255,7 +1301,8 @@
   "condition": "Ovarian cancer",
   "n_cells": 247636,
   "n_genes": 480,
-  "n_samples": 0,
+  "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 13,
   "n_niches": 7,
   "cell_types": [
@@ -1273,7 +1320,7 @@
    "Pericyte/Mural",
    "T/NK"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/pub_ovary_addon.png"
  },
  {
   "id": "pub_ovary_cancer_ff_v1",
@@ -1285,7 +1332,8 @@
   "condition": "Ovarian carcinoma (FF)",
   "n_cells": 205082,
   "n_genes": 477,
-  "n_samples": 0,
+  "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 13,
   "n_niches": 7,
   "cell_types": [
@@ -1303,7 +1351,7 @@
    "Pericyte/Mural",
    "T/NK"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/pub_ovary_cancer_ff_v1.png"
  },
  {
   "id": "pub_ovary_ff",
@@ -1316,6 +1364,7 @@
   "n_cells": 200900,
   "n_genes": 5001,
   "n_samples": 0,
+  "n_true_samples": 1,
   "n_celltypes": 17,
   "n_niches": 3,
   "cell_types": [
@@ -1350,6 +1399,7 @@
   "n_cells": 190965,
   "n_genes": 474,
   "n_samples": 0,
+  "n_true_samples": 1,
   "n_celltypes": 14,
   "n_niches": 9,
   "cell_types": [
@@ -1381,6 +1431,7 @@
   "n_cells": 190965,
   "n_genes": 474,
   "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 224,
   "n_niches": 31,
   "cell_types": [
@@ -1409,6 +1460,7 @@
   "n_cells": 140702,
   "n_genes": 377,
   "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 145,
   "n_niches": 29,
   "cell_types": [
@@ -1435,7 +1487,8 @@
   "condition": "Ductal adenocarcinoma",
   "n_cells": 235099,
   "n_genes": 380,
-  "n_samples": 0,
+  "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 11,
   "n_niches": 9,
   "cell_types": [
@@ -1451,7 +1504,7 @@
    "Pericyte/Mural",
    "T/NK"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/pub_pdac_io.png"
  },
  {
   "id": "pub_skin_melanoma",
@@ -1464,6 +1517,7 @@
   "n_cells": 106980,
   "n_genes": 282,
   "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 84,
   "n_niches": 29,
   "cell_types": [
@@ -1487,6 +1541,7 @@
   "n_cells": 40864,
   "n_genes": 132,
   "n_samples": 0,
+  "n_true_samples": 1,
   "n_celltypes": 68,
   "n_niches": 29,
   "cell_types": [
@@ -1513,6 +1568,7 @@
   "n_cells": 1047267,
   "n_genes": 246,
   "n_samples": 0,
+  "n_true_samples": 3,
   "n_celltypes": 10,
   "n_niches": 4,
   "cell_types": [
@@ -1540,6 +1596,7 @@
   "n_cells": 175167,
   "n_genes": 258,
   "n_samples": 0,
+  "n_true_samples": 1,
   "n_celltypes": 10,
   "n_niches": 6,
   "cell_types": [
@@ -1567,6 +1624,7 @@
   "n_cells": 376199,
   "n_genes": 258,
   "n_samples": 0,
+  "n_true_samples": 1,
   "n_celltypes": 10,
   "n_niches": 7,
   "cell_types": [
@@ -1594,6 +1652,7 @@
   "n_cells": 57536,
   "n_genes": 351,
   "n_samples": 0,
+  "n_true_samples": 3,
   "n_celltypes": 75,
   "n_niches": 32,
   "cell_types": [
@@ -1624,6 +1683,7 @@
   "n_cells": 1355564,
   "n_genes": 379,
   "n_samples": 0,
+  "n_true_samples": 1,
   "n_celltypes": 241,
   "n_niches": 31,
   "cell_types": [
@@ -1659,6 +1719,7 @@
   "n_cells": 44955,
   "n_genes": 354,
   "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 81,
   "n_niches": 31,
   "cell_types": [
@@ -1685,7 +1746,8 @@
   "condition": "Alzheimer model (TgCRND8, 18mo)",
   "n_cells": 62268,
   "n_genes": 347,
-  "n_samples": 0,
+  "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 8,
   "n_niches": 7,
   "cell_types": [
@@ -1698,7 +1760,7 @@
    "Pericyte/Mural",
    "T/NK"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/pub_tgcrnd8_18m.png"
  },
  {
   "id": "pub_tgcrnd8_3m",
@@ -1710,7 +1772,8 @@
   "condition": "Alzheimer model (TgCRND8, 3mo)",
   "n_cells": 53913,
   "n_genes": 347,
-  "n_samples": 0,
+  "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 9,
   "n_niches": 6,
   "cell_types": [
@@ -1724,7 +1787,7 @@
    "Pericyte/Mural",
    "T/NK"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/pub_tgcrnd8_3m.png"
  },
  {
   "id": "pub_tgcrnd8_6m",
@@ -1736,7 +1799,8 @@
   "condition": "Alzheimer model (TgCRND8, 6mo)",
   "n_cells": 58682,
   "n_genes": 347,
-  "n_samples": 0,
+  "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 9,
   "n_niches": 7,
   "cell_types": [
@@ -1750,7 +1814,7 @@
    "Pericyte/Mural",
    "T/NK"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/pub_tgcrnd8_6m.png"
  },
  {
   "id": "cosmx_kidney_injury",
@@ -1763,6 +1827,7 @@
   "n_cells": 558601,
   "n_genes": 1001,
   "n_samples": 0,
+  "n_true_samples": 2,
   "n_celltypes": 35,
   "n_niches": 32,
   "cell_types": [
@@ -1790,6 +1855,7 @@
   "n_cells": 33801,
   "n_genes": 477,
   "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 162,
   "n_niches": 28,
   "cell_types": [
@@ -1821,7 +1887,8 @@
   "condition": "Femur (EDTA/PFA decal)",
   "n_cells": 247876,
   "n_genes": 479,
-  "n_samples": 0,
+  "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 16,
   "n_niches": 10,
   "cell_types": [
@@ -1842,7 +1909,7 @@
    "Pericyte/Mural",
    "T/NK"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/pub_mfemur_edtapfa.png"
  },
  {
   "id": "pub_mfemur_formic",
@@ -1854,7 +1921,8 @@
   "condition": "Femur (formic decal)",
   "n_cells": 253560,
   "n_genes": 479,
-  "n_samples": 0,
+  "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 16,
   "n_niches": 10,
   "cell_types": [
@@ -1875,7 +1943,7 @@
    "Pericyte/Mural",
    "T/NK"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/pub_mfemur_formic.png"
  },
  {
   "id": "pub_mouse_femur",
@@ -1888,6 +1956,7 @@
   "n_cells": 348141,
   "n_genes": 479,
   "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 56,
   "n_niches": 23,
   "cell_types": [
@@ -1919,6 +1988,7 @@
   "n_cells": 84518,
   "n_genes": 477,
   "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 27,
   "n_niches": 10,
   "cell_types": [
@@ -1947,6 +2017,7 @@
   "n_cells": 48556,
   "n_genes": 950,
   "n_samples": 0,
+  "n_true_samples": 130,
   "n_celltypes": 14,
   "n_niches": 7,
   "cell_types": [
@@ -1978,6 +2049,7 @@
   "n_cells": 44679,
   "n_genes": 950,
   "n_samples": 0,
+  "n_true_samples": 66,
   "n_celltypes": 15,
   "n_niches": 8,
   "cell_types": [
@@ -2010,6 +2082,7 @@
   "n_cells": 131568,
   "n_genes": 18935,
   "n_samples": 0,
+  "n_true_samples": 360,
   "n_celltypes": 17,
   "n_niches": 8,
   "cell_types": [
@@ -2044,6 +2117,7 @@
   "n_cells": 24406,
   "n_genes": 319,
   "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 30,
   "n_niches": 28,
   "cell_types": [
@@ -2071,6 +2145,7 @@
   "n_cells": 127591,
   "n_genes": 440,
   "n_samples": 0,
+  "n_true_samples": 1,
   "n_celltypes": 60,
   "n_niches": 32,
   "cell_types": [
@@ -2098,6 +2173,7 @@
   "n_cells": 162033,
   "n_genes": 248,
   "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 55,
   "n_niches": 16,
   "cell_types": [
@@ -2125,7 +2201,8 @@
   "condition": "Brain",
   "n_cells": 63173,
   "n_genes": 5006,
-  "n_samples": 0,
+  "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 17,
   "n_niches": 11,
   "cell_types": [
@@ -2147,7 +2224,7 @@
    "Pericyte/Mural",
    "T/NK"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/pub_mousebrain_5k.png"
  },
  {
   "id": "pub_mousebrain_cor",
@@ -2160,6 +2237,7 @@
   "n_cells": 130870,
   "n_genes": 248,
   "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 65,
   "n_niches": 32,
   "cell_types": [
@@ -2189,6 +2267,7 @@
   "n_cells": 154654,
   "n_genes": 248,
   "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 47,
   "n_niches": 32,
   "cell_types": [
@@ -2211,6 +2290,7 @@
   "n_cells": 158047,
   "n_genes": 248,
   "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 36,
   "n_niches": 32,
   "cell_types": [
@@ -2233,6 +2313,7 @@
   "n_cells": 119173,
   "n_genes": 5413,
   "n_samples": 0,
+  "n_true_samples": 10,
   "n_celltypes": 14,
   "n_niches": 16,
   "cell_types": [
@@ -2259,7 +2340,8 @@
   "condition": "Wildtype brain (13mo)",
   "n_cells": 59935,
   "n_genes": 347,
-  "n_samples": 0,
+  "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 8,
   "n_niches": 7,
   "cell_types": [
@@ -2272,7 +2354,7 @@
    "Pericyte/Mural",
    "T/NK"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/pub_wt_13m.png"
  },
  {
   "id": "pub_wt_3m",
@@ -2284,7 +2366,8 @@
   "condition": "Wildtype brain (3mo)",
   "n_cells": 58231,
   "n_genes": 347,
-  "n_samples": 0,
+  "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 9,
   "n_niches": 6,
   "cell_types": [
@@ -2298,7 +2381,7 @@
    "Pericyte/Mural",
    "T/NK"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/pub_wt_3m.png"
  },
  {
   "id": "pub_wt_6m",
@@ -2310,7 +2393,8 @@
   "condition": "Wildtype brain (6mo)",
   "n_cells": 58685,
   "n_genes": 347,
-  "n_samples": 0,
+  "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 8,
   "n_niches": 6,
   "cell_types": [
@@ -2323,7 +2407,7 @@
    "Pericyte/Mural",
    "T/NK"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/pub_wt_6m.png"
  },
  {
   "id": "pub_colon_normal",
@@ -2336,6 +2420,7 @@
   "n_cells": 275822,
   "n_genes": 425,
   "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 47,
   "n_niches": 31,
   "cell_types": [
@@ -2357,7 +2442,8 @@
   "condition": "Colon",
   "n_cells": 270984,
   "n_genes": 325,
-  "n_samples": 0,
+  "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 11,
   "n_niches": 6,
   "cell_types": [
@@ -2373,7 +2459,7 @@
    "Neuron",
    "T/NK"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/pub_colon_normal_base.png"
  },
  {
   "id": "pub_mouse_colon",
@@ -2385,7 +2471,8 @@
   "condition": "Colon",
   "n_cells": 219797,
   "n_genes": 379,
-  "n_samples": 0,
+  "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 64,
   "n_niches": 25,
   "cell_types": [
@@ -2399,7 +2486,7 @@
    "Neural",
    "Proliferating"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/pub_mouse_colon.png"
  },
  {
   "id": "pub_heart",
@@ -2412,6 +2499,7 @@
   "n_cells": 26366,
   "n_genes": 377,
   "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 14,
   "n_niches": 13,
   "cell_types": [
@@ -2434,6 +2522,7 @@
   "n_cells": 1027848,
   "n_genes": 156,
   "n_samples": 0,
+  "n_true_samples": 36,
   "n_celltypes": 68,
   "n_niches": 18,
   "cell_types": [
@@ -2461,6 +2550,7 @@
   "n_cells": 97560,
   "n_genes": 377,
   "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 144,
   "n_niches": 30,
   "cell_types": [
@@ -2488,6 +2578,7 @@
   "n_cells": 239271,
   "n_genes": 377,
   "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 39,
   "n_niches": 24,
   "cell_types": [
@@ -2511,6 +2602,7 @@
   "n_cells": 377985,
   "n_genes": 377,
   "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 64,
   "n_niches": 32,
   "cell_types": [
@@ -2537,6 +2629,7 @@
   "n_cells": 708983,
   "n_genes": 4624,
   "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 29,
   "n_niches": 12,
   "cell_types": [
@@ -2561,6 +2654,7 @@
   "n_cells": 48944,
   "n_genes": 21731,
   "n_samples": 0,
+  "n_true_samples": 18,
   "n_celltypes": 37,
   "n_niches": 7,
   "cell_types": [
@@ -2586,6 +2680,7 @@
   "n_cells": 48944,
   "n_genes": 18946,
   "n_samples": 0,
+  "n_true_samples": 18,
   "n_celltypes": 16,
   "n_niches": 2,
   "cell_types": [
@@ -2618,7 +2713,8 @@
   "condition": "Pancreas",
   "n_cells": 103901,
   "n_genes": 377,
-  "n_samples": 0,
+  "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 13,
   "n_niches": 9,
   "cell_types": [
@@ -2636,7 +2732,7 @@
    "Pericyte/Mural",
    "T/NK"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/pub_pancreas_normal.png"
  },
  {
   "id": "pub_skin_normal",
@@ -2649,6 +2745,7 @@
   "n_cells": 68476,
   "n_genes": 377,
   "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 33,
   "n_niches": 30,
   "cell_types": [
@@ -2679,6 +2776,7 @@
   "n_cells": 90106,
   "n_genes": 377,
   "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 38,
   "n_niches": 16,
   "cell_types": [
@@ -2704,6 +2802,7 @@
   "n_cells": 1349620,
   "n_genes": 377,
   "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 222,
   "n_niches": 32,
   "cell_types": [
@@ -2746,6 +2845,7 @@
   "n_cells": 864388,
   "n_genes": 377,
   "n_samples": 1,
+  "n_true_samples": 1,
   "n_celltypes": 188,
   "n_niches": 30,
   "cell_types": [
@@ -2778,6 +2878,7 @@
   "n_cells": 3938808,
   "n_genes": 500,
   "n_samples": 0,
+  "n_true_samples": 59,
   "n_celltypes": 114,
   "n_niches": 32,
   "cell_types": [
