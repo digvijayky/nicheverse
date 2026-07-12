@@ -16,6 +16,7 @@ extensions = [
     "myst_nb",
     "sphinx_copybutton",
     "sphinx.ext.autodoc",
+    "sphinx.ext.mathjax",
     "sphinx.ext.intersphinx",
     "sphinx.ext.autosummary",
     "sphinx.ext.napoleon",

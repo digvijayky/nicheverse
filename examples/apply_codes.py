@@ -10,6 +10,12 @@ sample with an existing codebook.
 
 The neighborhood-graph arguments passed to predict_codes MUST match the ones
 used at training time so the neighborhood codes stay comparable.
+
+The graph settings, encoder, and seed below are the b32k reference defaults
+(spatial_graph='knn_radius' at radius=50 um, k_neighbors=20, weighted_mean,
+encoder_type='mlp_deep', seed=9). Only num_epochs (300 -> 20) and batch_size
+(32768 -> 2048) are shrunk from the b32k defaults so the demo runs quickly on the
+tiny bundled core.
 """
 from pathlib import Path
 
@@ -43,7 +49,8 @@ def main() -> None:
         cell_num_embeddings=256,
         neighborhood_num_embeddings=32,
     )
-    tc = TrainConfig(num_epochs=20, batch_size=2048, save_best=False, seed=49, **GRAPH)
+    # b32k defaults except num_epochs (300 -> 20) and batch_size (32768 -> 2048), shrunk for the demo.
+    tc = TrainConfig(num_epochs=20, batch_size=2048, save_best=False, seed=9, **GRAPH)
     train_model(train_ad, CKPT, model_config=mc, train_config=tc, sample_col="sample_id")
 
     # apply the trained codebook to the held-out cells (no retraining)

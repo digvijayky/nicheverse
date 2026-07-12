@@ -243,11 +243,11 @@ class ProjectContext:
         Omits empty fields, truncates long lists gracefully, and stays well under
         ~1500 chars for modest inputs. Uses ``label: value`` lines and numbered items
         (no markdown ``-`` bullets). The rendered block is guaranteed free of em-dashes
-        and of leading ``- ``/``* `` bullet markers even when user-supplied field values
-        (names, markers, notes, references) contain them: :func:`_clean` rewrites those
-        characters so the block always complies with the repo's prose rules. Stored field
-        values are never mutated (only the rendered copy is), so (de)serialization
-        roundtrips are unaffected.
+        and of leading markdown bullet markers (``-``, ``*``, ``+`` followed by a space)
+        even when user-supplied field values (names, markers, notes, references) contain
+        them: :func:`_clean` rewrites those characters so the block always complies with
+        the repo's prose rules. Stored field values are never mutated (only the rendered
+        copy is), so (de)serialization roundtrips are unaffected.
         """
         lines: list[str] = ["PROJECT CONTEXT"]
 
