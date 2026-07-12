@@ -178,6 +178,28 @@
     }
   }
 
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
-  else init();
+  // homepage live counter: datasets / cells / tissues / platforms from the catalogue
+  function initHomeStats() {
+    var box = document.getElementById("nv-homestats");
+    if (!box) return;
+    var src = box.getAttribute("data-src");
+    if (!src) return;
+    fetch(src).then(function (r) { return r.json(); }).then(function (data) {
+      var sites = {}, plats = {}, cells = 0;
+      data.forEach(function (d) {
+        if (d.site && d.site !== "Unknown") sites[d.site] = 1;
+        plats[platformFamily(d.platform)] = 1;
+        cells += d.n_cells || 0;
+      });
+      var set = function (id, v) { var el = document.getElementById(id); if (el) el.textContent = v; };
+      set("nv-hs-datasets", data.length);
+      set("nv-hs-cells", fmtCells(cells));
+      set("nv-hs-sites", Object.keys(sites).length);
+      set("nv-hs-plat", Object.keys(plats).length);
+    }).catch(function () {});
+  }
+
+  function boot() { init(); initHomeStats(); }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
+  else boot();
 })();
