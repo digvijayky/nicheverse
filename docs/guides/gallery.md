@@ -46,6 +46,10 @@
       <option value="all">All sites</option>
     </select>
 
+    <select class="bb-select" id="bb-platform" aria-label="Filter by platform">
+      <option value="all">All platforms</option>
+    </select>
+
     <div class="bb-viewtoggle" id="bb-viewtoggle" role="group" aria-label="Columns">
       <span class="bb-vlabel">View</span>
       <button class="bb-view" data-cols="2" aria-label="Two columns">2</button>

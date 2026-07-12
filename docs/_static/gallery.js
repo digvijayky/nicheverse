@@ -17,6 +17,20 @@
     return String(n);
   }
 
+  // collapse the many platform strings into a filterable family (Xenium / CosMx / MERFISH / ...)
+  function platformFamily(p) {
+    var s = String(p || "").toLowerCase();
+    if (s.indexOf("xenium") !== -1) return "Xenium";
+    if (s.indexOf("cosmx") !== -1) return "CosMx";
+    if (s.indexOf("merfish") !== -1) return "MERFISH";
+    if (s.indexOf("seqfish") !== -1) return "seqFISH";
+    if (s.indexOf("ribomap") !== -1) return "RIBOmap";
+    if (s.indexOf("eel") !== -1) return "EEL-FISH";
+    if (s.indexOf("starmap") !== -1) return "STARmap";
+    if (s.indexOf("osmfish") !== -1) return "osmFISH";
+    return p || "Other";
+  }
+
   function card(d) {
     var badges =
       '<span class="bb-badge bb-cat-' + esc(d.category) + '">' + esc(d.category) + "</span>" +
@@ -33,7 +47,7 @@
                   (d.cell_types || []).join(" ")].join(" ").toLowerCase();
     return (
       '<figure class="bb-tile" data-category="' + esc(d.category) + '" data-site="' + esc(d.site) +
-      '" data-search="' + esc(search) + '">' +
+      '" data-platform="' + esc(platformFamily(d.platform)) + '" data-search="' + esc(search) + '">' +
       '<span class="bb-frame">' + img + "</span>" +
       '<figcaption class="bb-caption">' +
       '<span class="bb-badges">' + badges + "</span>" +
@@ -50,17 +64,19 @@
     var src = grid.getAttribute("data-gallery-src");
     var chipBox = document.getElementById("bb-chips");
     var siteSel = document.getElementById("bb-site");
+    var platSel = document.getElementById("bb-platform");
     var searchEl = document.getElementById("bb-search");
     var viewBox = document.getElementById("bb-viewtoggle");
     var countEl = document.getElementById("bb-count");
 
-    var active = { category: "all", site: "all", q: "" };
+    var active = { category: "all", site: "all", platform: "all", q: "" };
 
     function tiles() { return Array.prototype.slice.call(grid.querySelectorAll(".bb-tile")); }
 
     function matches(t) {
       if (active.category !== "all" && t.getAttribute("data-category") !== active.category) return false;
       if (active.site !== "all" && t.getAttribute("data-site") !== active.site) return false;
+      if (active.platform !== "all" && t.getAttribute("data-platform") !== active.platform) return false;
       if (active.q && t.getAttribute("data-search").indexOf(active.q) === -1) return false;
       return true;
     }
@@ -85,6 +101,7 @@
         });
       }
       if (siteSel) siteSel.addEventListener("change", function () { active.site = siteSel.value; apply(); });
+      if (platSel) platSel.addEventListener("change", function () { active.platform = platSel.value; apply(); });
       if (searchEl) searchEl.addEventListener("input", function () { active.q = searchEl.value.trim().toLowerCase(); apply(); });
       if (viewBox) {
         viewBox.addEventListener("click", function (e) {
@@ -103,6 +120,13 @@
         sites.sort();
         siteSel.innerHTML = '<option value="all">All sites</option>' +
           sites.map(function (s) { return '<option value="' + esc(s) + '">' + esc(s) + "</option>"; }).join("");
+      }
+      if (platSel) {
+        var pseen = {}, plats = [];
+        data.forEach(function (d) { var f = platformFamily(d.platform); if (!pseen[f]) { pseen[f] = 1; plats.push(f); } });
+        plats.sort();
+        platSel.innerHTML = '<option value="all">All platforms</option>' +
+          plats.map(function (p) { return '<option value="' + esc(p) + '">' + esc(p) + "</option>"; }).join("");
       }
       wire();
       apply();

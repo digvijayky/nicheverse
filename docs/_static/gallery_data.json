@@ -1,5 +1,35 @@
 [
  {
+  "id": "pub_bonemarrow_all",
+  "title": "Bonemarrow All",
+  "category": "Cancer",
+  "site": "Bone marrow",
+  "organism": "Human",
+  "platform": "Xenium",
+  "condition": "Acute lymphoid leukemia",
+  "n_cells": 225906,
+  "n_genes": 477,
+  "n_samples": 1,
+  "n_celltypes": 25,
+  "n_niches": 11,
+  "cell_types": [
+   "Ambiguous",
+   "Bcell",
+   "Blast",
+   "Bone",
+   "Endothelial",
+   "Erythroid",
+   "HSPC",
+   "Lymphoid",
+   "Mast",
+   "Myeloid",
+   "Plasma",
+   "Proliferating",
+   "Stroma"
+  ],
+  "thumb": "gallery/sweep/pub_bonemarrow_all.png"
+ },
+ {
   "id": "pub_brain_gbm",
   "title": "Brain Gbm",
   "category": "Cancer",
@@ -22,6 +52,34 @@
    "Vascular / stroma"
   ],
   "thumb": "gallery/sweep/pub_brain_gbm.png"
+ },
+ {
+  "id": "xenium_melanoma_brainmet",
+  "title": "Xenium Melanoma Brainmet",
+  "category": "Cancer",
+  "site": "Brain",
+  "organism": "Mouse",
+  "platform": "Xenium",
+  "condition": "Melanoma brain metastasis (model)",
+  "n_cells": 74132,
+  "n_genes": 243,
+  "n_samples": 0,
+  "n_celltypes": 25,
+  "n_niches": 8,
+  "cell_types": [
+   "Ambiguous",
+   "Astrocyte",
+   "Endothelial",
+   "Fibroblast",
+   "Mural",
+   "Myeloid",
+   "Neuron",
+   "OPC",
+   "Oligodendrocyte",
+   "Proliferating",
+   "Tumor"
+  ],
+  "thumb": ""
  },
  {
   "id": "pub_breast",
@@ -91,7 +149,7 @@
   "condition": "Invasive ductal carcinoma",
   "n_cells": 574852,
   "n_genes": 280,
-  "n_samples": 1,
+  "n_samples": 0,
   "n_celltypes": 96,
   "n_niches": 30,
   "cell_types": [
@@ -101,7 +159,7 @@
    "Perivascular",
    "Stromal"
   ],
-  "thumb": "gallery/sweep/pub_breast_idc.png"
+  "thumb": ""
  },
  {
   "id": "pub_breast_ilc",
@@ -214,7 +272,7 @@
   "condition": "Colorectal cancer",
   "n_cells": 388175,
   "n_genes": 480,
-  "n_samples": 1,
+  "n_samples": 0,
   "n_celltypes": 54,
   "n_niches": 31,
   "cell_types": [
@@ -232,7 +290,7 @@
    "T-NK",
    "Tumor"
   ],
-  "thumb": "gallery/sweep/pub_colorectal.png"
+  "thumb": ""
  },
  {
   "id": "cosmx_kidney",
@@ -244,7 +302,7 @@
   "condition": "Clear cell RCC",
   "n_cells": 436787,
   "n_genes": 20378,
-  "n_samples": 1,
+  "n_samples": 0,
   "n_celltypes": 67,
   "n_niches": 28,
   "cell_types": [
@@ -260,7 +318,35 @@
    "T-NK",
    "Tumor"
   ],
-  "thumb": "gallery/sweep/cosmx_kidney.png"
+  "thumb": ""
+ },
+ {
+  "id": "pub_kidney_cancer",
+  "title": "Kidney Cancer",
+  "category": "Cancer",
+  "site": "Kidney",
+  "organism": "Human",
+  "platform": "Xenium",
+  "condition": "Kidney cancer",
+  "n_cells": 56510,
+  "n_genes": 377,
+  "n_samples": 1,
+  "n_celltypes": 24,
+  "n_niches": 6,
+  "cell_types": [
+   "Ambiguous",
+   "Endothelial",
+   "Epithelial",
+   "Fibroblast",
+   "Lymphoid",
+   "Mast",
+   "Mural",
+   "Myeloid",
+   "Plasma",
+   "Proliferating",
+   "Tumor"
+  ],
+  "thumb": "gallery/sweep/pub_kidney_cancer.png"
  },
  {
   "id": "rcc_patient_flex",
@@ -272,7 +358,7 @@
   "condition": "Clear cell RCC",
   "n_cells": 500000,
   "n_genes": 366,
-  "n_samples": 114,
+  "n_samples": 0,
   "n_celltypes": 253,
   "n_niches": 31,
   "cell_types": [
@@ -287,7 +373,7 @@
    "T-NK",
    "Tumor"
   ],
-  "thumb": "gallery/sweep/rcc_patient_flex.png"
+  "thumb": ""
  },
  {
   "id": "xenium_gp_rcc",
@@ -299,7 +385,7 @@
   "condition": "RCC",
   "n_cells": 465534,
   "n_genes": 405,
-  "n_samples": 1,
+  "n_samples": 0,
   "n_celltypes": 195,
   "n_niches": 32,
   "cell_types": [
@@ -314,7 +400,32 @@
    "T-NK",
    "Tumor"
   ],
-  "thumb": "gallery/sweep/xenium_gp_rcc.png"
+  "thumb": ""
+ },
+ {
+  "id": "merfish_hcc_1017",
+  "title": "Merfish Hcc 1017",
+  "category": "Cancer",
+  "site": "Liver",
+  "organism": "Human",
+  "platform": "MERFISH",
+  "condition": "Hepatocellular carcinoma",
+  "n_cells": 61404,
+  "n_genes": 400,
+  "n_samples": 0,
+  "n_celltypes": 240,
+  "n_niches": 31,
+  "cell_types": [
+   "Ambiguous",
+   "Endothelial",
+   "Epithelial",
+   "Fibroblast",
+   "Lymphoid",
+   "Myeloid",
+   "Plasma",
+   "Proliferating"
+  ],
+  "thumb": ""
  },
  {
   "id": "pub_liver_hcc",
@@ -392,7 +503,7 @@
   "condition": "NSCLC (squamous)",
   "n_cells": 91972,
   "n_genes": 960,
-  "n_samples": 1,
+  "n_samples": 0,
   "n_celltypes": 38,
   "n_niches": 32,
   "cell_types": [
@@ -406,7 +517,7 @@
    "T-NK",
    "Tumor"
   ],
-  "thumb": "gallery/sweep/pub_nsclc.png"
+  "thumb": ""
  },
  {
   "id": "pub_ovary",
@@ -475,7 +586,7 @@
   "condition": "PDAC",
   "n_cells": 140702,
   "n_genes": 377,
-  "n_samples": 1,
+  "n_samples": 0,
   "n_celltypes": 145,
   "n_niches": 29,
   "cell_types": [
@@ -490,7 +601,7 @@
    "T-NK",
    "Tumor-ductal"
   ],
-  "thumb": "gallery/sweep/pub_pdac.png"
+  "thumb": ""
  },
  {
   "id": "pub_skin_melanoma",
@@ -525,7 +636,7 @@
   "condition": "Hematopoiesis",
   "n_cells": 40864,
   "n_genes": 132,
-  "n_samples": 1,
+  "n_samples": 0,
   "n_celltypes": 68,
   "n_niches": 29,
   "cell_types": [
@@ -539,7 +650,7 @@
    "Proliferating",
    "Stroma-niche"
   ],
-  "thumb": "gallery/sweep/merfish_mfl.png"
+  "thumb": ""
  },
  {
   "id": "pub_embryo",
@@ -551,7 +662,7 @@
   "condition": "E8.5 gastrulation",
   "n_cells": 57536,
   "n_genes": 351,
-  "n_samples": 3,
+  "n_samples": 0,
   "n_celltypes": 75,
   "n_niches": 32,
   "cell_types": [
@@ -569,7 +680,7 @@
    "Somite",
    "Surface-ectoderm"
   ],
-  "thumb": "gallery/sweep/pub_embryo.png"
+  "thumb": ""
  },
  {
   "id": "wholemouse_pup",
@@ -581,7 +692,7 @@
   "condition": "Postnatal atlas",
   "n_cells": 1355564,
   "n_genes": 379,
-  "n_samples": 1,
+  "n_samples": 0,
   "n_celltypes": 241,
   "n_niches": 31,
   "cell_types": [
@@ -604,7 +715,7 @@
    "Pericyte-VSMC",
    "Skeletal-muscle"
   ],
-  "thumb": "gallery/sweep/wholemouse_pup.png"
+  "thumb": ""
  },
  {
   "id": "pub_brain_alz",
@@ -632,6 +743,124 @@
    "Vascular"
   ],
   "thumb": "gallery/sweep/pub_brain_alz.png"
+ },
+ {
+  "id": "cosmx_kidney_injury",
+  "title": "Cosmx Kidney Injury",
+  "category": "Disease",
+  "site": "Kidney",
+  "organism": "Human",
+  "platform": "CosMx",
+  "condition": "Acute kidney injury",
+  "n_cells": 558601,
+  "n_genes": 1001,
+  "n_samples": 0,
+  "n_celltypes": 35,
+  "n_niches": 32,
+  "cell_types": [
+   "Ambiguous",
+   "Endothelial",
+   "Epithelial",
+   "Fibroblast",
+   "InjuredPT",
+   "Lymphoid",
+   "Mast",
+   "Mural",
+   "Myeloid",
+   "Plasma"
+  ],
+  "thumb": ""
+ },
+ {
+  "id": "pub_bone_normal",
+  "title": "Bone Normal",
+  "category": "Normal",
+  "site": "Bone",
+  "organism": "Human",
+  "platform": "Xenium",
+  "condition": "Bone",
+  "n_cells": 33801,
+  "n_genes": 477,
+  "n_samples": 1,
+  "n_celltypes": 162,
+  "n_niches": 28,
+  "cell_types": [
+   "Adipocyte",
+   "Ambiguous",
+   "Bone",
+   "Chondrocyte",
+   "Endothelial",
+   "Erythroid",
+   "HSPC",
+   "Lymphoid",
+   "Mast",
+   "Mural",
+   "Myeloid",
+   "Neural",
+   "Plasma",
+   "Proliferating",
+   "Stroma"
+  ],
+  "thumb": "gallery/sweep/pub_bone_normal.png"
+ },
+ {
+  "id": "pub_mouse_femur",
+  "title": "Mouse Femur",
+  "category": "Normal",
+  "site": "Bone",
+  "organism": "Mouse",
+  "platform": "Xenium",
+  "condition": "Femur",
+  "n_cells": 348141,
+  "n_genes": 479,
+  "n_samples": 1,
+  "n_celltypes": 56,
+  "n_niches": 23,
+  "cell_types": [
+   "Adipocyte",
+   "Ambiguous",
+   "Bone",
+   "Chondrocyte",
+   "Endothelial",
+   "Erythroid",
+   "HSPC",
+   "Lymphoid",
+   "Mast",
+   "Megakaryocyte",
+   "Mural",
+   "Myeloid",
+   "Neural",
+   "Stroma"
+  ],
+  "thumb": "gallery/sweep/pub_mouse_femur.png"
+ },
+ {
+  "id": "pub_bonemarrow_norm",
+  "title": "Bonemarrow Norm",
+  "category": "Normal",
+  "site": "Bone marrow",
+  "organism": "Human",
+  "platform": "Xenium",
+  "condition": "Bone marrow",
+  "n_cells": 84518,
+  "n_genes": 477,
+  "n_samples": 1,
+  "n_celltypes": 27,
+  "n_niches": 10,
+  "cell_types": [
+   "Adipocyte",
+   "Ambiguous",
+   "Bone",
+   "Endothelial",
+   "Erythroid",
+   "HSPC",
+   "Lymphoid",
+   "Myeloid",
+   "Plasma",
+   "Proliferating",
+   "Stroma"
+  ],
+  "thumb": "gallery/sweep/pub_bonemarrow_norm.png"
  },
  {
   "id": "pub_brain_healthy",
@@ -670,7 +899,7 @@
   "condition": "Brain",
   "n_cells": 127591,
   "n_genes": 440,
-  "n_samples": 1,
+  "n_samples": 0,
   "n_celltypes": 60,
   "n_niches": 32,
   "cell_types": [
@@ -685,7 +914,7 @@
    "Pericyte-VSMC",
    "VLMC-meningeal"
   ],
-  "thumb": "gallery/sweep/pub_eelfish.png"
+  "thumb": ""
  },
  {
   "id": "pub_mousebrain",
@@ -697,7 +926,7 @@
   "condition": "Brain",
   "n_cells": 162033,
   "n_genes": 248,
-  "n_samples": 1,
+  "n_samples": 0,
   "n_celltypes": 55,
   "n_niches": 16,
   "cell_types": [
@@ -713,7 +942,7 @@
    "Pericyte-VSMC",
    "VLMC-meningeal"
   ],
-  "thumb": "gallery/sweep/pub_mousebrain.png"
+  "thumb": ""
  },
  {
   "id": "pub_mousebrain_cor",
@@ -798,7 +1027,7 @@
   "condition": "Brain",
   "n_cells": 119173,
   "n_genes": 5413,
-  "n_samples": 10,
+  "n_samples": 0,
   "n_celltypes": 14,
   "n_niches": 16,
   "cell_types": [
@@ -813,7 +1042,7 @@
    "Oligodendrocyte",
    "Pericyte-VSMC"
   ],
-  "thumb": "gallery/sweep/pub_ribomap.png"
+  "thumb": ""
  },
  {
   "id": "pub_colon_normal",
@@ -869,7 +1098,7 @@
   "condition": "Hypothalamus",
   "n_cells": 1027848,
   "n_genes": 156,
-  "n_samples": 36,
+  "n_samples": 0,
   "n_celltypes": 68,
   "n_niches": 18,
   "cell_types": [
@@ -884,7 +1113,34 @@
    "OPC",
    "Oligodendrocyte"
   ],
-  "thumb": "gallery/sweep/pub_hypothal.png"
+  "thumb": ""
+ },
+ {
+  "id": "pub_kidney_normal",
+  "title": "Kidney Normal",
+  "category": "Normal",
+  "site": "Kidney",
+  "organism": "Human",
+  "platform": "Xenium",
+  "condition": "Kidney",
+  "n_cells": 97560,
+  "n_genes": 377,
+  "n_samples": 1,
+  "n_celltypes": 144,
+  "n_niches": 30,
+  "cell_types": [
+   "Ambiguous",
+   "Endothelial",
+   "Epithelial",
+   "Fibroblast",
+   "Lymphoid",
+   "Mast",
+   "Mural",
+   "Myeloid",
+   "Plasma",
+   "Proliferating"
+  ],
+  "thumb": "gallery/sweep/pub_kidney_normal.png"
  },
  {
   "id": "pub_liver_normal",
@@ -969,7 +1225,7 @@
   "condition": "Pancreas",
   "n_cells": 48944,
   "n_genes": 21731,
-  "n_samples": 1,
+  "n_samples": 0,
   "n_celltypes": 37,
   "n_niches": 7,
   "cell_types": [
@@ -982,7 +1238,7 @@
    "Proliferating",
    "Schwann-neural"
   ],
-  "thumb": "gallery/sweep/cosmx_pancreas.png"
+  "thumb": ""
  },
  {
   "id": "pub_skin_normal",
@@ -1123,7 +1379,7 @@
   "condition": "Brain atlas",
   "n_cells": 3938808,
   "n_genes": 500,
-  "n_samples": 59,
+  "n_samples": 0,
   "n_celltypes": 114,
   "n_niches": 32,
   "cell_types": [
@@ -1142,6 +1398,6 @@
    "Pericyte-VSMC",
    "VLMC-meningeal"
   ],
-  "thumb": "gallery/sweep/allen_merfish_638850.png"
+  "thumb": ""
  }
 ]
