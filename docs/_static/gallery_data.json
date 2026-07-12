@@ -210,7 +210,7 @@
   "condition": "Breast carcinoma",
   "n_cells": 254480,
   "n_genes": 280,
-  "n_samples": 0,
+  "n_samples": 1,
   "n_celltypes": 10,
   "n_niches": 9,
   "cell_types": [
@@ -225,7 +225,7 @@
    "Pericyte/Mural",
    "T/NK"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/pub_breast_bm_s1b.png"
  },
  {
   "id": "pub_breast_bm_s1m",
@@ -237,7 +237,7 @@
   "condition": "Breast carcinoma",
   "n_cells": 375529,
   "n_genes": 280,
-  "n_samples": 0,
+  "n_samples": 1,
   "n_celltypes": 10,
   "n_niches": 8,
   "cell_types": [
@@ -252,7 +252,7 @@
    "Pericyte/Mural",
    "T/NK"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/pub_breast_bm_s1m.png"
  },
  {
   "id": "pub_breast_bm_s1t",
@@ -292,7 +292,7 @@
   "condition": "Breast carcinoma",
   "n_cells": 358519,
   "n_genes": 280,
-  "n_samples": 0,
+  "n_samples": 1,
   "n_celltypes": 11,
   "n_niches": 9,
   "cell_types": [
@@ -308,7 +308,7 @@
    "Pericyte/Mural",
    "T/NK"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/pub_breast_bm_s2b.png"
  },
  {
   "id": "pub_breast_bm_s2m",
@@ -320,7 +320,7 @@
   "condition": "Breast carcinoma",
   "n_cells": 380739,
   "n_genes": 280,
-  "n_samples": 0,
+  "n_samples": 1,
   "n_celltypes": 10,
   "n_niches": 9,
   "cell_types": [
@@ -335,7 +335,7 @@
    "Pericyte/Mural",
    "T/NK"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/pub_breast_bm_s2m.png"
  },
  {
   "id": "pub_breast_bm_s2t",
@@ -347,7 +347,7 @@
   "condition": "Breast carcinoma",
   "n_cells": 301854,
   "n_genes": 280,
-  "n_samples": 0,
+  "n_samples": 1,
   "n_celltypes": 11,
   "n_niches": 8,
   "cell_types": [
@@ -363,7 +363,7 @@
    "Pericyte/Mural",
    "T/NK"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/pub_breast_bm_s2t.png"
  },
  {
   "id": "pub_breast_bm_s3b",
@@ -402,7 +402,7 @@
   "condition": "Breast carcinoma",
   "n_cells": 373150,
   "n_genes": 280,
-  "n_samples": 0,
+  "n_samples": 1,
   "n_celltypes": 10,
   "n_niches": 6,
   "cell_types": [
@@ -417,7 +417,7 @@
    "Pericyte/Mural",
    "T/NK"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/pub_breast_bm_s3m.png"
  },
  {
   "id": "pub_breast_bm_s3t",
@@ -429,7 +429,7 @@
   "condition": "Breast carcinoma",
   "n_cells": 308531,
   "n_genes": 280,
-  "n_samples": 0,
+  "n_samples": 1,
   "n_celltypes": 11,
   "n_niches": 7,
   "cell_types": [
@@ -445,7 +445,7 @@
    "Pericyte/Mural",
    "T/NK"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/pub_breast_bm_s3t.png"
  },
  {
   "id": "pub_breast_bm_s4b",
@@ -485,7 +485,7 @@
   "condition": "Breast carcinoma",
   "n_cells": 335709,
   "n_genes": 280,
-  "n_samples": 0,
+  "n_samples": 1,
   "n_celltypes": 10,
   "n_niches": 8,
   "cell_types": [
@@ -500,7 +500,7 @@
    "Pericyte/Mural",
    "T/NK"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/pub_breast_bm_s4m.png"
  },
  {
   "id": "pub_breast_bm_s4t",
