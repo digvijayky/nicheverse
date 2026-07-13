@@ -23,6 +23,21 @@ d_c}$ and $z_e^{\text{niche}} \in \mathbb{R}^{B \times d_n}$, each snapped to it
 codebook. Symbols: $K$ codebook size, $D$ code dimension, $\operatorname{sg}[\cdot]$
 the stop-gradient operator.
 
+**Total training objective.** The trainer minimizes the sum of the two branch
+losses, each a reconstruction likelihood plus its VQ (commitment + diversity)
+term, weighted by `cell_weight` and `neighborhood_weight` (both $1.0$ by default):
+
+$$
+\mathcal{L} = \underbrace{w_{\text{cell}}\bigl(\mathcal{L}_{\text{recon}}^{\text{cell}} + \mathcal{L}_{\text{VQ}}^{\text{cell}}\bigr)}_{\text{cell branch}} + \underbrace{w_{\text{niche}}\bigl(\mathcal{L}_{\text{recon}}^{\text{niche}} + \mathcal{L}_{\text{VQ}}^{\text{niche}}\bigr)}_{\text{niche branch}},
+$$
+
+where $\mathcal{L}_{\text{recon}}^{\text{cell}}$ is the negative-binomial +
+detection-hurdle count likelihood, $\mathcal{L}_{\text{recon}}^{\text{niche}}$ is
+the composition MSE + Dirichlet-multinomial term, and each
+$\mathcal{L}_{\text{VQ}}$ is the commitment (+ diversity) loss of its quantizer
+(all defined below). Optional spatial-coherence regularizers are added only when
+`spatial_loss_weight > 0` (off by default).
+
 ### `HierarchicalVQVAE(config)`
 
 Two paired codebooks coupled by cross-attention. The cell encoder produces a cell
@@ -47,16 +62,23 @@ decoded and reconstructed.
 
 The quantized cell latent $z_q^{\text{cell}}$ is conditioned on the quantized niche
 latent $z_q^{\text{niche}}$ by a single multi-head attention read, mixed back with a
-fixed residual weight $\lambda = \texttt{cross\_attention\_weight}$ (default $0.5$):
+**fixed** residual weight $\lambda = \texttt{cross\_attention\_weight}$ (default
+$0.5$; this is a constant residual gate, not a learned sigmoid gate):
 
 $$
 z_q^{\text{cell,final}} = z_q^{\text{cell}} + \lambda \,\operatorname{Attn}\!\bigl(Q = z_q^{\text{cell}},\; K = V = W_p\, z_q^{\text{niche}}\bigr),
+\qquad
+\operatorname{Attn}(Q,K,V) = \operatorname{softmax}\!\Bigl(\tfrac{QK^{\top}}{\sqrt{d_c}}\Bigr) V,
 $$
 
-where $W_p$ is the learned niche-to-cell projection. This is one-directional: the
-niche latent is never updated from the cell (the niche code stays a pure tissue
-descriptor). The decoders $g_{\text{cell}}, g_{\text{niche}}$ then map
-$z_q^{\text{cell,final}}$ and $z_q^{\text{niche}}$ back to the input spaces.
+with $W_p$ the learned niche-to-cell projection (`neighborhood_projection`) and the
+attention a `torch.nn.MultiheadAttention` over a single-token sequence per cell
+(so the softmax is over one key and reduces to $V$, i.e. the read returns the
+projected niche vector; the head count is the largest divisor of $d_c$ at most
+`cross_attention_heads`, default $4$). This is one-directional: the niche latent is
+never updated from the cell (the niche code stays a pure tissue descriptor). The
+decoders $g_{\text{cell}}, g_{\text{niche}}$ then map $z_q^{\text{cell,final}}$ and
+$z_q^{\text{niche}}$ back to the input spaces.
 
 ### `VectorQuantizer(num_embeddings, embedding_dim, commitment_cost, ...)`
 
@@ -168,10 +190,17 @@ $$
 $$
 
 Both terms are reduced to per-gene means (divided by $G$) so they are comparable,
-and the cell loss is $\tfrac{1}{G}\mathrm{NLL}_{\text{NB}} + w_{\text{det}}\cdot
-\tfrac{1}{G}\mathrm{BCE}$ with detection weight $w_{\text{det}} = 0.5$ by default.
-The `"mse"` mode recovers the released Gaussian (MSE-on-log1p) term
-$\lVert \hat x - x\rVert_2^2 / (BG)$.
+giving the default cell reconstruction loss
+
+$$
+\mathcal{L}_{\text{recon}}^{\text{cell}} = \tfrac{1}{G}\,\mathrm{NLL}_{\text{NB}}(x) + w_{\text{det}}\cdot \tfrac{1}{G}\,\mathrm{BCE}(x), \qquad w_{\text{det}} = 0.5,
+$$
+
+with the detection weight $w_{\text{det}} = \texttt{detection\_weight}$. The `"mse"`
+mode instead recovers the released Gaussian (MSE-on-log1p) term
+$\lVert \hat x - x\rVert_2^2 / (BG)$; `"poisson"` uses the equidispersed count NLL
+(the NB with $\theta \to \infty$); `"both"` sums $w_{\text{mse}}\,\mathrm{MSE} +
+w_{\text{nb}}\,\tfrac{1}{G}\mathrm{NLL}_{\text{NB}}$.
 
 The default niche branch (`niche_recon="mse_dirmult"`) sums a composition MSE on the
 log1p niche vector and a Dirichlet-multinomial NLL on the count-scale
@@ -220,6 +249,50 @@ cross-attention, so the emitted cell / niche code indices match the standard mod
   $(B, M)$ bool; $M$ is the padded molecule count. Neighborhood features (optional):
   $(B, 2G)$.
 - Cell reconstruction: $(B, G)$; code indices $(B, 1)$ each.
+
+### `ModelConfig` defaults (b32k production model)
+
+The released RCC/BrM production model (`b32k`) is reproduced by the
+{class}`~nicheverse.ModelConfig` defaults below. Where a field's dataclass default
+differs from a legacy checkpoint's serialized value, the code default is authoritative
+(the loader falls back to the pre-refactor `cell_recon="default"` / `niche_recon="mse"`
+/ `detection_weight=0.0` only for checkpoints saved before those fields existed).
+
+| Field | Default | Meaning |
+| --- | --- | --- |
+| `cell_num_embeddings` × `cell_embedding_dim` | $256 \times 64$ | cell codebook $K_c \times d_c$ |
+| `neighborhood_num_embeddings` × `neighborhood_embedding_dim` | $32 \times 256$ | niche codebook $K_n \times d_n$ |
+| `commitment_cost` | $0.25$ | VQ commitment weight $\beta$ |
+| `encoder_type` | `"mlp_deep"` | SwiGLU pre-norm residual MLP |
+| `quantizer_type` | `"vq"` | EMA codebook (default {class}`~nicheverse.VectorQuantizer`) |
+| `vq_distance` | `"l2"` | squared-Euclidean code assignment |
+| `use_cross_attention` | `True` | cell reads niche |
+| `cross_attention_weight` | $0.5$ | residual mix $\lambda$ |
+| `cross_attention_heads` | $4$ | attention heads |
+| `cell_recon` | `"nb"` | NB count likelihood + detection hurdle |
+| `detection_weight` | $0.5$ | hurdle weight $w_{\text{det}}$ |
+| `niche_recon` | `"mse_dirmult"` | composition MSE + Dirichlet-multinomial |
+| `w_niche_mse`, `w_dirmult` | $1.0$, $1.0$ | niche-loss weights |
+| `hidden_dims` | $(256, 128)$ | encoder MLP widths (decoder reversed) |
+
+### `TrainConfig` defaults (b32k trajectory)
+
+The released training trajectory is reproduced by the {class}`~nicheverse.TrainConfig`
+defaults below.
+
+| Field | Default | Meaning |
+| --- | --- | --- |
+| `num_epochs` | $300$ | full passes over the cohort |
+| `batch_size` | $32768$ | cells per mini-batch (b32k) |
+| `learning_rate` | $3\times10^{-4}$ | Adam base LR (plateau-scheduled) |
+| `weight_decay` | $0.01$ | decoupled AdamW (weights only, codebooks excluded) |
+| `spatial_graph` | `"knn_radius"` | k-NN capped at `radius` microns, per sample |
+| `radius` | $50.0$ | niche-edge cap in microns |
+| `k_neighbors` | $20$ | neighbors per cell |
+| `neighborhood_aggregation` | `"weighted_mean"` | inverse-distance neighbor pooling |
+| `cell_weight`, `neighborhood_weight` | $1.0$, $1.0$ | branch multipliers $w_{\text{cell}}, w_{\text{niche}}$ |
+| `lr_schedule` | `"plateau"` | halve LR on val/train plateau (patience $5$) |
+| `spatial_loss_weight` | $0.0$ | spatial-coherence regularizer off by default |
 
 ## Model
 

@@ -5,39 +5,52 @@ html_theme.sidebar_secondary.remove: true
 
 # NICHEVERSE
 
-:::::{div} landing-hero
-::::{div} hero-copy
-<h1 class="hero-title">NICHEVERSE</h1>
-<p class="hero-tagline">Neighborhood-Inferred Cell type HiErarchical annotation + VEctor-quantized Representations of Spatial Ecotypes</p>
-<p class="hero-lead">A PyTorch world model for tissues: it learns paired discrete codebooks of recurrent cell states and multicellular spatial niches from imaging-based spatial transcriptomics (Xenium, MERFISH, seqFISH, CosMx), and annotates any cohort reproducibly.</p>
+```{raw} html
+<div class="nvh">
+  <section class="nvh-hero">
+    <div class="nvh-hero-copy">
+      <span class="nvh-eyebrow">A world model for tissues</span>
+      <h1 class="nvh-title">Read every tissue as a world&nbsp;model.</h1>
+      <p class="nvh-lead">The released NICHEVERSE checkpoint, frozen and never retrained, learns paired discrete codebooks of recurrent cell states and multicellular spatial niches from imaging-based spatial transcriptomics, and reads any cohort reproducibly.</p>
+      <div class="nvh-cta">
+        <a class="nvh-btn" href="guides/gallery.html">Explore the atlas</a>
+        <a class="nvh-btn nvh-btn--ghost" href="guides/quickstart.html">Get started</a>
+      </div>
+      <dl class="nv-homestats" id="nv-homestats" data-src="_static/gallery_data.json" aria-label="Atlas totals">
+        <div class="nv-hs"><dd id="nv-hs-samples">381</dd><dt>samples</dt></div>
+        <div class="nv-hs"><dd id="nv-hs-datasets">102</dd><dt>datasets</dt></div>
+        <div class="nv-hs"><dd id="nv-hs-cells">39M</dd><dt>cells mapped</dt></div>
+        <div class="nv-hs"><dd id="nv-hs-sites">20</dd><dt>tissues</dt></div>
+        <div class="nv-hs"><dd id="nv-hs-plat">6</dd><dt>platforms</dt></div>
+      </dl>
+    </div>
+    <figure class="nvh-hero-shot">
+      <img src="_static/gallery/sweep/cosmx_wtx_brain__cosmx_wtx_brain.png" alt="A whole brain section read into neuronal and glial cell-state lineages">
+    </figure>
+  </section>
 
-```{button-ref} guides/quickstart
-:ref-type: doc
-:color: primary
-:class: hero-btn
-Get started
+  <section class="nvh-explore">
+    <div class="nvh-circles" aria-hidden="true">
+      <img src="_static/gallery/sweep/rcc_brm_xenium__0069489_metastases_core3.png" loading="lazy" alt="">
+      <img src="_static/gallery/sweep/cosmx_pancreas__cosmx_pancreas.png" loading="lazy" alt="">
+      <img src="_static/gallery/sweep/pub_tonsil__pub_tonsil.png" loading="lazy" alt="">
+      <img src="_static/gallery/sweep/cosmx_multiomic_breast_rna__cosmx_multiomic_breast_rna.png" loading="lazy" alt="">
+      <img src="_static/gallery/sweep/pub_ovary_ff__pub_ovary_ff.png" loading="lazy" alt="">
+      <img src="_static/gallery/sweep/xenium_dev_kidney_w16__xenium_dev_kidney_w16.png" loading="lazy" alt="">
+      <img src="_static/gallery/sweep/pub_colon_cancer_base__pub_colon_cancer_base.png" loading="lazy" alt="">
+      <img src="_static/gallery/sweep/merfish_hcc_1003__merfish_hcc_1003.png" loading="lazy" alt="">
+      <img src="_static/gallery/sweep/pub_lung_5k__pub_lung_5k.png" loading="lazy" alt="">
+    </div>
+    <div class="nvh-explore-copy">
+      <h2 class="nvh-h2">Explore the atlas</h2>
+      <p class="nvh-p">One frozen checkpoint, read across <b>381 independent samples</b> from 102 datasets and every accessible platform, Xenium, CosMx, MERFISH, seqFISH, RIBOmap, EEL-FISH. Every cell is painted by the lineage of the cell-state code the model assigns it.</p>
+      <a class="nvh-btn" href="guides/gallery.html">Browse all samples</a>
+    </div>
+  </section>
+</div>
 ```
-```{button-ref} api
-:ref-type: doc
-:color: primary
-:outline:
-:class: hero-btn
-API reference
-```
 
-<dl class="nv-homestats" id="nv-homestats" data-src="_static/gallery_data.json" aria-label="Atlas totals">
-  <div class="nv-hs"><dd id="nv-hs-samples">381</dd><dt>samples</dt></div>
-  <div class="nv-hs"><dd id="nv-hs-datasets">102</dd><dt>datasets</dt></div>
-  <div class="nv-hs"><dd id="nv-hs-cells">39M</dd><dt>cells mapped</dt></div>
-  <div class="nv-hs"><dd id="nv-hs-sites">20</dd><dt>tissues</dt></div>
-  <div class="nv-hs"><dd id="nv-hs-plat">6</dd><dt>platforms</dt></div>
-</dl>
-::::
-
-::::{div} hero-media
-<figure class="hero-shot"><img src="_static/gallery/sweep/pub_tonsil__pub_tonsil.png" alt="A reactive human tonsil resolved into cell-state lineages on nuclear boundaries"><figcaption>A reactive human tonsil, every nucleus painted by its learned cell-state lineage, one of 380+ samples the frozen model reads</figcaption></figure>
-::::
-:::::
+:::::{div} nvh-body
 
 ::::{grid} 1 2 2 3
 :gutter: 3
@@ -86,27 +99,7 @@ annotated = nv.predict_codes(
 )
 ```
 
-{.reveal}
-## One model, every tissue
-
-The released checkpoint, run unchanged across 100+ published datasets spanning every accessible platform: Xenium, CosMx, MERFISH, seqFISH, RIBOmap, EEL-FISH. Each tile is one dataset's whole section, every cell colored by the lineage of its learned cell-state code.
-
-```{raw} html
-<div class="nv-showcase reveal">
-  <figure class="nv-shot nv-shot--wide"><img src="_static/gallery/overview_all.png" alt="Every rendered dataset, whole-section nucleus-boundary maps" loading="lazy"><figcaption>Every rendered dataset</figcaption></figure>
-  <div class="nv-shot-row">
-    <figure class="nv-shot"><img src="_static/gallery/overview_cancer.png" alt="Cancer datasets" loading="lazy"><figcaption>Cancer</figcaption></figure>
-    <figure class="nv-shot"><img src="_static/gallery/overview_normal.png" alt="Normal datasets" loading="lazy"><figcaption>Normal</figcaption></figure>
-  </div>
-</div>
-```
-
-```{button-ref} guides/gallery
-:ref-type: doc
-:color: primary
-:class: hero-btn
-Browse all datasets
-```
+:::::
 
 ```{toctree}
 :hidden:

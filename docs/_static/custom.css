@@ -988,6 +988,11 @@ html[data-theme="dark"] .hero-shot img { border-color: #20242b; }
 .nv-hs dd { margin: 0; font-size: 1.75rem; font-weight: 700; line-height: 1; letter-spacing: -0.02em; color: var(--nv-ink); font-variant-numeric: tabular-nums; font-family: var(--nv-mono); }
 .nv-hs dt { font-size: 0.7rem; letter-spacing: 0.13em; text-transform: uppercase; color: var(--nv-mut); margin-top: 0.32rem; }
 
+/* global developer credit in the footer of every page */
+#nv-dev-credit { width: 100%; text-align: center; font-size: 0.8rem; color: var(--nv-mut); margin-top: 0.6rem; padding-top: 0.6rem; }
+#nv-dev-credit a { color: var(--nv-teal, #35cabf); text-decoration: none; }
+#nv-dev-credit a:hover { text-decoration: underline; }
+
 /* ============ Beautiful-Biology gallery: left filter sidebar + results bar + image grid ============ */
 .gx-body { display: grid; grid-template-columns: 244px minmax(0, 1fr); gap: 36px; align-items: start; }
 .gx-side { position: sticky; top: 74px; align-self: start; }
@@ -1032,6 +1037,44 @@ html[data-theme="dark"] .hero-shot img { border-color: #20242b; }
   .gx-body { grid-template-columns: 1fr; gap: 20px; }
   .gx-side { position: static; }
   .gx-side-inner { max-height: none; overflow: visible; }
+}
+
+/* ============ Beautiful-Biology homepage: serif hero + big image + circular showcase ============ */
+.nvh { --nvh-serif: "Zilla Slab", "Superclarendon", "Rockwell", Georgia, serif;
+  background: #000; color: #eef1f5; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+  padding: clamp(1.5rem, 4vw, 4rem) clamp(1.1rem, 5vw, 5rem) clamp(2rem, 5vw, 5rem); box-sizing: border-box; overflow: hidden; margin: -1rem 0 0; }
+/* homepage full-width (scoped via :has, same as the gallery) so the hero is not clipped */
+.bd-article:has(.nvh), .bd-content:has(.nvh), .bd-content:has(.nvh) .bd-article-container { max-width: none !important; padding-left: 0 !important; padding-right: 0 !important; padding-top: 0 !important; }
+.bd-article:has(.nvh) .bd-breadcrumbs { display: none !important; }
+.nvh-body { max-width: 1120px; margin: 0 auto; padding: clamp(2rem, 5vw, 4.5rem) clamp(1.1rem, 4vw, 2rem) 3rem; }
+.nvh-hero { max-width: 1600px; margin: 0 auto; display: grid; grid-template-columns: 1.05fr 0.95fr; gap: clamp(1.5rem, 4vw, 4rem); align-items: center; min-height: min(78vh, 760px); }
+.nvh-eyebrow { display: inline-block; font-size: 0.8rem; letter-spacing: 0.22em; text-transform: uppercase; color: #35cabf; margin-bottom: 1.1rem; }
+.nvh .nvh-title { font-family: var(--nvh-serif); font-weight: 500; font-size: clamp(2.6rem, 6vw, 5rem); line-height: 1.02; letter-spacing: 0.002em; color: #fff; margin: 0 0 1.4rem; max-width: 15ch; }
+.nvh .nvh-lead { font-size: clamp(1rem, 1.35vw, 1.2rem); line-height: 1.62; color: #b9c0ca; margin: 0 0 1.9rem; max-width: 42ch; }
+.nvh-cta { display: flex; flex-wrap: wrap; gap: 0.8rem; margin-bottom: 2.4rem; }
+.nvh .nvh-btn { display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.95rem; font-weight: 600; letter-spacing: 0.01em;
+  color: #06070a; background: #35cabf; border: 1px solid #35cabf; border-radius: 999px; padding: 0.72rem 1.5rem; text-decoration: none; transition: transform 0.18s cubic-bezier(0.4,0,0.2,1), background 0.18s ease; }
+.nvh .nvh-btn::after { content: "\2192"; }
+.nvh .nvh-btn:hover { transform: translateX(3px); background: #4fd8ce; }
+.nvh .nvh-btn--ghost { color: #eef1f5; background: transparent; border-color: #33404f; }
+.nvh .nvh-btn--ghost:hover { background: rgba(255,255,255,0.06); border-color: #4a5a6d; }
+.nvh-hero-shot { margin: 0; }
+.nvh-hero-shot img { width: 100%; height: min(72vh, 680px); object-fit: cover; display: block; background: #000; border-radius: 6px; }
+.nvh .nv-homestats { display: flex; flex-wrap: wrap; gap: 1.3rem 2.6rem; margin: 0; padding-top: 1.6rem; border-top: 1px solid #1c2128; }
+.nvh .nv-hs dd { font-family: var(--nvh-serif); font-size: 2rem; font-weight: 500; color: #fff; margin: 0; line-height: 1; font-variant-numeric: tabular-nums; }
+.nvh .nv-hs dt { font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: #7c8896; margin-top: 0.4rem; }
+
+.nvh-explore { max-width: 1600px; margin: clamp(2.5rem, 6vw, 6rem) auto 0; display: grid; grid-template-columns: 1fr 0.9fr; gap: clamp(1.5rem, 4vw, 4rem); align-items: center; }
+.nvh-circles { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(0.8rem, 1.6vw, 1.4rem); }
+.nvh-circles img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 50%; background: #000; display: block; transition: transform 0.4s cubic-bezier(0.4,0,0.2,1); }
+.nvh-circles img:hover { transform: scale(1.05); }
+.nvh .nvh-h2 { font-family: var(--nvh-serif); font-weight: 500; font-size: clamp(2rem, 4vw, 3.2rem); line-height: 1.05; color: #fff; margin: 0 0 1.1rem; }
+.nvh .nvh-p { font-size: 1.02rem; line-height: 1.62; color: #b9c0ca; margin: 0 0 1.7rem; max-width: 44ch; }
+.nvh .nvh-p b { color: #fff; font-weight: 600; }
+@media (max-width: 860px) {
+  .nvh-hero, .nvh-explore { grid-template-columns: 1fr; }
+  .nvh-hero-shot { order: -1; } .nvh-hero-shot img { height: 46vh; }
+  .nvh-explore { margin-top: 3rem; }
 }
 
 /* smoothness pass (matches Beautiful Biology: standard ease, smooth scroll, antialiasing) */
