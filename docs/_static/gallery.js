@@ -175,6 +175,11 @@
 
     function render(data) {
       grid.innerHTML = data.map(function (d) { return card(d); }).join("");
+      // smooth fade-in as each map loads (incl. cached images)
+      Array.prototype.forEach.call(grid.querySelectorAll("img"), function (im) {
+        if (im.complete && im.naturalWidth) im.classList.add("is-loaded");
+        else im.addEventListener("load", function () { im.classList.add("is-loaded"); }, { once: true });
+      });
       updateStats(data); buildKey(); buildGroups(data); wire(); apply();
     }
 
