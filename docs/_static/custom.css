@@ -14,8 +14,8 @@
   --nv-ink:    #1a1a1a;   /* primary text                        */
   --nv-mut:    #5c5f66;   /* muted / secondary text              */
   --nv-line:   #e7e7e4;   /* hairline borders                    */
-  --nv-accent: #0e7c86;   /* single restrained teal accent       */
-  --nv-accent-dk: #0b5f66;
+  --nv-accent: #9a6a12;   /* single restrained amber accent       */
+  --nv-accent-dk: #7a540c;
   --nv-shadow: 0 8px 28px rgba(20, 20, 20, 0.10);
   --nv-shadow-soft: 0 4px 16px rgba(20, 20, 20, 0.07);
   --nv-radius: 10px;
@@ -31,13 +31,13 @@
   --pst-font-family-monospace: var(--nv-mono);
   --pst-font-size-base: 16px;
 
-  --pst-color-primary: #0e7c86;
-  --pst-color-primary-highlight: #0b5f66;
+  --pst-color-primary: #9a6a12;
+  --pst-color-primary-highlight: #7a540c;
   --pst-color-secondary: #5c5f66;
-  --pst-color-accent: #0e7c86;
-  --pst-color-link: #0e7c86;
-  --pst-color-link-hover: #0b5f66;
-  --pst-color-inline-code: #0b5f66;
+  --pst-color-accent: #9a6a12;
+  --pst-color-link: #9a6a12;
+  --pst-color-link-hover: #7a540c;
+  --pst-color-inline-code: #7a540c;
 
   --pst-color-background: #ffffff;
   --pst-color-on-background: #ffffff;
@@ -54,16 +54,16 @@ html[data-theme="dark"] {
   --nv-ink:    #e9ebee;
   --nv-mut:    #a2a7b0;
   --nv-line:   #1d2026;
-  --nv-accent: #2dd4bf;
-  --nv-accent-dk: #5eead4;
+  --nv-accent: #e0a63a;
+  --nv-accent-dk: #efc370;
   --nv-shadow: 0 8px 28px rgba(0, 0, 0, 0.5);
   --nv-shadow-soft: 0 4px 16px rgba(0, 0, 0, 0.4);
 
-  --pst-color-primary: #2dd4bf;
-  --pst-color-primary-highlight: #5eead4;
-  --pst-color-link: #2dd4bf;
-  --pst-color-link-hover: #5eead4;
-  --pst-color-inline-code: #5eead4;
+  --pst-color-primary: #e0a63a;
+  --pst-color-primary-highlight: #efc370;
+  --pst-color-link: #e0a63a;
+  --pst-color-link-hover: #efc370;
+  --pst-color-inline-code: #efc370;
   --pst-color-background: #000000;
   --pst-color-on-background: #000000;
   --pst-color-surface: #0a0b0d;
