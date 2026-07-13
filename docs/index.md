@@ -26,11 +26,11 @@ API reference
 ```
 
 <dl class="nv-homestats" id="nv-homestats" data-src="_static/gallery_data.json" aria-label="Atlas totals">
-  <div class="nv-hs"><dd id="nv-hs-datasets">100+</dd><dt>datasets</dt></div>
-  <div class="nv-hs"><dd id="nv-hs-samples">1,409</dd><dt>samples</dt></div>
-  <div class="nv-hs"><dd id="nv-hs-cells">35M</dd><dt>cells mapped</dt></div>
-  <div class="nv-hs"><dd id="nv-hs-sites">21</dd><dt>tissues</dt></div>
-  <div class="nv-hs"><dd id="nv-hs-plat">7</dd><dt>platforms</dt></div>
+  <div class="nv-hs"><dd id="nv-hs-datasets">101</dd><dt>datasets</dt></div>
+  <div class="nv-hs"><dd id="nv-hs-samples">1,294</dd><dt>samples</dt></div>
+  <div class="nv-hs"><dd id="nv-hs-cells">33M</dd><dt>cells mapped</dt></div>
+  <div class="nv-hs"><dd id="nv-hs-sites">20</dd><dt>tissues</dt></div>
+  <div class="nv-hs"><dd id="nv-hs-plat">6</dd><dt>platforms</dt></div>
 </dl>
 ::::
 

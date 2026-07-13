@@ -68,7 +68,7 @@
   "condition": "Glioblastoma (immuno-oncology)",
   "n_cells": 816769,
   "n_genes": 480,
-  "n_samples": 0,
+  "n_samples": 1,
   "n_true_samples": 1,
   "n_celltypes": 54,
   "n_niches": 5,
@@ -82,7 +82,7 @@
    "Proliferating",
    "T/NK"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/pub_brain_gbm_io.png"
  },
  {
   "id": "xenium_melanoma_brainmet",
@@ -94,7 +94,7 @@
   "condition": "Melanoma brain metastasis (model)",
   "n_cells": 74132,
   "n_genes": 243,
-  "n_samples": 0,
+  "n_samples": 1,
   "n_true_samples": 1,
   "n_celltypes": 25,
   "n_niches": 27,
@@ -108,7 +108,7 @@
    "Pericyte/Mural",
    "Tumor/Malignant"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/xenium_melanoma_brainmet.png"
  },
  {
   "id": "cosmx_multiomic_breast_rna",
@@ -120,7 +120,7 @@
   "condition": "Invasive ductal carcinoma",
   "n_cells": 152451,
   "n_genes": 18942,
-  "n_samples": 0,
+  "n_samples": 1,
   "n_true_samples": 108,
   "n_celltypes": 102,
   "n_niches": 30,
@@ -140,7 +140,7 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/cosmx_multiomic_breast_rna.png"
  },
  {
   "id": "pub_breast",
@@ -561,7 +561,7 @@
   "condition": "Invasive ductal carcinoma",
   "n_cells": 574852,
   "n_genes": 280,
-  "n_samples": 0,
+  "n_samples": 1,
   "n_true_samples": 1,
   "n_celltypes": 215,
   "n_niches": 24,
@@ -580,7 +580,7 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/pub_breast_idc.png"
  },
  {
   "id": "pub_breast_idc_addon",
@@ -827,7 +827,7 @@
   "condition": "Colorectal cancer",
   "n_cells": 647524,
   "n_genes": 325,
-  "n_samples": 0,
+  "n_samples": 1,
   "n_true_samples": 1,
   "n_celltypes": 10,
   "n_niches": 4,
@@ -843,7 +843,7 @@
    "Neuron",
    "T/NK"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/pub_colon_cancer_base.png"
  },
  {
   "id": "pub_colorectal",
@@ -883,7 +883,7 @@
   "condition": "Clear cell RCC",
   "n_cells": 436787,
   "n_genes": 20378,
-  "n_samples": 0,
+  "n_samples": 1,
   "n_true_samples": 393,
   "n_celltypes": 67,
   "n_niches": 28,
@@ -900,7 +900,7 @@
    "T-NK",
    "Tumor"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/cosmx_kidney.png"
  },
  {
   "id": "pub_kidney_cancer",
@@ -934,37 +934,6 @@
   "thumb": "gallery/sweep/pub_kidney_cancer.png"
  },
  {
-  "id": "rcc_patient_flex",
-  "title": "Rcc Patient Flex",
-  "category": "Cancer",
-  "site": "Kidney",
-  "organism": "Human",
-  "platform": "Xenium",
-  "condition": "Clear cell RCC",
-  "n_cells": 500000,
-  "n_genes": 366,
-  "n_samples": 0,
-  "n_true_samples": 114,
-  "n_celltypes": 245,
-  "n_niches": 32,
-  "cell_types": [
-   "Ambiguous",
-   "B/Plasma",
-   "Endothelial",
-   "Fibroblast/CAF",
-   "Glia",
-   "Mast/Granulocyte",
-   "Myeloid",
-   "Nephron",
-   "Neuron",
-   "Pericyte/Mural",
-   "Proliferating",
-   "T/NK",
-   "Tumor/Malignant"
-  ],
-  "thumb": ""
- },
- {
   "id": "xenium_gp_rcc",
   "title": "Xenium Gp Rcc",
   "category": "Cancer",
@@ -974,7 +943,7 @@
   "condition": "RCC",
   "n_cells": 465534,
   "n_genes": 405,
-  "n_samples": 0,
+  "n_samples": 1,
   "n_true_samples": 1,
   "n_celltypes": 249,
   "n_niches": 32,
@@ -991,7 +960,7 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/xenium_gp_rcc.png"
  },
  {
   "id": "merfish_hcc_1003",
@@ -1003,7 +972,7 @@
   "condition": "Hepatocellular carcinoma",
   "n_cells": 369399,
   "n_genes": 400,
-  "n_samples": 0,
+  "n_samples": 1,
   "n_true_samples": 1,
   "n_celltypes": 8,
   "n_niches": 6,
@@ -1017,7 +986,7 @@
    "Pericyte/Mural",
    "T/NK"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/merfish_hcc_1003.png"
  },
  {
   "id": "merfish_hcc_1012",
@@ -1029,7 +998,7 @@
   "condition": "Hepatocellular carcinoma",
   "n_cells": 283525,
   "n_genes": 400,
-  "n_samples": 0,
+  "n_samples": 1,
   "n_true_samples": 1,
   "n_celltypes": 148,
   "n_niches": 30,
@@ -1044,7 +1013,7 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/merfish_hcc_1012.png"
  },
  {
   "id": "merfish_hcc_1017",
@@ -1056,7 +1025,7 @@
   "condition": "Hepatocellular carcinoma",
   "n_cells": 61404,
   "n_genes": 400,
-  "n_samples": 0,
+  "n_samples": 1,
   "n_true_samples": 1,
   "n_celltypes": 247,
   "n_niches": 31,
@@ -1070,7 +1039,7 @@
    "Proliferating",
    "T/NK"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/merfish_hcc_1017.png"
  },
  {
   "id": "pub_liver_hcc",
@@ -1115,7 +1084,7 @@
   "condition": "Lung cancer",
   "n_cells": 278328,
   "n_genes": 5001,
-  "n_samples": 0,
+  "n_samples": 1,
   "n_true_samples": 1,
   "n_celltypes": 16,
   "n_niches": 11,
@@ -1137,7 +1106,7 @@
    "Pericyte/Mural",
    "T/NK"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/pub_lung_5k.png"
  },
  {
   "id": "pub_lung_addon",
@@ -1296,7 +1265,7 @@
   "condition": "NSCLC (squamous)",
   "n_cells": 91972,
   "n_genes": 960,
-  "n_samples": 0,
+  "n_samples": 1,
   "n_true_samples": 1,
   "n_celltypes": 225,
   "n_niches": 32,
@@ -1314,7 +1283,7 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/pub_nsclc.png"
  },
  {
   "id": "pub_ovary",
@@ -1415,7 +1384,7 @@
   "condition": "Serous carcinoma (FF)",
   "n_cells": 200900,
   "n_genes": 5001,
-  "n_samples": 0,
+  "n_samples": 1,
   "n_true_samples": 1,
   "n_celltypes": 17,
   "n_niches": 3,
@@ -1438,7 +1407,7 @@
    "Pericyte/Mural",
    "T/NK"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/pub_ovary_ff.png"
  },
  {
   "id": "pub_pancreas_ca_addon",
@@ -1595,7 +1564,7 @@
   "condition": "Hematopoiesis",
   "n_cells": 40864,
   "n_genes": 132,
-  "n_samples": 0,
+  "n_samples": 1,
   "n_true_samples": 1,
   "n_celltypes": 228,
   "n_niches": 13,
@@ -1609,7 +1578,7 @@
    "Myeloid",
    "Proliferating"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/merfish_mfl.png"
  },
  {
   "id": "seqfish_dev_kidney",
@@ -1621,7 +1590,7 @@
   "condition": "Fetal nephrogenesis (246-gene)",
   "n_cells": 1047267,
   "n_genes": 246,
-  "n_samples": 0,
+  "n_samples": 3,
   "n_true_samples": 3,
   "n_celltypes": 85,
   "n_niches": 29,
@@ -1639,7 +1608,7 @@
    "Stroma",
    "T/NK"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/seqfish_dev_kidney.png"
  },
  {
   "id": "xenium_dev_kidney_w13",
@@ -1651,7 +1620,7 @@
   "condition": "Fetal nephrogenesis (wk13.5)",
   "n_cells": 175167,
   "n_genes": 258,
-  "n_samples": 0,
+  "n_samples": 1,
   "n_true_samples": 1,
   "n_celltypes": 150,
   "n_niches": 31,
@@ -1668,7 +1637,7 @@
    "Stroma",
    "T/NK"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/xenium_dev_kidney_w13.png"
  },
  {
   "id": "xenium_dev_kidney_w16",
@@ -1680,7 +1649,7 @@
   "condition": "Fetal nephrogenesis (wk16.5)",
   "n_cells": 376199,
   "n_genes": 258,
-  "n_samples": 0,
+  "n_samples": 1,
   "n_true_samples": 1,
   "n_celltypes": 123,
   "n_niches": 32,
@@ -1697,7 +1666,7 @@
    "Proliferating",
    "T/NK"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/xenium_dev_kidney_w16.png"
  },
  {
   "id": "pub_embryo",
@@ -1709,7 +1678,7 @@
   "condition": "E8.5 gastrulation",
   "n_cells": 57536,
   "n_genes": 351,
-  "n_samples": 0,
+  "n_samples": 3,
   "n_true_samples": 3,
   "n_celltypes": 250,
   "n_niches": 31,
@@ -1726,7 +1695,7 @@
    "Myeloid",
    "Neuron"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/pub_embryo.png"
  },
  {
   "id": "wholemouse_pup",
@@ -1738,7 +1707,7 @@
   "condition": "Postnatal atlas",
   "n_cells": 1355564,
   "n_genes": 379,
-  "n_samples": 0,
+  "n_samples": 1,
   "n_true_samples": 1,
   "n_celltypes": 185,
   "n_niches": 32,
@@ -1760,7 +1729,7 @@
    "Pericyte/Mural",
    "T/NK"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/wholemouse_pup.png"
  },
  {
   "id": "pub_brain_alz",
@@ -1877,7 +1846,7 @@
   "condition": "Acute kidney injury",
   "n_cells": 558601,
   "n_genes": 1001,
-  "n_samples": 0,
+  "n_samples": 2,
   "n_true_samples": 2,
   "n_celltypes": 203,
   "n_niches": 31,
@@ -1895,7 +1864,7 @@
    "Pericyte/Mural",
    "T/NK"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/cosmx_kidney_injury.png"
  },
  {
   "id": "pub_bone_normal",
@@ -2074,7 +2043,7 @@
   "condition": "Half brain",
   "n_cells": 48556,
   "n_genes": 950,
-  "n_samples": 0,
+  "n_samples": 1,
   "n_true_samples": 130,
   "n_celltypes": 14,
   "n_niches": 7,
@@ -2094,7 +2063,7 @@
    "Pericyte/Mural",
    "T/NK"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/cosmx_mouse_halfbrain_simple.png"
  },
  {
   "id": "cosmx_mouse_quarterbrain_simple",
@@ -2106,7 +2075,7 @@
   "condition": "Quarter brain",
   "n_cells": 44679,
   "n_genes": 950,
-  "n_samples": 0,
+  "n_samples": 1,
   "n_true_samples": 66,
   "n_celltypes": 15,
   "n_niches": 8,
@@ -2127,7 +2096,7 @@
    "Pericyte/Mural",
    "T/NK"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/cosmx_mouse_quarterbrain_simple.png"
  },
  {
   "id": "cosmx_wtx_brain",
@@ -2139,7 +2108,7 @@
   "condition": "Hippocampus",
   "n_cells": 131568,
   "n_genes": 18935,
-  "n_samples": 0,
+  "n_samples": 1,
   "n_true_samples": 360,
   "n_celltypes": 90,
   "n_niches": 26,
@@ -2154,7 +2123,7 @@
    "Pericyte/Mural",
    "T/NK"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/cosmx_wtx_brain.png"
  },
  {
   "id": "pub_brain_healthy",
@@ -2193,7 +2162,7 @@
   "condition": "Brain",
   "n_cells": 127591,
   "n_genes": 440,
-  "n_samples": 0,
+  "n_samples": 1,
   "n_true_samples": 1,
   "n_celltypes": 247,
   "n_niches": 32,
@@ -2207,7 +2176,7 @@
    "Pericyte/Mural",
    "Proliferating"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/pub_eelfish.png"
  },
  {
   "id": "pub_mousebrain",
@@ -2354,7 +2323,7 @@
   "condition": "Brain",
   "n_cells": 119173,
   "n_genes": 5413,
-  "n_samples": 0,
+  "n_samples": 10,
   "n_true_samples": 10,
   "n_celltypes": 29,
   "n_niches": 7,
@@ -2365,7 +2334,7 @@
    "Neuron",
    "Pericyte/Mural"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/pub_ribomap.png"
  },
  {
   "id": "pub_wt_13m",
@@ -2574,7 +2543,7 @@
   "condition": "Hypothalamus",
   "n_cells": 1027848,
   "n_genes": 156,
-  "n_samples": 0,
+  "n_samples": 30,
   "n_true_samples": 36,
   "n_celltypes": 133,
   "n_niches": 30,
@@ -2588,7 +2557,7 @@
    "Pericyte/Mural",
    "Proliferating"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/pub_hypothal.png"
  },
  {
   "id": "pub_kidney_normal",
@@ -2657,7 +2626,7 @@
   "condition": "Lung",
   "n_cells": 295883,
   "n_genes": 392,
-  "n_samples": 0,
+  "n_samples": 1,
   "n_true_samples": 1,
   "n_celltypes": 82,
   "n_niches": 27,
@@ -2674,7 +2643,7 @@
    "Proliferating",
    "T/NK"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/pub_lung_normal.png"
  },
  {
   "id": "pub_lymphnode",
@@ -2742,7 +2711,7 @@
   "condition": "Pancreas",
   "n_cells": 48944,
   "n_genes": 21731,
-  "n_samples": 0,
+  "n_samples": 1,
   "n_true_samples": 18,
   "n_celltypes": 49,
   "n_niches": 3,
@@ -2760,7 +2729,7 @@
    "Proliferating",
    "T/NK"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/cosmx_pancreas.png"
  },
  {
   "id": "cosmx_pancreas_wtx",
@@ -2772,7 +2741,7 @@
   "condition": "Pancreas reference",
   "n_cells": 48944,
   "n_genes": 18946,
-  "n_samples": 0,
+  "n_samples": 1,
   "n_true_samples": 18,
   "n_celltypes": 22,
   "n_niches": 13,
@@ -2791,7 +2760,7 @@
    "Proliferating",
    "T/NK"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/cosmx_pancreas_wtx.png"
  },
  {
   "id": "pub_pancreas_normal",
@@ -2947,7 +2916,7 @@
   "condition": "Brain atlas",
   "n_cells": 3938808,
   "n_genes": 500,
-  "n_samples": 0,
+  "n_samples": 59,
   "n_true_samples": 59,
   "n_celltypes": 114,
   "n_niches": 32,
@@ -2960,6 +2929,6 @@
    "Pericyte/Mural",
    "Proliferating"
   ],
-  "thumb": ""
+  "thumb": "gallery/sweep/allen_merfish_638850.png"
  }
 ]
