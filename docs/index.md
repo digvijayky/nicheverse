@@ -10,8 +10,7 @@ html_theme.sidebar_secondary.remove: true
   <section class="nvh-hero">
     <div class="nvh-hero-copy">
       <span class="nvh-eyebrow">A world model for tissues</span>
-      <h1 class="nvh-title">Read every tissue as a world&nbsp;model.</h1>
-      <p class="nvh-lead">The released NICHEVERSE checkpoint, frozen and never retrained, learns paired discrete codebooks of recurrent cell states and multicellular spatial niches from imaging-based spatial transcriptomics, and reads any cohort reproducibly.</p>
+      <h1 class="nvh-title">Every cell and niche mapped to an interpretable&nbsp;codebook.</h1>
       <div class="nvh-cta">
         <a class="nvh-btn" href="guides/gallery.html">Explore the atlas</a>
         <a class="nvh-btn nvh-btn--ghost" href="guides/quickstart.html">Get started</a>
@@ -31,11 +30,11 @@ html_theme.sidebar_secondary.remove: true
 
   <section class="nvh-codebook">
     <figure class="nvh-cb-shot">
-      <img src="_static/home/codebook_core.png" alt="A renal tumor core with every nucleus painted by its learned cell-state code">
+      <img src="_static/gallery/sweep/wholemouse_pup__wholemouse_pup.png" alt="A whole mouse pup with every cell painted by its learned cell-state code">
     </figure>
     <div class="nvh-cb-copy">
       <span class="nvh-eyebrow">Interpretable by construction</span>
-      <h2 class="nvh-h2">Every cell and niche mapped to an interpretable codebook.</h2>
+      <h2 class="nvh-h2">A discrete code for every cell and niche.</h2>
       <p class="nvh-p">Each cell is quantized to one of <b>256 learned cell states</b> and each neighborhood to one of <b>32 spatial niches</b>, coupled by cross-attention so identity is always read in tissue context. The same discrete vocabulary transfers, unchanged, from one cohort and platform to the next.</p>
       <div class="nvh-cb-tags">
         <span class="nvh-tag"><b>256</b> cell-state codes</span>
@@ -56,18 +55,10 @@ html_theme.sidebar_secondary.remove: true
     </figure>
   </section>
 
-  <section class="nvh-steps">
-    <ol class="nvh-steplist">
-      <li><span class="nvh-step-n">01</span><h3 class="nvh-step-h">Encode</h3><p class="nvh-step-p">Raw transcript counts and the local neighborhood are read by a shared encoder into a continuous cell embedding.</p></li>
-      <li><span class="nvh-step-n">02</span><h3 class="nvh-step-h">Quantize</h3><p class="nvh-step-p">The embedding snaps to its nearest codebook entry, a single discrete cell state, paired with the niche code for its surroundings.</p></li>
-      <li><span class="nvh-step-n">03</span><h3 class="nvh-step-h">Paint</h3><p class="nvh-step-p">Every cell is colored by the lineage of its assigned code, turning any slide into a reproducible map of states and niches.</p></li>
-    </ol>
-  </section>
-
   <section class="nvh-explore">
     <div class="nvh-circles" aria-hidden="true">
       <img src="_static/gallery/sweep/rcc_brm_xenium__metastasis_003.png" loading="lazy" alt="">
-      <img src="_static/gallery/sweep/wholemouse_pup__wholemouse_pup.png" loading="lazy" alt="">
+      <img src="_static/home/codebook_niches.png" loading="lazy" alt="">
       <img src="_static/gallery/sweep/pub_tonsil__pub_tonsil.png" loading="lazy" alt="">
       <img src="_static/gallery/sweep/cosmx_multiomic_breast_rna__cosmx_multiomic_breast_rna.png" loading="lazy" alt="">
       <img src="_static/gallery/sweep/pub_ovary_ff__pub_ovary_ff.png" loading="lazy" alt="">
@@ -84,19 +75,9 @@ html_theme.sidebar_secondary.remove: true
   </section>
 
   <section class="nvh-wordmark" aria-label="NICHEVERSE">
-    <ol class="nvh-acrostic">
-      <li><span class="nvh-ac-l">N</span><span class="nvh-ac-w">atural killer cell</span></li>
-      <li><span class="nvh-ac-l">I</span><span class="nvh-ac-w">nterstitial fibroblast</span></li>
-      <li><span class="nvh-ac-l">C</span><span class="nvh-ac-w">ytotoxic T cell</span></li>
-      <li><span class="nvh-ac-l">H</span><span class="nvh-ac-w">ematopoietic stem cell</span></li>
-      <li><span class="nvh-ac-l">E</span><span class="nvh-ac-w">ndothelial cell</span></li>
-      <li><span class="nvh-ac-l">V</span><span class="nvh-ac-w">ascular smooth muscle cell</span></li>
-      <li><span class="nvh-ac-l">E</span><span class="nvh-ac-w">pithelial cell</span></li>
-      <li><span class="nvh-ac-l">R</span><span class="nvh-ac-w">egulatory T cell</span></li>
-      <li><span class="nvh-ac-l">S</span><span class="nvh-ac-w">tromal cell</span></li>
-      <li><span class="nvh-ac-l">E</span><span class="nvh-ac-w">rythroid progenitor</span></li>
-    </ol>
-    <p class="nvh-wordmark-cap">One vocabulary of cells and niches, read across every tissue in the nicheverse.</p>
+    <h2 class="nvh-wm-mark">NICHEVERSE</h2>
+    <p class="nvh-wm-exp"><b>N</b>eighborhood-<b>I</b>nferred <b>C</b>ell type <b>H</b>i<b>E</b>rarchical annotation + <b>VE</b>ctor-quantized <b>R</b>epresentations of <b>S</b>patial <b>E</b>cotypes</p>
+    <p class="nvh-wm-desc">The released NICHEVERSE checkpoint, frozen and never retrained, learns paired discrete codebooks of recurrent cell states and multicellular spatial niches from imaging-based spatial transcriptomics, and reads any cohort reproducibly.</p>
   </section>
 </div>
 ```
@@ -111,10 +92,10 @@ html_theme.sidebar_secondary.remove: true
 Paired cell-state and spatial-niche codebooks coupled by cross-attention, so cell identity is read in tissue context.
 :::
 :::{grid-item-card} Swappable components
-Encoder registry: `mlp_deep` (default) / `mlp` / `mlp_plr` / `residual_mlp` / `transformer` / `cnn` / `fast_cnn` / `deep_cnn` / `gnn` / `diffusion` / `dit` / `set_transformer` / `perceiver_io` / `soft_moe` / `ft_transformer`. Quantizer registry: `vq` (default) / `rvq` / `grvq` / `pq` / `qinco` / `rot` / `soft` / `bsq` / `lfq` / `fsq` / `residual_fsq`.
+Encoder registry: `mlp_deep` (default), `mlp`, `mlp_plr`, `residual_mlp`, `transformer`, `cnn`, `fast_cnn`, `deep_cnn`, `gnn`, `diffusion`, `dit`, `set_transformer`, `perceiver_io`, `soft_moe`, `ft_transformer`. Quantizer registry: `vq` (default), `rvq`, `grvq`, `pq`, `qinco`, `rot`, `soft`, `bsq`, `lfq`, `fsq`, `residual_fsq`.
 :::
 :::{grid-item-card} Spatial-aware
-Per-sample graphs (`knn`, `knn_radius` default at 50 microns, `radius`, `delaunay`, `alpha_complex`, `gabriel`, `rng`), inverse-distance aggregation, and opt-in spatial-coherence losses.
+Per-sample graphs (`knn`, `knn_radius`, `radius`, `delaunay`, `alpha_complex`, `gabriel`, `rng`), inverse-distance aggregation, and opt-in spatial-coherence losses.
 :::
 :::{grid-item-card} Reproducible
 Byte-exact reproduction of the published renal cell carcinoma and brain-metastasis model, guarded by a regression test.
