@@ -87,7 +87,7 @@ html_theme = "pydata_sphinx_theme"
 html_title = "NICHEVERSE"
 html_static_path = ["_static"]
 html_css_files = ["custom.css"]
-html_js_files = ["force-dark.js", "gallery.js", "bb-motion.js"]
+html_js_files = ["force-dark.js", "gallery.js", "bb-motion.js", "nv-analytics.js"]
 # Canonical URL for the published docs (harmless locally).
 html_baseurl = "https://nicheverse.readthedocs.io/en/latest/"
 # pydata-sphinx-theme reads the default light/dark mode from html_context.

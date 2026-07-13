@@ -522,6 +522,7 @@ table.autosummary td p { margin-bottom: 0; }
 .bb-grid[data-cols="2"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .bb-grid[data-cols="3"] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .bb-grid[data-cols="4"] { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.bb-grid[data-cols="5"] { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 
 .bb-tile { display: flex; flex-direction: column; transition: transform 0.18s ease; }
 .bb-tile.is-hidden { display: none; }
@@ -712,7 +713,8 @@ button:focus-visible,
   .bb-grid,
   .bb-grid[data-cols="2"],
   .bb-grid[data-cols="3"],
-  .bb-grid[data-cols="4"] { grid-template-columns: 1fr; }
+  .bb-grid[data-cols="4"],
+  .bb-grid[data-cols="5"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   /* feature grid + gallery preview -> single column */
   .nv-features .sd-row > [class*="sd-col"],
   .nv-gallery .sd-row > [class*="sd-col"] {
@@ -797,6 +799,10 @@ button:focus-visible,
    NICHEVERSE gallery — dark specimen atlas  (scoped under .gx)
    Signature: the lineage spectrum. Numbers set in monospace.
    ================================================================== */
+/* Clarendon-style slab serif for headlines (matches Beautiful Biology's Superclarendon) */
+@font-face { font-family: "Zilla Slab"; src: url("fonts/ZillaSlab-Regular.ttf") format("truetype"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Zilla Slab"; src: url("fonts/ZillaSlab-Medium.ttf") format("truetype"); font-weight: 500; font-display: swap; }
+@font-face { font-family: "Zilla Slab"; src: url("fonts/ZillaSlab-SemiBold.ttf") format("truetype"); font-weight: 600; font-display: swap; }
 .gx {
   --gx-void: #0a0c0f;
   --gx-panel: #0f1319;
@@ -810,14 +816,26 @@ button:focus-visible,
   --gx-spectrum: linear-gradient(90deg,
     #FF3B30 0%, #FF6A1A 9%, #FF9500 18%, #FFD400 27%, #66A61E 37%, #00D97E 46%,
     #35CABF 55%, #3399FF 64%, #66CCFF 72%, #B07CE8 81%, #FF4FA3 90%, #B8925A 100%);
-  background: var(--gx-void);
-  border: 1px solid var(--gx-line);
-  border-radius: 18px;
-  padding: clamp(1.4rem, 4vw, 3rem);
-  margin: 0.5rem 0 1.5rem;
+  --gx-serif: "Zilla Slab", "Superclarendon", "Rockwell", "Roboto Slab", Georgia, serif;
+  background: #000;
+  border: 0;
+  border-radius: 0;
+  padding: clamp(2.2rem, 4vw, 4rem) clamp(1.1rem, 3.5vw, 3.5rem) 5rem;
   color: var(--gx-ink);
   overflow: hidden;
+  margin: -1rem 0 0;
 }
+.gx-inner { max-width: 1780px; margin: 0 auto; }
+/* lean, editorial header: a refined serif title over a one-line tagline */
+.gx-head { margin: 0 0 1.8rem; }
+.gx .gx-serif { font-family: var(--gx-serif); font-weight: 500; font-size: clamp(2.2rem, 4.2vw, 3.3rem); line-height: 1.05; letter-spacing: 0.002em; color: #fff; margin: 0 0 0.5rem; max-width: none; }
+.gx .gx-tagline { color: var(--gx-mut); font-size: 0.95rem; letter-spacing: 0.01em; margin: 0; font-variant-numeric: tabular-nums; }
+/* gallery page only (scoped via :has): make the docs article full-width + strip chrome */
+.bd-article:has(.gx),
+.bd-content:has(.gx),
+.bd-content:has(.gx) .bd-article-container { max-width: none !important; padding-left: 0 !important; padding-right: 0 !important; padding-top: 0 !important; }
+.bd-article:has(.gx) .bd-breadcrumbs { display: none !important; }
+main:has(.gx) > .bd-article > section > h1:first-child { display: none; }  /* redundant page H1; hero says it */
 
 /* ---- hero ---- */
 .gx-hero { max-width: 46rem; }
@@ -908,34 +926,25 @@ button:focus-visible,
 .gx .bb-view:hover { color: var(--gx-ink); }
 .gx .bb-view.is-active { color: var(--gx-void); background: var(--gx-teal); border-color: var(--gx-teal); }
 
-/* ---- plate grid + cards ---- */
-.gx .bb-grid { gap: 26px; }
-.gx .bb-tile { background: var(--gx-panel); border: 1px solid var(--gx-line); border-radius: 14px; overflow: hidden; transition: transform 0.18s ease, border-color 0.18s ease; }
-.gx .bb-tile:hover { transform: translateY(-4px); border-color: #33404f; }
-.gx .bb-frame { position: relative; background: #000; border-radius: 0; box-shadow: none; }
-.gx .bb-frame::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: var(--gx-spectrum); opacity: 0; transition: opacity 0.2s ease; }
-.gx .bb-tile:hover .bb-frame::after { opacity: 0.9; }
-.gx .bb-plate {
-  position: absolute; top: 0.6rem; left: 0.7rem; z-index: 2;
-  font-family: var(--gx-mono); font-size: 0.64rem; letter-spacing: 0.14em; color: rgba(255,255,255,0.62);
-  background: rgba(0,0,0,0.42); padding: 0.15rem 0.4rem; border-radius: 4px; backdrop-filter: blur(2px);
-}
-.gx .bb-caption { padding: 0.85rem 0.95rem 1rem; margin: 0; }
-.gx .bb-ds { display: block; font-family: var(--gx-mono); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gx-dim); margin-bottom: 0.2rem; }
-.gx .bb-caption b { color: #fff; font-weight: 650; font-size: 1rem; line-height: 1.25; display: block; }
-.gx .bb-caption .bb-sub { color: var(--gx-mut); font-size: 0.85rem; margin-top: 0.15rem; display: block; }
-.gx .bb-stat { font-family: var(--gx-mono); font-size: 0.74rem; color: var(--gx-dim); margin-top: 0.5rem; display: block; font-variant-numeric: tabular-nums; }
-.gx .bb-badges { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.5rem; }
-.gx .bb-badge {
-  font-family: var(--gx-mono); font-size: 0.66rem; letter-spacing: 0.03em; text-transform: uppercase;
-  color: var(--gx-mut); background: transparent; border: 1px solid var(--gx-line); border-radius: 4px; padding: 0.12rem 0.4rem;
-}
-.gx .bb-badge.bb-cat-Cancer { color: #fff; border-color: transparent; background: #d64535; }
-.gx .bb-badge.bb-cat-Normal { color: var(--gx-void); border-color: transparent; background: var(--gx-teal); }
-.gx .bb-badge.bb-cat-Developmental { color: #fff; border-color: transparent; background: #9a63d8; }
-.gx .bb-badge.bb-cat-Disease { color: #111; border-color: transparent; background: #e0a63a; }
-.gx .bb-noimg { display: flex; align-items: center; justify-content: center; aspect-ratio: 16/10; color: var(--gx-dim); font-family: var(--gx-mono); font-size: 0.78rem; background: #000; }
-.gx .bb-method { color: var(--gx-dim); font-size: 0.82rem; line-height: 1.55; margin-top: 1.8rem; max-width: 44rem; }
+/* ---- shared cell-state color key (one legend, images stay clean) ---- */
+.gx-key { display: flex; flex-wrap: wrap; gap: 0.5rem 1.15rem; margin: 0 0 1.5rem; padding: 1rem 0 0; border-top: 1px solid var(--gx-line); }
+.gx-k { display: inline-flex; align-items: center; gap: 0.42rem; font-size: 0.76rem; color: var(--gx-mut); letter-spacing: 0.01em; }
+.gx-k i { width: 0.72rem; height: 0.72rem; border-radius: 2px; flex: none; }
+
+/* ---- image-forward specimen grid: square tiles, caption ALWAYS below (Beautiful-Biology style) ---- */
+.gx .bb-grid { gap: 32px 18px; }
+.gx .bb-tile { background: transparent; border: 0; border-radius: 0; overflow: visible; cursor: zoom-in; }
+.gx .bb-tile:hover { transform: none; }
+.gx .bb-frame { position: relative; display: block; aspect-ratio: 1 / 1; background: #000; overflow: hidden; box-shadow: none; border-radius: 0; }
+.gx .bb-tile img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; background: #000; transition: transform 0.6s cubic-bezier(.2,.7,.2,1), opacity 0.3s ease; }
+.gx .bb-tile:hover img { transform: scale(1.045); opacity: 0.9; }
+.gx .bb-tag { position: absolute; top: 0; right: 0; font-size: 0.64rem; letter-spacing: 0.04em; color: rgba(255,255,255,0.92); background: rgba(0,0,0,0.5); padding: 0.24rem 0.5rem; opacity: 0; transition: opacity 0.2s ease; }
+.gx .bb-tile:hover .bb-tag { opacity: 1; }
+.gx .bb-cap { padding: 0.6rem 0.05rem 0; margin: 0; }
+.gx .bb-cap b { display: block; color: #fff; font-weight: 500; font-size: 0.9rem; line-height: 1.28; letter-spacing: 0.004em; }
+.gx .bb-cap-sub { display: block; color: var(--gx-dim); font-size: 0.75rem; margin-top: 0.16rem; }
+.gx .bb-noimg { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--gx-dim); font-size: 0.78rem; background: #000; }
+.gx .bb-method { color: var(--gx-dim); font-size: 0.82rem; line-height: 1.55; margin-top: 2.4rem; max-width: 44rem; }
 .gx .bb-method code { background: var(--gx-panel2); color: var(--gx-teal); border: 1px solid var(--gx-line); }
 
 @media (prefers-reduced-motion: reduce){ .gx-spectrum { animation: none; } }
@@ -961,10 +970,7 @@ html[data-theme="dark"] .hero-shot img { border-color: #20242b; }
 .nv-shot-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 @media (max-width: 640px){ .nv-shot-row { grid-template-columns: 1fr; } }
 
-/* gallery: plates are clickable to open large */
-.gx .bb-tile { cursor: zoom-in; }
-.gx .bb-frame::before { content: "\2922"; position: absolute; top: .55rem; right: .6rem; z-index: 2; font-size: .82rem; color: rgba(255,255,255,.6); background: rgba(0,0,0,.42); width: 1.45rem; height: 1.45rem; border-radius: 5px; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity .18s ease; }
-.gx .bb-tile:hover .bb-frame::before { opacity: 1; }
+/* tiles are clickable to open the map large; the hover veil signals it (no corner glyph) */
 
 /* lightbox */
 .gx-lightbox { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; background: rgba(3,4,6,.94); padding: 2.5vmin; -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
@@ -980,3 +986,49 @@ html[data-theme="dark"] .hero-shot img { border-color: #20242b; }
 .nv-hs { display: flex; flex-direction: column; }
 .nv-hs dd { margin: 0; font-size: 1.75rem; font-weight: 700; line-height: 1; letter-spacing: -0.02em; color: var(--nv-ink); font-variant-numeric: tabular-nums; font-family: var(--nv-mono); }
 .nv-hs dt { font-size: 0.7rem; letter-spacing: 0.13em; text-transform: uppercase; color: var(--nv-mut); margin-top: 0.32rem; }
+
+/* ============ Beautiful-Biology gallery: left filter sidebar + results bar + image grid ============ */
+.gx-body { display: grid; grid-template-columns: 244px minmax(0, 1fr); gap: 36px; align-items: start; }
+.gx-side { position: sticky; top: 74px; align-self: start; }
+.gx-side-inner { max-height: calc(100vh - 94px); overflow-y: auto; padding-right: 6px; }
+.gx-side-inner::-webkit-scrollbar { width: 7px; }
+.gx-side-inner::-webkit-scrollbar-thumb { background: #26262a; border-radius: 4px; }
+
+.gx .bb-search { width: 100%; box-sizing: border-box; background: #121214; color: var(--gx-ink); border: 1px solid #26262a; border-radius: 7px; padding: 0.62rem 0.8rem; font-size: 0.86rem; margin: 0 0 0.9rem; }
+.gx .bb-search::placeholder { color: var(--gx-dim); }
+.gx .bb-search:focus { outline: none; border-color: var(--gx-teal); }
+.gx-clear { display: block; width: 100%; text-align: left; background: none; border: 0; color: var(--gx-teal); font-size: 0.78rem; letter-spacing: 0.02em; padding: 0 0 0.9rem; cursor: pointer; }
+
+.gx-fgroup { border-top: 1px solid #202024; }
+.gx-fhead { width: 100%; display: flex; align-items: center; justify-content: space-between; background: none; border: 0; color: #fff; font-size: 0.73rem; font-weight: 600; letter-spacing: 0.13em; text-transform: uppercase; padding: 0.95rem 0.1rem 0.8rem; cursor: pointer; }
+.gx-fchevron { color: var(--gx-mut); font-size: 1rem; font-weight: 400; line-height: 1; }
+.gx-fgroup.is-collapsed .gx-fbody { display: none; }
+.gx-fbody { padding-bottom: 0.65rem; }
+.gx-fopt { display: flex; align-items: center; gap: 0.6rem; padding: 0.3rem 0.1rem; cursor: pointer; color: var(--gx-mut); font-size: 0.87rem; }
+.gx-fopt:hover { color: #fff; }
+.gx-fopt input { appearance: none; -webkit-appearance: none; width: 15px; height: 15px; border: 1px solid #3a3a42; border-radius: 3px; background: #121214; flex: none; cursor: pointer; position: relative; margin: 0; }
+.gx-fopt input:checked { background: var(--gx-teal); border-color: var(--gx-teal); }
+.gx-fopt input:checked::after { content: ""; position: absolute; left: 4px; top: 1px; width: 4px; height: 8px; border: solid #06070a; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+.gx-fname { flex: 1 1 auto; }
+.gx-fcount { color: var(--gx-dim); font-size: 0.78rem; font-variant-numeric: tabular-nums; }
+
+.gx-key { display: block; border-top: 1px solid #202024; margin: 0.4rem 0 0; padding: 1rem 0 0; }
+.gx-key-h { display: block; color: #fff; font-size: 0.73rem; font-weight: 600; letter-spacing: 0.13em; text-transform: uppercase; margin-bottom: 0.7rem; }
+.gx .gx-k { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: var(--gx-mut); padding: 0.16rem 0; letter-spacing: 0; }
+.gx .gx-k i { width: 0.72rem; height: 0.72rem; border-radius: 2px; flex: none; }
+
+.gx-resbar { display: flex; align-items: center; justify-content: space-between; padding: 0 0 1.05rem; border-bottom: 1px solid #202024; margin-bottom: 1.5rem; }
+.gx .bb-count { color: var(--gx-mut); font-size: 0.85rem; letter-spacing: 0.02em; }
+.gx .bb-count b { color: #fff; font-variant-numeric: tabular-nums; font-weight: 600; }
+.gx .bb-viewtoggle { display: inline-flex; gap: 4px; align-items: center; }
+.gx .bb-view { display: inline-flex; align-items: center; gap: 2px; width: auto; height: auto; background: none; border: 0; border-radius: 0; padding: 6px 5px; cursor: pointer; opacity: 0.5; }
+.gx .bb-view span { width: 4px; height: 15px; background: var(--gx-mut); display: block; border-radius: 1px; }
+.gx .bb-view:hover { opacity: 0.85; }
+.gx .bb-view.is-active { opacity: 1; }
+.gx .bb-view.is-active span { background: #fff; }
+
+@media (max-width: 820px) {
+  .gx-body { grid-template-columns: 1fr; gap: 20px; }
+  .gx-side { position: static; }
+  .gx-side-inner { max-height: none; overflow: visible; }
+}
