@@ -178,12 +178,17 @@
       // smooth fade-in as each map loads (incl. cached images)
       Array.prototype.forEach.call(grid.querySelectorAll("img"), function (im) {
         if (im.complete && im.naturalWidth) im.classList.add("is-loaded");
-        else im.addEventListener("load", function () { im.classList.add("is-loaded"); }, { once: true });
+        else {
+          im.addEventListener("load", function () { im.classList.add("is-loaded"); }, { once: true });
+          im.addEventListener("error", function () { im.classList.add("is-loaded"); }, { once: true });  // never leave a tile invisible
+        }
       });
       updateStats(data); buildKey(); buildGroups(data); wire(); apply();
     }
 
-    if (src) fetch(src).then(function (r) { return r.json(); }).then(render).catch(function () { wire(); apply(); });
+    // prefer the embedded data global (works when opened locally, file://); fall back to fetch when served
+    if (window.NV_GALLERY_DATA) render(window.NV_GALLERY_DATA);
+    else if (src) fetch(src).then(function (r) { return r.json(); }).then(render).catch(function () { wire(); apply(); });
     else { wire(); apply(); }
   }
 
@@ -192,8 +197,7 @@
     var box = document.getElementById("nv-homestats");
     if (!box) return;
     var src = box.getAttribute("data-src");
-    if (!src) return;
-    fetch(src).then(function (r) { return r.json(); }).then(function (data) {
+    var apply = function (data) {
       var set = function (id, v) { var el = document.getElementById(id); if (el) el.textContent = v; };
       var nplat = uniq(data.map(function (d) { return { p: platformFamily(d.platform) }; }), "p").length;
       set("nv-hs-datasets", uniq(data, "dataset").length);
@@ -201,7 +205,9 @@
       set("nv-hs-cells", fmtCells(cellsByDataset(data)));
       set("nv-hs-sites", uniq(data, "site").length);
       set("nv-hs-plat", nplat);
-    }).catch(function () {});
+    };
+    if (window.NV_GALLERY_DATA) apply(window.NV_GALLERY_DATA);
+    else if (src) fetch(src).then(function (r) { return r.json(); }).then(apply).catch(function () {});
   }
 
   function boot() { init(); initHomeStats(); }
