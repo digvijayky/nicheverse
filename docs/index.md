@@ -25,7 +25,7 @@ html_theme.sidebar_secondary.remove: true
       </dl>
     </div>
     <figure class="nvh-hero-shot">
-      <img src="_static/gallery/sweep/cosmx_wtx_brain__cosmx_wtx_brain.png" alt="A whole brain section read into neuronal and glial cell-state lineages">
+      <img src="_static/gallery/sweep/rcc_brm_xenium__primary_029.png" alt="A clear cell renal cell carcinoma primary tumor core read into cell-state lineages">
     </figure>
   </section>
 
