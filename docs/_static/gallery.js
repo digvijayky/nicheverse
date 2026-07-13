@@ -1,5 +1,5 @@
-// NICHEVERSE gallery: data-driven cards from gallery_data.json with category filter,
-// site dropdown, free-text search (site + cell type), column toggle, live count.
+// NICHEVERSE gallery: ONE CARD PER INDEPENDENT SAMPLE from gallery_data.json, with category,
+// site, platform, and dataset filters, free-text search, column toggle, and live counts.
 // Vanilla JS, no dependencies. Safe on pages without the gallery markup.
 (function () {
   "use strict";
@@ -31,47 +31,50 @@
     return p || "Other";
   }
 
+  // cells are a DATASET property; sum once per dataset so per-sample cards do not multiply the total
+  function cellsByDataset(data) {
+    var seen = {}, total = 0;
+    data.forEach(function (d) { if (!seen[d.dataset]) { seen[d.dataset] = 1; total += d.n_cells || 0; } });
+    return total;
+  }
+  function uniq(data, key) { var s = {}; data.forEach(function (d) { if (d[key]) s[d[key]] = 1; }); return Object.keys(s); }
+
   function plateNo(idx) { var s = String(idx + 1); while (s.length < 3) s = "0" + s; return "PLATE " + s; }
 
   function card(d, idx) {
+    var fam = platformFamily(d.platform);
     var badges =
       '<span class="bb-badge bb-cat-' + esc(d.category) + '">' + esc(d.category) + "</span>" +
       '<span class="bb-badge">' + esc(d.site) + "</span>" +
-      '<span class="bb-badge">' + esc(platformFamily(d.platform)) + "</span>";
-    var stat = [fmtCells(d.n_cells) + " cells",
-                (d.n_celltypes ? d.n_celltypes + " cell types" : ""),
-                (d.n_samples > 1 ? d.n_samples + " samples" : "")]
-      .filter(Boolean).join("  ·  ");
+      '<span class="bb-badge">' + esc(fam) + "</span>";
     var img = d.thumb
       ? '<img src="../_static/' + esc(d.thumb) + '" alt="' + esc(d.title) + '" loading="lazy">'
       : '<span class="bb-noimg">map rendering&hellip;</span>';
-    var search = [d.id, d.title, d.site, d.condition, d.organism, d.platform,
-                  (d.cell_types || []).join(" ")].join(" ").toLowerCase();
+    var search = [d.dataset, d.dataset_title, d.sample, d.title, d.site, d.condition,
+                  d.organism, d.platform, (d.cell_types || []).join(" ")].join(" ").toLowerCase();
+    // multi-sample datasets show the dataset name as an eyebrow above the sample name
+    var eyebrow = d.sample ? '<span class="bb-ds">' + esc(d.dataset_title) + "</span>" : "";
     return (
       '<figure class="bb-tile" data-category="' + esc(d.category) + '" data-site="' + esc(d.site) +
-      '" data-platform="' + esc(platformFamily(d.platform)) + '" data-search="' + esc(search) + '">' +
+      '" data-platform="' + esc(fam) + '" data-dataset="' + esc(d.dataset) +
+      '" data-search="' + esc(search) + '">' +
       '<span class="bb-frame"><span class="bb-plate">' + plateNo(idx) + "</span>" + img + "</span>" +
       '<figcaption class="bb-caption">' +
       '<span class="bb-badges">' + badges + "</span>" +
+      eyebrow +
       "<b>" + esc(d.title) + "</b>" +
       '<span class="bb-sub">' + esc(d.condition || d.organism || "") + "</span>" +
-      '<span class="bb-stat">' + esc(stat) + "</span>" +
       "</figcaption></figure>"
     );
   }
 
   function updateStats(data) {
     var set = function (id, v) { var el = document.getElementById(id); if (el) el.textContent = v; };
-    var sites = {}, plats = {}, cells = 0;
-    data.forEach(function (d) {
-      if (d.site) sites[d.site] = 1;
-      plats[platformFamily(d.platform)] = 1;
-      cells += d.n_cells || 0;
-    });
-    set("gx-n-datasets", data.length);
-    set("gx-n-sites", Object.keys(sites).length);
-    set("gx-n-plat", Object.keys(plats).length);
-    set("gx-n-cells", fmtCells(cells));
+    set("gx-n-samples", data.length);
+    set("gx-n-datasets", uniq(data, "dataset").length);
+    set("gx-n-sites", uniq(data, "site").length);
+    set("gx-n-plat", (function () { var s = {}; data.forEach(function (d) { s[platformFamily(d.platform)] = 1; }); return Object.keys(s).length; })());
+    set("gx-n-cells", fmtCells(cellsByDataset(data)));
   }
 
   function init() {
@@ -81,11 +84,12 @@
     var chipBox = document.getElementById("bb-chips");
     var siteSel = document.getElementById("bb-site");
     var platSel = document.getElementById("bb-platform");
+    var dsSel = document.getElementById("bb-dataset");
     var searchEl = document.getElementById("bb-search");
     var viewBox = document.getElementById("bb-viewtoggle");
     var countEl = document.getElementById("bb-count");
 
-    var active = { category: "all", site: "all", platform: "all", q: "" };
+    var active = { category: "all", site: "all", platform: "all", dataset: "all", q: "" };
 
     // lightbox: click a plate to open its map large
     var lb = document.getElementById("gx-lightbox");
@@ -95,8 +99,8 @@
     function openLB(tile) {
       var img = tile.querySelector("img"); if (!img || !lb) return;
       lbImg.src = img.src; lbImg.alt = img.alt || "";
-      var t = tile.querySelector(".bb-caption b"); var s = tile.querySelector(".bb-stat");
-      lbCap.textContent = (t ? t.textContent : "") + (s ? "  ·  " + s.textContent : "");
+      var ds = tile.querySelector(".bb-ds"); var t = tile.querySelector(".bb-caption b");
+      lbCap.textContent = (ds ? ds.textContent + "  ·  " : "") + (t ? t.textContent : "");
       lb.hidden = false; document.body.style.overflow = "hidden";
     }
     function closeLB() { if (!lb) return; lb.hidden = true; lbImg.src = ""; document.body.style.overflow = ""; }
@@ -115,6 +119,7 @@
       if (active.category !== "all" && t.getAttribute("data-category") !== active.category) return false;
       if (active.site !== "all" && t.getAttribute("data-site") !== active.site) return false;
       if (active.platform !== "all" && t.getAttribute("data-platform") !== active.platform) return false;
+      if (active.dataset !== "all" && t.getAttribute("data-dataset") !== active.dataset) return false;
       if (active.q && t.getAttribute("data-search").indexOf(active.q) === -1) return false;
       return true;
     }
@@ -126,7 +131,7 @@
         t.classList.toggle("is-hidden", !ok);
         if (ok) shown += 1;
       });
-      if (countEl) countEl.innerHTML = "<b>" + shown + "</b> " + (shown === 1 ? "plate" : "plates");
+      if (countEl) countEl.innerHTML = "<b>" + shown + "</b> " + (shown === 1 ? "sample" : "samples");
     }
 
     function wire() {
@@ -140,6 +145,7 @@
       }
       if (siteSel) siteSel.addEventListener("change", function () { active.site = siteSel.value; apply(); });
       if (platSel) platSel.addEventListener("change", function () { active.platform = platSel.value; apply(); });
+      if (dsSel) dsSel.addEventListener("change", function () { active.dataset = dsSel.value; apply(); });
       if (searchEl) searchEl.addEventListener("input", function () { active.q = searchEl.value.trim().toLowerCase(); apply(); });
       if (viewBox) {
         viewBox.addEventListener("click", function (e) {
@@ -150,23 +156,25 @@
       }
     }
 
+    function fillSelect(sel, values, allLabel) {
+      if (!sel) return;
+      sel.innerHTML = '<option value="all">' + allLabel + "</option>" +
+        values.map(function (v) { return '<option value="' + esc(v) + '">' + esc(v) + "</option>"; }).join("");
+    }
+
     function render(data) {
       grid.innerHTML = data.map(function (d, i) { return card(d, i); }).join("");
       updateStats(data);
-      if (siteSel) {
-        var seen = {}, sites = [];
-        data.forEach(function (d) { if (!seen[d.site]) { seen[d.site] = 1; sites.push(d.site); } });
-        sites.sort();
-        siteSel.innerHTML = '<option value="all">All sites</option>' +
-          sites.map(function (s) { return '<option value="' + esc(s) + '">' + esc(s) + "</option>"; }).join("");
-      }
-      if (platSel) {
-        var pseen = {}, plats = [];
-        data.forEach(function (d) { var f = platformFamily(d.platform); if (!pseen[f]) { pseen[f] = 1; plats.push(f); } });
-        plats.sort();
-        platSel.innerHTML = '<option value="all">All platforms</option>' +
-          plats.map(function (p) { return '<option value="' + esc(p) + '">' + esc(p) + "</option>"; }).join("");
-      }
+      var sites = uniq(data, "site").sort();
+      fillSelect(siteSel, sites, "All tissues");
+      var plats = {}; data.forEach(function (d) { plats[platformFamily(d.platform)] = 1; });
+      fillSelect(platSel, Object.keys(plats).sort(), "All platforms");
+      // dataset dropdown: label by dataset_title, value by dataset id
+      var dsSeen = {}, dsOpts = [];
+      data.forEach(function (d) { if (!dsSeen[d.dataset]) { dsSeen[d.dataset] = 1; dsOpts.push([d.dataset, d.dataset_title]); } });
+      dsOpts.sort(function (a, b) { return a[1] < b[1] ? -1 : 1; });
+      if (dsSel) dsSel.innerHTML = '<option value="all">All datasets</option>' +
+        dsOpts.map(function (o) { return '<option value="' + esc(o[0]) + '">' + esc(o[1]) + "</option>"; }).join("");
       wire();
       apply();
     }
@@ -178,26 +186,19 @@
     }
   }
 
-  // homepage live counter: datasets / cells / tissues / platforms from the catalogue
+  // homepage live counter: samples / datasets / cells / tissues / platforms from the catalogue
   function initHomeStats() {
     var box = document.getElementById("nv-homestats");
     if (!box) return;
     var src = box.getAttribute("data-src");
     if (!src) return;
     fetch(src).then(function (r) { return r.json(); }).then(function (data) {
-      var sites = {}, plats = {}, cells = 0, samples = 0;
-      data.forEach(function (d) {
-        if (d.site && d.site !== "Unknown") sites[d.site] = 1;
-        plats[platformFamily(d.platform)] = 1;
-        cells += d.n_cells || 0;
-        samples += d.n_true_samples || 1;
-      });
       var set = function (id, v) { var el = document.getElementById(id); if (el) el.textContent = v; };
-      set("nv-hs-datasets", data.length);
-      set("nv-hs-samples", samples.toLocaleString());
-      set("nv-hs-cells", fmtCells(cells));
-      set("nv-hs-sites", Object.keys(sites).length);
-      set("nv-hs-plat", Object.keys(plats).length);
+      set("nv-hs-datasets", uniq(data, "dataset").length);
+      set("nv-hs-samples", data.length.toLocaleString());
+      set("nv-hs-cells", fmtCells(cellsByDataset(data)));
+      set("nv-hs-sites", uniq(data, "site").length);
+      set("nv-hs-plat", (function () { var s = {}; data.forEach(function (d) { s[platformFamily(d.platform)] = 1; }); return Object.keys(s).length; })());
     }).catch(function () {});
   }
 
