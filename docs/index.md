@@ -31,7 +31,7 @@ html_theme.sidebar_secondary.remove: true
 
   <section class="nvh-explore">
     <div class="nvh-circles" aria-hidden="true">
-      <img src="_static/gallery/sweep/rcc_brm_xenium__0069489_metastases_core3.png" loading="lazy" alt="">
+      <img src="_static/gallery/sweep/rcc_brm_xenium__metastasis_003.png" loading="lazy" alt="">
       <img src="_static/gallery/sweep/cosmx_pancreas__cosmx_pancreas.png" loading="lazy" alt="">
       <img src="_static/gallery/sweep/pub_tonsil__pub_tonsil.png" loading="lazy" alt="">
       <img src="_static/gallery/sweep/cosmx_multiomic_breast_rna__cosmx_multiomic_breast_rna.png" loading="lazy" alt="">

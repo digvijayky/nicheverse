@@ -934,11 +934,11 @@
   "thumb": "gallery/sweep/pub_kidney_cancer__pub_kidney_cancer.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069489_metastases_core1",
+  "sample_id": "rcc_brm_xenium__brainmet_001",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069489 Metastases Core1",
-  "title": "0069489 Metastases Core1",
+  "sample": "Brainmet 001",
+  "title": "Brainmet 001",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -960,14 +960,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069489_metastases_core1.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__brainmet_001.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069489_metastases_core10",
+  "sample_id": "rcc_brm_xenium__brainmet_002",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069489 Metastases Core10",
-  "title": "0069489 Metastases Core10",
+  "sample": "Brainmet 002",
+  "title": "Brainmet 002",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -989,14 +989,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069489_metastases_core10.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__brainmet_002.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069489_metastases_core11",
+  "sample_id": "rcc_brm_xenium__brainmet_003",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069489 Metastases Core11",
-  "title": "0069489 Metastases Core11",
+  "sample": "Brainmet 003",
+  "title": "Brainmet 003",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -1018,14 +1018,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069489_metastases_core11.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__brainmet_003.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069489_metastases_core12",
+  "sample_id": "rcc_brm_xenium__brainmet_004",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069489 Metastases Core12",
-  "title": "0069489 Metastases Core12",
+  "sample": "Brainmet 004",
+  "title": "Brainmet 004",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -1047,14 +1047,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069489_metastases_core12.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__brainmet_004.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069489_metastases_core13",
+  "sample_id": "rcc_brm_xenium__brainmet_005",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069489 Metastases Core13",
-  "title": "0069489 Metastases Core13",
+  "sample": "Brainmet 005",
+  "title": "Brainmet 005",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -1076,14 +1076,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069489_metastases_core13.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__brainmet_005.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069489_metastases_core14",
+  "sample_id": "rcc_brm_xenium__brainmet_006",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069489 Metastases Core14",
-  "title": "0069489 Metastases Core14",
+  "sample": "Brainmet 006",
+  "title": "Brainmet 006",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -1105,14 +1105,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069489_metastases_core14.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__brainmet_006.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069489_metastases_core15",
+  "sample_id": "rcc_brm_xenium__brainmet_007",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069489 Metastases Core15",
-  "title": "0069489 Metastases Core15",
+  "sample": "Brainmet 007",
+  "title": "Brainmet 007",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -1134,14 +1134,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069489_metastases_core15.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__brainmet_007.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069489_metastases_core16",
+  "sample_id": "rcc_brm_xenium__brainmet_008",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069489 Metastases Core16",
-  "title": "0069489 Metastases Core16",
+  "sample": "Brainmet 008",
+  "title": "Brainmet 008",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -1163,14 +1163,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069489_metastases_core16.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__brainmet_008.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069489_metastases_core2",
+  "sample_id": "rcc_brm_xenium__brainmet_009",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069489 Metastases Core2",
-  "title": "0069489 Metastases Core2",
+  "sample": "Brainmet 009",
+  "title": "Brainmet 009",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -1192,14 +1192,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069489_metastases_core2.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__brainmet_009.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069489_metastases_core3",
+  "sample_id": "rcc_brm_xenium__brainmet_010",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069489 Metastases Core3",
-  "title": "0069489 Metastases Core3",
+  "sample": "Brainmet 010",
+  "title": "Brainmet 010",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -1221,14 +1221,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069489_metastases_core3.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__brainmet_010.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069489_metastases_core4",
+  "sample_id": "rcc_brm_xenium__brainmet_011",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069489 Metastases Core4",
-  "title": "0069489 Metastases Core4",
+  "sample": "Brainmet 011",
+  "title": "Brainmet 011",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -1250,14 +1250,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069489_metastases_core4.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__brainmet_011.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069489_metastases_core5",
+  "sample_id": "rcc_brm_xenium__brainmet_012",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069489 Metastases Core5",
-  "title": "0069489 Metastases Core5",
+  "sample": "Brainmet 012",
+  "title": "Brainmet 012",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -1279,14 +1279,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069489_metastases_core5.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__brainmet_012.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069489_metastases_core6",
+  "sample_id": "rcc_brm_xenium__lungmet_001",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069489 Metastases Core6",
-  "title": "0069489 Metastases Core6",
+  "sample": "Lungmet 001",
+  "title": "Lungmet 001",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -1308,14 +1308,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069489_metastases_core6.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__lungmet_001.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069489_metastases_core7",
+  "sample_id": "rcc_brm_xenium__metastasis_001",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069489 Metastases Core7",
-  "title": "0069489 Metastases Core7",
+  "sample": "Metastasis 001",
+  "title": "Metastasis 001",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -1337,14 +1337,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069489_metastases_core7.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__metastasis_001.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069489_metastases_core8",
+  "sample_id": "rcc_brm_xenium__metastasis_002",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069489 Metastases Core8",
-  "title": "0069489 Metastases Core8",
+  "sample": "Metastasis 002",
+  "title": "Metastasis 002",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -1366,14 +1366,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069489_metastases_core8.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__metastasis_002.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069489_metastases_core9",
+  "sample_id": "rcc_brm_xenium__metastasis_003",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069489 Metastases Core9",
-  "title": "0069489 Metastases Core9",
+  "sample": "Metastasis 003",
+  "title": "Metastasis 003",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -1395,14 +1395,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069489_metastases_core9.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__metastasis_003.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069490_primary1_core0",
+  "sample_id": "rcc_brm_xenium__metastasis_004",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069490 Primary1 Core0",
-  "title": "0069490 Primary1 Core0",
+  "sample": "Metastasis 004",
+  "title": "Metastasis 004",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -1424,14 +1424,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069490_primary1_core0.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__metastasis_004.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069490_primary1_core1",
+  "sample_id": "rcc_brm_xenium__metastasis_005",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069490 Primary1 Core1",
-  "title": "0069490 Primary1 Core1",
+  "sample": "Metastasis 005",
+  "title": "Metastasis 005",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -1453,14 +1453,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069490_primary1_core1.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__metastasis_005.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069490_primary1_core10",
+  "sample_id": "rcc_brm_xenium__metastasis_006",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069490 Primary1 Core10",
-  "title": "0069490 Primary1 Core10",
+  "sample": "Metastasis 006",
+  "title": "Metastasis 006",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -1482,14 +1482,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069490_primary1_core10.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__metastasis_006.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069490_primary1_core11",
+  "sample_id": "rcc_brm_xenium__metastasis_007",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069490 Primary1 Core11",
-  "title": "0069490 Primary1 Core11",
+  "sample": "Metastasis 007",
+  "title": "Metastasis 007",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -1511,14 +1511,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069490_primary1_core11.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__metastasis_007.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069490_primary1_core12",
+  "sample_id": "rcc_brm_xenium__metastasis_008",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069490 Primary1 Core12",
-  "title": "0069490 Primary1 Core12",
+  "sample": "Metastasis 008",
+  "title": "Metastasis 008",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -1540,14 +1540,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069490_primary1_core12.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__metastasis_008.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069490_primary1_core13",
+  "sample_id": "rcc_brm_xenium__metastasis_009",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069490 Primary1 Core13",
-  "title": "0069490 Primary1 Core13",
+  "sample": "Metastasis 009",
+  "title": "Metastasis 009",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -1569,14 +1569,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069490_primary1_core13.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__metastasis_009.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069490_primary1_core14",
+  "sample_id": "rcc_brm_xenium__metastasis_010",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069490 Primary1 Core14",
-  "title": "0069490 Primary1 Core14",
+  "sample": "Metastasis 010",
+  "title": "Metastasis 010",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -1598,14 +1598,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069490_primary1_core14.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__metastasis_010.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069490_primary1_core15",
+  "sample_id": "rcc_brm_xenium__metastasis_011",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069490 Primary1 Core15",
-  "title": "0069490 Primary1 Core15",
+  "sample": "Metastasis 011",
+  "title": "Metastasis 011",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -1627,14 +1627,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069490_primary1_core15.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__metastasis_011.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069490_primary1_core16",
+  "sample_id": "rcc_brm_xenium__metastasis_012",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069490 Primary1 Core16",
-  "title": "0069490 Primary1 Core16",
+  "sample": "Metastasis 012",
+  "title": "Metastasis 012",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -1656,14 +1656,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069490_primary1_core16.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__metastasis_012.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069490_primary1_core17",
+  "sample_id": "rcc_brm_xenium__metastasis_013",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069490 Primary1 Core17",
-  "title": "0069490 Primary1 Core17",
+  "sample": "Metastasis 013",
+  "title": "Metastasis 013",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -1685,14 +1685,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069490_primary1_core17.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__metastasis_013.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069490_primary1_core18",
+  "sample_id": "rcc_brm_xenium__metastasis_014",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069490 Primary1 Core18",
-  "title": "0069490 Primary1 Core18",
+  "sample": "Metastasis 014",
+  "title": "Metastasis 014",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -1714,14 +1714,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069490_primary1_core18.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__metastasis_014.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069490_primary1_core19",
+  "sample_id": "rcc_brm_xenium__metastasis_015",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069490 Primary1 Core19",
-  "title": "0069490 Primary1 Core19",
+  "sample": "Metastasis 015",
+  "title": "Metastasis 015",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -1743,14 +1743,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069490_primary1_core19.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__metastasis_015.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069490_primary1_core2",
+  "sample_id": "rcc_brm_xenium__metastasis_016",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069490 Primary1 Core2",
-  "title": "0069490 Primary1 Core2",
+  "sample": "Metastasis 016",
+  "title": "Metastasis 016",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -1772,14 +1772,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069490_primary1_core2.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__metastasis_016.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069490_primary1_core20",
+  "sample_id": "rcc_brm_xenium__metastasis_017",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069490 Primary1 Core20",
-  "title": "0069490 Primary1 Core20",
+  "sample": "Metastasis 017",
+  "title": "Metastasis 017",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -1801,14 +1801,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069490_primary1_core20.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__metastasis_017.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069490_primary1_core21",
+  "sample_id": "rcc_brm_xenium__metastasis_018",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069490 Primary1 Core21",
-  "title": "0069490 Primary1 Core21",
+  "sample": "Metastasis 018",
+  "title": "Metastasis 018",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -1830,14 +1830,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069490_primary1_core21.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__metastasis_018.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069490_primary1_core22",
+  "sample_id": "rcc_brm_xenium__metastasis_019",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069490 Primary1 Core22",
-  "title": "0069490 Primary1 Core22",
+  "sample": "Metastasis 019",
+  "title": "Metastasis 019",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -1859,14 +1859,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069490_primary1_core22.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__metastasis_019.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069490_primary1_core23",
+  "sample_id": "rcc_brm_xenium__metastasis_020",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069490 Primary1 Core23",
-  "title": "0069490 Primary1 Core23",
+  "sample": "Metastasis 020",
+  "title": "Metastasis 020",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -1888,14 +1888,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069490_primary1_core23.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__metastasis_020.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069490_primary1_core24",
+  "sample_id": "rcc_brm_xenium__metastasis_021",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069490 Primary1 Core24",
-  "title": "0069490 Primary1 Core24",
+  "sample": "Metastasis 021",
+  "title": "Metastasis 021",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -1917,14 +1917,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069490_primary1_core24.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__metastasis_021.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069490_primary1_core25",
+  "sample_id": "rcc_brm_xenium__metastasis_022",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069490 Primary1 Core25",
-  "title": "0069490 Primary1 Core25",
+  "sample": "Metastasis 022",
+  "title": "Metastasis 022",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -1946,14 +1946,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069490_primary1_core25.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__metastasis_022.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069490_primary1_core26",
+  "sample_id": "rcc_brm_xenium__metastasis_023",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069490 Primary1 Core26",
-  "title": "0069490 Primary1 Core26",
+  "sample": "Metastasis 023",
+  "title": "Metastasis 023",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -1975,14 +1975,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069490_primary1_core26.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__metastasis_023.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069490_primary1_core27",
+  "sample_id": "rcc_brm_xenium__metastasis_024",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069490 Primary1 Core27",
-  "title": "0069490 Primary1 Core27",
+  "sample": "Metastasis 024",
+  "title": "Metastasis 024",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -2004,14 +2004,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069490_primary1_core27.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__metastasis_024.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069490_primary1_core28",
+  "sample_id": "rcc_brm_xenium__metastasis_025",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069490 Primary1 Core28",
-  "title": "0069490 Primary1 Core28",
+  "sample": "Metastasis 025",
+  "title": "Metastasis 025",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -2033,14 +2033,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069490_primary1_core28.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__metastasis_025.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069490_primary1_core29",
+  "sample_id": "rcc_brm_xenium__metastasis_026",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069490 Primary1 Core29",
-  "title": "0069490 Primary1 Core29",
+  "sample": "Metastasis 026",
+  "title": "Metastasis 026",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -2062,14 +2062,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069490_primary1_core29.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__metastasis_026.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069490_primary1_core3",
+  "sample_id": "rcc_brm_xenium__metastasis_027",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069490 Primary1 Core3",
-  "title": "0069490 Primary1 Core3",
+  "sample": "Metastasis 027",
+  "title": "Metastasis 027",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -2091,14 +2091,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069490_primary1_core3.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__metastasis_027.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069490_primary1_core30",
+  "sample_id": "rcc_brm_xenium__metastasis_028",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069490 Primary1 Core30",
-  "title": "0069490 Primary1 Core30",
+  "sample": "Metastasis 028",
+  "title": "Metastasis 028",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -2120,14 +2120,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069490_primary1_core30.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__metastasis_028.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069490_primary1_core31",
+  "sample_id": "rcc_brm_xenium__metastasis_029",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069490 Primary1 Core31",
-  "title": "0069490 Primary1 Core31",
+  "sample": "Metastasis 029",
+  "title": "Metastasis 029",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -2149,14 +2149,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069490_primary1_core31.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__metastasis_029.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069490_primary1_core32",
+  "sample_id": "rcc_brm_xenium__metastasis_030",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069490 Primary1 Core32",
-  "title": "0069490 Primary1 Core32",
+  "sample": "Metastasis 030",
+  "title": "Metastasis 030",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -2178,14 +2178,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069490_primary1_core32.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__metastasis_030.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069490_primary1_core4",
+  "sample_id": "rcc_brm_xenium__metastasis_031",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069490 Primary1 Core4",
-  "title": "0069490 Primary1 Core4",
+  "sample": "Metastasis 031",
+  "title": "Metastasis 031",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -2207,14 +2207,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069490_primary1_core4.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__metastasis_031.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069490_primary1_core5",
+  "sample_id": "rcc_brm_xenium__metastasis_032",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069490 Primary1 Core5",
-  "title": "0069490 Primary1 Core5",
+  "sample": "Metastasis 032",
+  "title": "Metastasis 032",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -2236,14 +2236,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069490_primary1_core5.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__metastasis_032.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069490_primary1_core6",
+  "sample_id": "rcc_brm_xenium__metastasis_033",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069490 Primary1 Core6",
-  "title": "0069490 Primary1 Core6",
+  "sample": "Metastasis 033",
+  "title": "Metastasis 033",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -2265,14 +2265,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069490_primary1_core6.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__metastasis_033.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069490_primary1_core7",
+  "sample_id": "rcc_brm_xenium__metastasis_034",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069490 Primary1 Core7",
-  "title": "0069490 Primary1 Core7",
+  "sample": "Metastasis 034",
+  "title": "Metastasis 034",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -2294,14 +2294,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069490_primary1_core7.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__metastasis_034.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069490_primary1_core8",
+  "sample_id": "rcc_brm_xenium__metastasis_035",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069490 Primary1 Core8",
-  "title": "0069490 Primary1 Core8",
+  "sample": "Metastasis 035",
+  "title": "Metastasis 035",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -2323,14 +2323,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069490_primary1_core8.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__metastasis_035.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069490_primary1_core9",
+  "sample_id": "rcc_brm_xenium__primary_001",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069490 Primary1 Core9",
-  "title": "0069490 Primary1 Core9",
+  "sample": "Primary 001",
+  "title": "Primary 001",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -2352,14 +2352,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069490_primary1_core9.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_001.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069555_primary1and2_core0",
+  "sample_id": "rcc_brm_xenium__primary_002",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069555 Primary1And2 Core0",
-  "title": "0069555 Primary1And2 Core0",
+  "sample": "Primary 002",
+  "title": "Primary 002",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -2381,14 +2381,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069555_primary1and2_core0.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_002.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069555_primary1and2_core1",
+  "sample_id": "rcc_brm_xenium__primary_003",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069555 Primary1And2 Core1",
-  "title": "0069555 Primary1And2 Core1",
+  "sample": "Primary 003",
+  "title": "Primary 003",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -2410,14 +2410,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069555_primary1and2_core1.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_003.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069555_primary1and2_core10",
+  "sample_id": "rcc_brm_xenium__primary_004",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069555 Primary1And2 Core10",
-  "title": "0069555 Primary1And2 Core10",
+  "sample": "Primary 004",
+  "title": "Primary 004",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -2439,14 +2439,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069555_primary1and2_core10.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_004.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069555_primary1and2_core11",
+  "sample_id": "rcc_brm_xenium__primary_005",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069555 Primary1And2 Core11",
-  "title": "0069555 Primary1And2 Core11",
+  "sample": "Primary 005",
+  "title": "Primary 005",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -2468,14 +2468,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069555_primary1and2_core11.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_005.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069555_primary1and2_core12",
+  "sample_id": "rcc_brm_xenium__primary_006",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069555 Primary1And2 Core12",
-  "title": "0069555 Primary1And2 Core12",
+  "sample": "Primary 006",
+  "title": "Primary 006",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -2497,14 +2497,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069555_primary1and2_core12.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_006.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069555_primary1and2_core13",
+  "sample_id": "rcc_brm_xenium__primary_007",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069555 Primary1And2 Core13",
-  "title": "0069555 Primary1And2 Core13",
+  "sample": "Primary 007",
+  "title": "Primary 007",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -2526,14 +2526,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069555_primary1and2_core13.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_007.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069555_primary1and2_core14",
+  "sample_id": "rcc_brm_xenium__primary_008",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069555 Primary1And2 Core14",
-  "title": "0069555 Primary1And2 Core14",
+  "sample": "Primary 008",
+  "title": "Primary 008",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -2555,14 +2555,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069555_primary1and2_core14.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_008.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069555_primary1and2_core15",
+  "sample_id": "rcc_brm_xenium__primary_009",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069555 Primary1And2 Core15",
-  "title": "0069555 Primary1And2 Core15",
+  "sample": "Primary 009",
+  "title": "Primary 009",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -2584,14 +2584,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069555_primary1and2_core15.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_009.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069555_primary1and2_core16",
+  "sample_id": "rcc_brm_xenium__primary_010",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069555 Primary1And2 Core16",
-  "title": "0069555 Primary1And2 Core16",
+  "sample": "Primary 010",
+  "title": "Primary 010",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -2613,14 +2613,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069555_primary1and2_core16.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_010.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069555_primary1and2_core17",
+  "sample_id": "rcc_brm_xenium__primary_011",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069555 Primary1And2 Core17",
-  "title": "0069555 Primary1And2 Core17",
+  "sample": "Primary 011",
+  "title": "Primary 011",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -2642,14 +2642,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069555_primary1and2_core17.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_011.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069555_primary1and2_core18",
+  "sample_id": "rcc_brm_xenium__primary_012",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069555 Primary1And2 Core18",
-  "title": "0069555 Primary1And2 Core18",
+  "sample": "Primary 012",
+  "title": "Primary 012",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -2671,14 +2671,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069555_primary1and2_core18.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_012.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069555_primary1and2_core19",
+  "sample_id": "rcc_brm_xenium__primary_013",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069555 Primary1And2 Core19",
-  "title": "0069555 Primary1And2 Core19",
+  "sample": "Primary 013",
+  "title": "Primary 013",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -2700,14 +2700,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069555_primary1and2_core19.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_013.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069555_primary1and2_core2",
+  "sample_id": "rcc_brm_xenium__primary_014",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069555 Primary1And2 Core2",
-  "title": "0069555 Primary1And2 Core2",
+  "sample": "Primary 014",
+  "title": "Primary 014",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -2729,14 +2729,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069555_primary1and2_core2.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_014.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069555_primary1and2_core20",
+  "sample_id": "rcc_brm_xenium__primary_015",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069555 Primary1And2 Core20",
-  "title": "0069555 Primary1And2 Core20",
+  "sample": "Primary 015",
+  "title": "Primary 015",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -2758,14 +2758,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069555_primary1and2_core20.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_015.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069555_primary1and2_core21",
+  "sample_id": "rcc_brm_xenium__primary_016",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069555 Primary1And2 Core21",
-  "title": "0069555 Primary1And2 Core21",
+  "sample": "Primary 016",
+  "title": "Primary 016",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -2787,14 +2787,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069555_primary1and2_core21.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_016.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069555_primary1and2_core3",
+  "sample_id": "rcc_brm_xenium__primary_017",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069555 Primary1And2 Core3",
-  "title": "0069555 Primary1And2 Core3",
+  "sample": "Primary 017",
+  "title": "Primary 017",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -2816,14 +2816,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069555_primary1and2_core3.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_017.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069555_primary1and2_core4",
+  "sample_id": "rcc_brm_xenium__primary_018",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069555 Primary1And2 Core4",
-  "title": "0069555 Primary1And2 Core4",
+  "sample": "Primary 018",
+  "title": "Primary 018",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -2845,14 +2845,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069555_primary1and2_core4.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_018.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069555_primary1and2_core5",
+  "sample_id": "rcc_brm_xenium__primary_019",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069555 Primary1And2 Core5",
-  "title": "0069555 Primary1And2 Core5",
+  "sample": "Primary 019",
+  "title": "Primary 019",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -2874,14 +2874,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069555_primary1and2_core5.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_019.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069555_primary1and2_core6",
+  "sample_id": "rcc_brm_xenium__primary_020",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069555 Primary1And2 Core6",
-  "title": "0069555 Primary1And2 Core6",
+  "sample": "Primary 020",
+  "title": "Primary 020",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -2903,14 +2903,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069555_primary1and2_core6.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_020.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069555_primary1and2_core7",
+  "sample_id": "rcc_brm_xenium__primary_021",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069555 Primary1And2 Core7",
-  "title": "0069555 Primary1And2 Core7",
+  "sample": "Primary 021",
+  "title": "Primary 021",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -2932,14 +2932,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069555_primary1and2_core7.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_021.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069555_primary1and2_core8",
+  "sample_id": "rcc_brm_xenium__primary_022",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069555 Primary1And2 Core8",
-  "title": "0069555 Primary1And2 Core8",
+  "sample": "Primary 022",
+  "title": "Primary 022",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -2961,14 +2961,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069555_primary1and2_core8.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_022.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069555_primary1and2_core9",
+  "sample_id": "rcc_brm_xenium__primary_023",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069555 Primary1And2 Core9",
-  "title": "0069555 Primary1And2 Core9",
+  "sample": "Primary 023",
+  "title": "Primary 023",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -2990,14 +2990,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069555_primary1and2_core9.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_023.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069556_primary2_core0",
+  "sample_id": "rcc_brm_xenium__primary_024",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069556 Primary2 Core0",
-  "title": "0069556 Primary2 Core0",
+  "sample": "Primary 024",
+  "title": "Primary 024",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -3019,14 +3019,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069556_primary2_core0.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_024.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069556_primary2_core1",
+  "sample_id": "rcc_brm_xenium__primary_025",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069556 Primary2 Core1",
-  "title": "0069556 Primary2 Core1",
+  "sample": "Primary 025",
+  "title": "Primary 025",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -3048,14 +3048,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069556_primary2_core1.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_025.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069556_primary2_core10",
+  "sample_id": "rcc_brm_xenium__primary_026",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069556 Primary2 Core10",
-  "title": "0069556 Primary2 Core10",
+  "sample": "Primary 026",
+  "title": "Primary 026",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -3077,14 +3077,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069556_primary2_core10.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_026.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069556_primary2_core11",
+  "sample_id": "rcc_brm_xenium__primary_027",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069556 Primary2 Core11",
-  "title": "0069556 Primary2 Core11",
+  "sample": "Primary 027",
+  "title": "Primary 027",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -3106,14 +3106,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069556_primary2_core11.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_027.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069556_primary2_core12",
+  "sample_id": "rcc_brm_xenium__primary_028",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069556 Primary2 Core12",
-  "title": "0069556 Primary2 Core12",
+  "sample": "Primary 028",
+  "title": "Primary 028",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -3135,14 +3135,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069556_primary2_core12.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_028.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069556_primary2_core13",
+  "sample_id": "rcc_brm_xenium__primary_029",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069556 Primary2 Core13",
-  "title": "0069556 Primary2 Core13",
+  "sample": "Primary 029",
+  "title": "Primary 029",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -3164,14 +3164,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069556_primary2_core13.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_029.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069556_primary2_core14",
+  "sample_id": "rcc_brm_xenium__primary_030",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069556 Primary2 Core14",
-  "title": "0069556 Primary2 Core14",
+  "sample": "Primary 030",
+  "title": "Primary 030",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -3193,14 +3193,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069556_primary2_core14.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_030.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069556_primary2_core15",
+  "sample_id": "rcc_brm_xenium__primary_031",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069556 Primary2 Core15",
-  "title": "0069556 Primary2 Core15",
+  "sample": "Primary 031",
+  "title": "Primary 031",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -3222,14 +3222,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069556_primary2_core15.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_031.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069556_primary2_core16",
+  "sample_id": "rcc_brm_xenium__primary_032",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069556 Primary2 Core16",
-  "title": "0069556 Primary2 Core16",
+  "sample": "Primary 032",
+  "title": "Primary 032",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -3251,14 +3251,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069556_primary2_core16.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_032.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069556_primary2_core17",
+  "sample_id": "rcc_brm_xenium__primary_033",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069556 Primary2 Core17",
-  "title": "0069556 Primary2 Core17",
+  "sample": "Primary 033",
+  "title": "Primary 033",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -3280,14 +3280,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069556_primary2_core17.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_033.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069556_primary2_core18",
+  "sample_id": "rcc_brm_xenium__primary_034",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069556 Primary2 Core18",
-  "title": "0069556 Primary2 Core18",
+  "sample": "Primary 034",
+  "title": "Primary 034",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -3309,14 +3309,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069556_primary2_core18.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_034.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069556_primary2_core19",
+  "sample_id": "rcc_brm_xenium__primary_035",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069556 Primary2 Core19",
-  "title": "0069556 Primary2 Core19",
+  "sample": "Primary 035",
+  "title": "Primary 035",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -3338,14 +3338,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069556_primary2_core19.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_035.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069556_primary2_core2",
+  "sample_id": "rcc_brm_xenium__primary_036",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069556 Primary2 Core2",
-  "title": "0069556 Primary2 Core2",
+  "sample": "Primary 036",
+  "title": "Primary 036",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -3367,14 +3367,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069556_primary2_core2.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_036.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069556_primary2_core20",
+  "sample_id": "rcc_brm_xenium__primary_037",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069556 Primary2 Core20",
-  "title": "0069556 Primary2 Core20",
+  "sample": "Primary 037",
+  "title": "Primary 037",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -3396,14 +3396,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069556_primary2_core20.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_037.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069556_primary2_core21",
+  "sample_id": "rcc_brm_xenium__primary_038",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069556 Primary2 Core21",
-  "title": "0069556 Primary2 Core21",
+  "sample": "Primary 038",
+  "title": "Primary 038",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -3425,14 +3425,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069556_primary2_core21.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_038.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069556_primary2_core22",
+  "sample_id": "rcc_brm_xenium__primary_039",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069556 Primary2 Core22",
-  "title": "0069556 Primary2 Core22",
+  "sample": "Primary 039",
+  "title": "Primary 039",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -3454,14 +3454,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069556_primary2_core22.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_039.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069556_primary2_core23",
+  "sample_id": "rcc_brm_xenium__primary_040",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069556 Primary2 Core23",
-  "title": "0069556 Primary2 Core23",
+  "sample": "Primary 040",
+  "title": "Primary 040",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -3483,14 +3483,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069556_primary2_core23.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_040.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069556_primary2_core24",
+  "sample_id": "rcc_brm_xenium__primary_041",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069556 Primary2 Core24",
-  "title": "0069556 Primary2 Core24",
+  "sample": "Primary 041",
+  "title": "Primary 041",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -3512,14 +3512,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069556_primary2_core24.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_041.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069556_primary2_core25",
+  "sample_id": "rcc_brm_xenium__primary_042",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069556 Primary2 Core25",
-  "title": "0069556 Primary2 Core25",
+  "sample": "Primary 042",
+  "title": "Primary 042",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -3541,14 +3541,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069556_primary2_core25.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_042.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069556_primary2_core26",
+  "sample_id": "rcc_brm_xenium__primary_043",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069556 Primary2 Core26",
-  "title": "0069556 Primary2 Core26",
+  "sample": "Primary 043",
+  "title": "Primary 043",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -3570,14 +3570,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069556_primary2_core26.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_043.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069556_primary2_core27",
+  "sample_id": "rcc_brm_xenium__primary_044",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069556 Primary2 Core27",
-  "title": "0069556 Primary2 Core27",
+  "sample": "Primary 044",
+  "title": "Primary 044",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -3599,14 +3599,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069556_primary2_core27.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_044.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069556_primary2_core28",
+  "sample_id": "rcc_brm_xenium__primary_045",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069556 Primary2 Core28",
-  "title": "0069556 Primary2 Core28",
+  "sample": "Primary 045",
+  "title": "Primary 045",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -3628,14 +3628,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069556_primary2_core28.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_045.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069556_primary2_core29",
+  "sample_id": "rcc_brm_xenium__primary_046",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069556 Primary2 Core29",
-  "title": "0069556 Primary2 Core29",
+  "sample": "Primary 046",
+  "title": "Primary 046",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -3657,14 +3657,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069556_primary2_core29.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_046.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069556_primary2_core3",
+  "sample_id": "rcc_brm_xenium__primary_047",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069556 Primary2 Core3",
-  "title": "0069556 Primary2 Core3",
+  "sample": "Primary 047",
+  "title": "Primary 047",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -3686,14 +3686,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069556_primary2_core3.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_047.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069556_primary2_core30",
+  "sample_id": "rcc_brm_xenium__primary_048",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069556 Primary2 Core30",
-  "title": "0069556 Primary2 Core30",
+  "sample": "Primary 048",
+  "title": "Primary 048",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -3715,14 +3715,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069556_primary2_core30.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_048.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069556_primary2_core31",
+  "sample_id": "rcc_brm_xenium__primary_049",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069556 Primary2 Core31",
-  "title": "0069556 Primary2 Core31",
+  "sample": "Primary 049",
+  "title": "Primary 049",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -3744,14 +3744,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069556_primary2_core31.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_049.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069556_primary2_core4",
+  "sample_id": "rcc_brm_xenium__primary_050",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069556 Primary2 Core4",
-  "title": "0069556 Primary2 Core4",
+  "sample": "Primary 050",
+  "title": "Primary 050",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -3773,14 +3773,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069556_primary2_core4.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_050.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069556_primary2_core5",
+  "sample_id": "rcc_brm_xenium__primary_051",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069556 Primary2 Core5",
-  "title": "0069556 Primary2 Core5",
+  "sample": "Primary 051",
+  "title": "Primary 051",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -3802,14 +3802,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069556_primary2_core5.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_051.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069556_primary2_core6",
+  "sample_id": "rcc_brm_xenium__primary_052",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069556 Primary2 Core6",
-  "title": "0069556 Primary2 Core6",
+  "sample": "Primary 052",
+  "title": "Primary 052",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -3831,14 +3831,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069556_primary2_core6.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_052.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069556_primary2_core7",
+  "sample_id": "rcc_brm_xenium__primary_053",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069556 Primary2 Core7",
-  "title": "0069556 Primary2 Core7",
+  "sample": "Primary 053",
+  "title": "Primary 053",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -3860,14 +3860,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069556_primary2_core7.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_053.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069556_primary2_core8",
+  "sample_id": "rcc_brm_xenium__primary_054",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069556 Primary2 Core8",
-  "title": "0069556 Primary2 Core8",
+  "sample": "Primary 054",
+  "title": "Primary 054",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -3889,14 +3889,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069556_primary2_core8.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_054.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__0069556_primary2_core9",
+  "sample_id": "rcc_brm_xenium__primary_055",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "0069556 Primary2 Core9",
-  "title": "0069556 Primary2 Core9",
+  "sample": "Primary 055",
+  "title": "Primary 055",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -3918,14 +3918,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__0069556_primary2_core9.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_055.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx1_core0",
+  "sample_id": "rcc_brm_xenium__primary_056",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx1 Core0",
-  "title": "Pretx1 Core0",
+  "sample": "Primary 056",
+  "title": "Primary 056",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -3947,14 +3947,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx1_core0.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_056.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx1_core1",
+  "sample_id": "rcc_brm_xenium__primary_057",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx1 Core1",
-  "title": "Pretx1 Core1",
+  "sample": "Primary 057",
+  "title": "Primary 057",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -3976,14 +3976,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx1_core1.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_057.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx1_core10",
+  "sample_id": "rcc_brm_xenium__primary_058",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx1 Core10",
-  "title": "Pretx1 Core10",
+  "sample": "Primary 058",
+  "title": "Primary 058",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -4005,14 +4005,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx1_core10.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_058.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx1_core11",
+  "sample_id": "rcc_brm_xenium__primary_059",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx1 Core11",
-  "title": "Pretx1 Core11",
+  "sample": "Primary 059",
+  "title": "Primary 059",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -4034,14 +4034,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx1_core11.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_059.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx1_core12",
+  "sample_id": "rcc_brm_xenium__primary_060",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx1 Core12",
-  "title": "Pretx1 Core12",
+  "sample": "Primary 060",
+  "title": "Primary 060",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -4063,14 +4063,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx1_core12.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_060.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx1_core13",
+  "sample_id": "rcc_brm_xenium__primary_061",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx1 Core13",
-  "title": "Pretx1 Core13",
+  "sample": "Primary 061",
+  "title": "Primary 061",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -4092,14 +4092,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx1_core13.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_061.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx1_core14",
+  "sample_id": "rcc_brm_xenium__primary_062",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx1 Core14",
-  "title": "Pretx1 Core14",
+  "sample": "Primary 062",
+  "title": "Primary 062",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -4121,14 +4121,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx1_core14.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_062.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx1_core15",
+  "sample_id": "rcc_brm_xenium__primary_063",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx1 Core15",
-  "title": "Pretx1 Core15",
+  "sample": "Primary 063",
+  "title": "Primary 063",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -4150,14 +4150,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx1_core15.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_063.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx1_core16",
+  "sample_id": "rcc_brm_xenium__primary_064",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx1 Core16",
-  "title": "Pretx1 Core16",
+  "sample": "Primary 064",
+  "title": "Primary 064",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -4179,14 +4179,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx1_core16.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_064.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx1_core17",
+  "sample_id": "rcc_brm_xenium__primary_065",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx1 Core17",
-  "title": "Pretx1 Core17",
+  "sample": "Primary 065",
+  "title": "Primary 065",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -4208,14 +4208,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx1_core17.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_065.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx1_core18",
+  "sample_id": "rcc_brm_xenium__primary_066",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx1 Core18",
-  "title": "Pretx1 Core18",
+  "sample": "Primary 066",
+  "title": "Primary 066",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -4237,14 +4237,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx1_core18.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_066.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx1_core19",
+  "sample_id": "rcc_brm_xenium__primary_067",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx1 Core19",
-  "title": "Pretx1 Core19",
+  "sample": "Primary 067",
+  "title": "Primary 067",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -4266,14 +4266,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx1_core19.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_067.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx1_core2",
+  "sample_id": "rcc_brm_xenium__primary_068",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx1 Core2",
-  "title": "Pretx1 Core2",
+  "sample": "Primary 068",
+  "title": "Primary 068",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -4295,14 +4295,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx1_core2.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_068.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx1_core20",
+  "sample_id": "rcc_brm_xenium__primary_069",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx1 Core20",
-  "title": "Pretx1 Core20",
+  "sample": "Primary 069",
+  "title": "Primary 069",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -4324,14 +4324,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx1_core20.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_069.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx1_core22",
+  "sample_id": "rcc_brm_xenium__primary_070",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx1 Core22",
-  "title": "Pretx1 Core22",
+  "sample": "Primary 070",
+  "title": "Primary 070",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -4353,14 +4353,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx1_core22.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_070.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx1_core23",
+  "sample_id": "rcc_brm_xenium__primary_071",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx1 Core23",
-  "title": "Pretx1 Core23",
+  "sample": "Primary 071",
+  "title": "Primary 071",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -4382,14 +4382,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx1_core23.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_071.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx1_core24",
+  "sample_id": "rcc_brm_xenium__primary_072",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx1 Core24",
-  "title": "Pretx1 Core24",
+  "sample": "Primary 072",
+  "title": "Primary 072",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -4411,14 +4411,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx1_core24.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_072.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx1_core25",
+  "sample_id": "rcc_brm_xenium__primary_073",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx1 Core25",
-  "title": "Pretx1 Core25",
+  "sample": "Primary 073",
+  "title": "Primary 073",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -4440,14 +4440,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx1_core25.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_073.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx1_core26",
+  "sample_id": "rcc_brm_xenium__primary_074",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx1 Core26",
-  "title": "Pretx1 Core26",
+  "sample": "Primary 074",
+  "title": "Primary 074",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -4469,14 +4469,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx1_core26.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_074.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx1_core28",
+  "sample_id": "rcc_brm_xenium__primary_075",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx1 Core28",
-  "title": "Pretx1 Core28",
+  "sample": "Primary 075",
+  "title": "Primary 075",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -4498,14 +4498,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx1_core28.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_075.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx1_core29",
+  "sample_id": "rcc_brm_xenium__primary_076",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx1 Core29",
-  "title": "Pretx1 Core29",
+  "sample": "Primary 076",
+  "title": "Primary 076",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -4527,14 +4527,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx1_core29.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_076.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx1_core3",
+  "sample_id": "rcc_brm_xenium__primary_077",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx1 Core3",
-  "title": "Pretx1 Core3",
+  "sample": "Primary 077",
+  "title": "Primary 077",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -4556,14 +4556,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx1_core3.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_077.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx1_core30",
+  "sample_id": "rcc_brm_xenium__primary_078",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx1 Core30",
-  "title": "Pretx1 Core30",
+  "sample": "Primary 078",
+  "title": "Primary 078",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -4585,14 +4585,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx1_core30.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_078.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx1_core5",
+  "sample_id": "rcc_brm_xenium__primary_079",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx1 Core5",
-  "title": "Pretx1 Core5",
+  "sample": "Primary 079",
+  "title": "Primary 079",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -4614,14 +4614,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx1_core5.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_079.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx1_core6",
+  "sample_id": "rcc_brm_xenium__primary_080",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx1 Core6",
-  "title": "Pretx1 Core6",
+  "sample": "Primary 080",
+  "title": "Primary 080",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -4643,14 +4643,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx1_core6.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_080.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx1_core7",
+  "sample_id": "rcc_brm_xenium__primary_081",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx1 Core7",
-  "title": "Pretx1 Core7",
+  "sample": "Primary 081",
+  "title": "Primary 081",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -4672,14 +4672,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx1_core7.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_081.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx1_core8",
+  "sample_id": "rcc_brm_xenium__primary_082",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx1 Core8",
-  "title": "Pretx1 Core8",
+  "sample": "Primary 082",
+  "title": "Primary 082",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -4701,14 +4701,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx1_core8.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_082.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx1_core9",
+  "sample_id": "rcc_brm_xenium__primary_083",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx1 Core9",
-  "title": "Pretx1 Core9",
+  "sample": "Primary 083",
+  "title": "Primary 083",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -4730,14 +4730,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx1_core9.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_083.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx3_core0",
+  "sample_id": "rcc_brm_xenium__primary_084",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx3 Core0",
-  "title": "Pretx3 Core0",
+  "sample": "Primary 084",
+  "title": "Primary 084",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -4759,14 +4759,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx3_core0.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_084.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx3_core1",
+  "sample_id": "rcc_brm_xenium__primary_085",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx3 Core1",
-  "title": "Pretx3 Core1",
+  "sample": "Primary 085",
+  "title": "Primary 085",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -4788,14 +4788,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx3_core1.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_085.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx3_core10",
+  "sample_id": "rcc_brm_xenium__primary_086",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx3 Core10",
-  "title": "Pretx3 Core10",
+  "sample": "Primary 086",
+  "title": "Primary 086",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -4817,14 +4817,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx3_core10.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_086.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx3_core11",
+  "sample_id": "rcc_brm_xenium__primary_087",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx3 Core11",
-  "title": "Pretx3 Core11",
+  "sample": "Primary 087",
+  "title": "Primary 087",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -4846,14 +4846,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx3_core11.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_087.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx3_core12",
+  "sample_id": "rcc_brm_xenium__primary_088",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx3 Core12",
-  "title": "Pretx3 Core12",
+  "sample": "Primary 088",
+  "title": "Primary 088",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -4875,14 +4875,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx3_core12.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_088.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx3_core13",
+  "sample_id": "rcc_brm_xenium__primary_089",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx3 Core13",
-  "title": "Pretx3 Core13",
+  "sample": "Primary 089",
+  "title": "Primary 089",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -4904,14 +4904,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx3_core13.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_089.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx3_core14",
+  "sample_id": "rcc_brm_xenium__primary_090",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx3 Core14",
-  "title": "Pretx3 Core14",
+  "sample": "Primary 090",
+  "title": "Primary 090",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -4933,14 +4933,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx3_core14.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_090.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx3_core15",
+  "sample_id": "rcc_brm_xenium__primary_091",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx3 Core15",
-  "title": "Pretx3 Core15",
+  "sample": "Primary 091",
+  "title": "Primary 091",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -4962,14 +4962,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx3_core15.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_091.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx3_core17",
+  "sample_id": "rcc_brm_xenium__primary_092",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx3 Core17",
-  "title": "Pretx3 Core17",
+  "sample": "Primary 092",
+  "title": "Primary 092",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -4991,14 +4991,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx3_core17.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_092.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx3_core19",
+  "sample_id": "rcc_brm_xenium__primary_093",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx3 Core19",
-  "title": "Pretx3 Core19",
+  "sample": "Primary 093",
+  "title": "Primary 093",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -5020,14 +5020,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx3_core19.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_093.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx3_core2",
+  "sample_id": "rcc_brm_xenium__primary_094",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx3 Core2",
-  "title": "Pretx3 Core2",
+  "sample": "Primary 094",
+  "title": "Primary 094",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -5049,14 +5049,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx3_core2.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_094.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx3_core20",
+  "sample_id": "rcc_brm_xenium__primary_095",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx3 Core20",
-  "title": "Pretx3 Core20",
+  "sample": "Primary 095",
+  "title": "Primary 095",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -5078,14 +5078,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx3_core20.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_095.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx3_core21",
+  "sample_id": "rcc_brm_xenium__primary_096",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx3 Core21",
-  "title": "Pretx3 Core21",
+  "sample": "Primary 096",
+  "title": "Primary 096",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -5107,14 +5107,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx3_core21.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_096.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx3_core22",
+  "sample_id": "rcc_brm_xenium__primary_097",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx3 Core22",
-  "title": "Pretx3 Core22",
+  "sample": "Primary 097",
+  "title": "Primary 097",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -5136,14 +5136,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx3_core22.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_097.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx3_core23",
+  "sample_id": "rcc_brm_xenium__primary_098",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx3 Core23",
-  "title": "Pretx3 Core23",
+  "sample": "Primary 098",
+  "title": "Primary 098",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -5165,14 +5165,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx3_core23.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_098.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx3_core24",
+  "sample_id": "rcc_brm_xenium__primary_099",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx3 Core24",
-  "title": "Pretx3 Core24",
+  "sample": "Primary 099",
+  "title": "Primary 099",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -5194,14 +5194,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx3_core24.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_099.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx3_core25",
+  "sample_id": "rcc_brm_xenium__primary_100",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx3 Core25",
-  "title": "Pretx3 Core25",
+  "sample": "Primary 100",
+  "title": "Primary 100",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -5223,14 +5223,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx3_core25.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_100.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx3_core26",
+  "sample_id": "rcc_brm_xenium__primary_101",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx3 Core26",
-  "title": "Pretx3 Core26",
+  "sample": "Primary 101",
+  "title": "Primary 101",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -5252,14 +5252,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx3_core26.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_101.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx3_core27",
+  "sample_id": "rcc_brm_xenium__primary_102",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx3 Core27",
-  "title": "Pretx3 Core27",
+  "sample": "Primary 102",
+  "title": "Primary 102",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -5281,14 +5281,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx3_core27.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_102.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx3_core29",
+  "sample_id": "rcc_brm_xenium__primary_103",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx3 Core29",
-  "title": "Pretx3 Core29",
+  "sample": "Primary 103",
+  "title": "Primary 103",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -5310,14 +5310,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx3_core29.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_103.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx3_core3",
+  "sample_id": "rcc_brm_xenium__primary_104",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx3 Core3",
-  "title": "Pretx3 Core3",
+  "sample": "Primary 104",
+  "title": "Primary 104",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -5339,14 +5339,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx3_core3.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_104.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx3_core30",
+  "sample_id": "rcc_brm_xenium__primary_105",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx3 Core30",
-  "title": "Pretx3 Core30",
+  "sample": "Primary 105",
+  "title": "Primary 105",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -5368,14 +5368,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx3_core30.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_105.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx3_core31",
+  "sample_id": "rcc_brm_xenium__primary_106",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx3 Core31",
-  "title": "Pretx3 Core31",
+  "sample": "Primary 106",
+  "title": "Primary 106",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -5397,14 +5397,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx3_core31.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_106.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx3_core4",
+  "sample_id": "rcc_brm_xenium__primary_107",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx3 Core4",
-  "title": "Pretx3 Core4",
+  "sample": "Primary 107",
+  "title": "Primary 107",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -5426,14 +5426,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx3_core4.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_107.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx3_core5",
+  "sample_id": "rcc_brm_xenium__primary_108",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx3 Core5",
-  "title": "Pretx3 Core5",
+  "sample": "Primary 108",
+  "title": "Primary 108",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -5455,14 +5455,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx3_core5.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_108.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx3_core6",
+  "sample_id": "rcc_brm_xenium__primary_109",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx3 Core6",
-  "title": "Pretx3 Core6",
+  "sample": "Primary 109",
+  "title": "Primary 109",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -5484,14 +5484,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx3_core6.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_109.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx3_core7",
+  "sample_id": "rcc_brm_xenium__primary_110",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx3 Core7",
-  "title": "Pretx3 Core7",
+  "sample": "Primary 110",
+  "title": "Primary 110",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -5513,14 +5513,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx3_core7.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_110.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx3_core8",
+  "sample_id": "rcc_brm_xenium__primary_111",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx3 Core8",
-  "title": "Pretx3 Core8",
+  "sample": "Primary 111",
+  "title": "Primary 111",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -5542,14 +5542,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx3_core8.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_111.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__pretx3_core9",
+  "sample_id": "rcc_brm_xenium__primary_112",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "Pretx3 Core9",
-  "title": "Pretx3 Core9",
+  "sample": "Primary 112",
+  "title": "Primary 112",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -5571,14 +5571,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__pretx3_core9.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_112.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__S_lungm",
+  "sample_id": "rcc_brm_xenium__primary_113",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "S Lungm",
-  "title": "S Lungm",
+  "sample": "Primary 113",
+  "title": "Primary 113",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -5600,14 +5600,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__S_lungm.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_113.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__S20_15120_untreated",
+  "sample_id": "rcc_brm_xenium__primary_114",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "S20 15120 Untreated",
-  "title": "S20 15120 Untreated",
+  "sample": "Primary 114",
+  "title": "Primary 114",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -5629,14 +5629,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__S20_15120_untreated.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_114.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__S20_16448_untreated",
+  "sample_id": "rcc_brm_xenium__primary_115",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "S20 16448 Untreated",
-  "title": "S20 16448 Untreated",
+  "sample": "Primary 115",
+  "title": "Primary 115",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -5658,14 +5658,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__S20_16448_untreated.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_115.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__S20_23798_pre_SRS_post_TKI_IO",
+  "sample_id": "rcc_brm_xenium__primary_116",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "S20 23798 Pre Srs Post Tki Io",
-  "title": "S20 23798 Pre Srs Post Tki Io",
+  "sample": "Primary 116",
+  "title": "Primary 116",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -5687,14 +5687,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__S20_23798_pre_SRS_post_TKI_IO.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_116.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__S20_59277_VEGF_TKI_PD1_PDL1_IO_PARP_region1",
+  "sample_id": "rcc_brm_xenium__primary_117",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "S20 59277 Vegf Tki Pd1 Pdl1 Io Parp Region1",
-  "title": "S20 59277 Vegf Tki Pd1 Pdl1 Io Parp Region1",
+  "sample": "Primary 117",
+  "title": "Primary 117",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -5716,14 +5716,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__S20_59277_VEGF_TKI_PD1_PDL1_IO_PARP_region1.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_117.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__S20_59277_VEGF_TKI_PD1_PDL1_IO_PARP_region2",
+  "sample_id": "rcc_brm_xenium__primary_118",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "S20 59277 Vegf Tki Pd1 Pdl1 Io Parp Region2",
-  "title": "S20 59277 Vegf Tki Pd1 Pdl1 Io Parp Region2",
+  "sample": "Primary 118",
+  "title": "Primary 118",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -5745,14 +5745,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__S20_59277_VEGF_TKI_PD1_PDL1_IO_PARP_region2.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_118.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__S20_65888_VEGF_TKI_PD1_IO",
+  "sample_id": "rcc_brm_xenium__primary_119",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "S20 65888 Vegf Tki Pd1 Io",
-  "title": "S20 65888 Vegf Tki Pd1 Io",
+  "sample": "Primary 119",
+  "title": "Primary 119",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -5774,14 +5774,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__S20_65888_VEGF_TKI_PD1_IO.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_119.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__S22_13186_post_RT_ipi_nivo_IO",
+  "sample_id": "rcc_brm_xenium__primary_120",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "S22 13186 Post Rt Ipi Nivo Io",
-  "title": "S22 13186 Post Rt Ipi Nivo Io",
+  "sample": "Primary 120",
+  "title": "Primary 120",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -5803,14 +5803,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__S22_13186_post_RT_ipi_nivo_IO.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_120.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__S22_71986_untreated",
+  "sample_id": "rcc_brm_xenium__primary_121",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "S22 71986 Untreated",
-  "title": "S22 71986 Untreated",
+  "sample": "Primary 121",
+  "title": "Primary 121",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -5832,14 +5832,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__S22_71986_untreated.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_121.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__S22_72564_post_RT_cabo_nivo_IO",
+  "sample_id": "rcc_brm_xenium__primary_122",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "S22 72564 Post Rt Cabo Nivo Io",
-  "title": "S22 72564 Post Rt Cabo Nivo Io",
+  "sample": "Primary 122",
+  "title": "Primary 122",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -5861,14 +5861,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__S22_72564_post_RT_cabo_nivo_IO.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_122.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__S23_32709_PD1_IO_CTLA4_region1",
+  "sample_id": "rcc_brm_xenium__primary_123",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "S23 32709 Pd1 Io Ctla4 Region1",
-  "title": "S23 32709 Pd1 Io Ctla4 Region1",
+  "sample": "Primary 123",
+  "title": "Primary 123",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -5890,14 +5890,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__S23_32709_PD1_IO_CTLA4_region1.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_123.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__S23_32709_PD1_IO_CTLA4_region2",
+  "sample_id": "rcc_brm_xenium__primary_124",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "S23 32709 Pd1 Io Ctla4 Region2",
-  "title": "S23 32709 Pd1 Io Ctla4 Region2",
+  "sample": "Primary 124",
+  "title": "Primary 124",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -5919,14 +5919,14 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__S23_32709_PD1_IO_CTLA4_region2.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_124.png"
  },
  {
-  "sample_id": "rcc_brm_xenium__S390529_brm",
+  "sample_id": "rcc_brm_xenium__primary_125",
   "dataset": "rcc_brm_xenium",
   "dataset_title": "RCC primary + metastases (in-house)",
-  "sample": "S390529 Brm",
-  "title": "S390529 Brm",
+  "sample": "Primary 125",
+  "title": "Primary 125",
   "category": "Cancer",
   "site": "Kidney",
   "organism": "Human",
@@ -5948,7 +5948,7 @@
    "T/NK",
    "Tumor/Malignant"
   ],
-  "thumb": "gallery/sweep/rcc_brm_xenium__S390529_brm.png"
+  "thumb": "gallery/sweep/rcc_brm_xenium__primary_125.png"
  },
  {
   "sample_id": "xenium_gp_rcc__xenium_gp_rcc",

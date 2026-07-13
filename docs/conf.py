@@ -93,7 +93,6 @@ html_baseurl = "https://nicheverse.readthedocs.io/en/latest/"
 # pydata-sphinx-theme reads the default light/dark mode from html_context.
 html_context = {"default_mode": "dark"}
 html_theme_options = {
-    "github_url": "https://github.com/digvijayky/nicheverse",
     "show_prev_next": False,
     "navbar_align": "left",
     "header_links_before_dropdown": 3,
