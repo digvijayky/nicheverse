@@ -29,10 +29,45 @@ html_theme.sidebar_secondary.remove: true
     </figure>
   </section>
 
+  <section class="nvh-codebook">
+    <figure class="nvh-cb-shot">
+      <img src="_static/home/codebook_core.png" alt="A renal tumor core with every nucleus painted by its learned cell-state code">
+    </figure>
+    <div class="nvh-cb-copy">
+      <span class="nvh-eyebrow">Interpretable by construction</span>
+      <h2 class="nvh-h2">Every cell and niche mapped to an interpretable codebook.</h2>
+      <p class="nvh-p">Each cell is quantized to one of <b>256 learned cell states</b> and each neighborhood to one of <b>32 spatial niches</b>, coupled by cross-attention so identity is always read in tissue context. The same discrete vocabulary transfers, unchanged, from one cohort and platform to the next.</p>
+      <div class="nvh-cb-tags">
+        <span class="nvh-tag"><b>256</b> cell-state codes</span>
+        <span class="nvh-tag"><b>32</b> niche codes</span>
+        <span class="nvh-tag">cross-attention coupled</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="nvh-vocab">
+    <div class="nvh-vocab-copy">
+      <span class="nvh-eyebrow">Recovered, not supervised</span>
+      <h2 class="nvh-h2">An interpretable vocabulary of cell states.</h2>
+      <p class="nvh-p">Correlating the learned code embeddings blocks them into coherent lineages with no labels supplied, epithelium, stroma, endothelium, and the immune compartment separate on their own. Each code carries a stable expression signature you can read, name, and compare across tissues.</p>
+    </div>
+    <figure class="nvh-vocab-shot">
+      <img src="_static/home/codebook_clustermap.png" alt="Hierarchically clustered correlation of the 256 cell-state codes, colored by dominant cell type">
+    </figure>
+  </section>
+
+  <section class="nvh-steps">
+    <ol class="nvh-steplist">
+      <li><span class="nvh-step-n">01</span><h3 class="nvh-step-h">Encode</h3><p class="nvh-step-p">Raw transcript counts and the local neighborhood are read by a shared encoder into a continuous cell embedding.</p></li>
+      <li><span class="nvh-step-n">02</span><h3 class="nvh-step-h">Quantize</h3><p class="nvh-step-p">The embedding snaps to its nearest codebook entry, a single discrete cell state, paired with the niche code for its surroundings.</p></li>
+      <li><span class="nvh-step-n">03</span><h3 class="nvh-step-h">Paint</h3><p class="nvh-step-p">Every cell is colored by the lineage of its assigned code, turning any slide into a reproducible map of states and niches.</p></li>
+    </ol>
+  </section>
+
   <section class="nvh-explore">
     <div class="nvh-circles" aria-hidden="true">
       <img src="_static/gallery/sweep/rcc_brm_xenium__metastasis_003.png" loading="lazy" alt="">
-      <img src="_static/gallery/sweep/cosmx_pancreas__cosmx_pancreas.png" loading="lazy" alt="">
+      <img src="_static/gallery/sweep/wholemouse_pup__wholemouse_pup.png" loading="lazy" alt="">
       <img src="_static/gallery/sweep/pub_tonsil__pub_tonsil.png" loading="lazy" alt="">
       <img src="_static/gallery/sweep/cosmx_multiomic_breast_rna__cosmx_multiomic_breast_rna.png" loading="lazy" alt="">
       <img src="_static/gallery/sweep/pub_ovary_ff__pub_ovary_ff.png" loading="lazy" alt="">
@@ -42,10 +77,26 @@ html_theme.sidebar_secondary.remove: true
       <img src="_static/gallery/sweep/pub_lung_5k__pub_lung_5k.png" loading="lazy" alt="">
     </div>
     <div class="nvh-explore-copy">
-      <h2 class="nvh-h2">Explore the atlas</h2>
-      <p class="nvh-p">One frozen checkpoint, read across <b>381 independent samples</b> from 102 datasets and every accessible platform, Xenium, CosMx, MERFISH, seqFISH, RIBOmap, EEL-FISH. Every cell is painted by the lineage of the cell-state code the model assigns it.</p>
+      <h2 class="nvh-h2">Explore the atlases mapped in the nicheverse</h2>
+      <p class="nvh-p">Read across <b>381 independent samples</b> from 102 datasets and every accessible platform, Xenium, CosMx, MERFISH, seqFISH, RIBOmap, EEL-FISH. Every cell is painted by the lineage of the cell-state code the model assigns it.</p>
       <a class="nvh-btn" href="guides/gallery.html">Browse all samples</a>
     </div>
+  </section>
+
+  <section class="nvh-wordmark" aria-label="NICHEVERSE">
+    <ol class="nvh-acrostic">
+      <li><span class="nvh-ac-l">N</span><span class="nvh-ac-w">atural killer cell</span></li>
+      <li><span class="nvh-ac-l">I</span><span class="nvh-ac-w">nterstitial fibroblast</span></li>
+      <li><span class="nvh-ac-l">C</span><span class="nvh-ac-w">ytotoxic T cell</span></li>
+      <li><span class="nvh-ac-l">H</span><span class="nvh-ac-w">ematopoietic stem cell</span></li>
+      <li><span class="nvh-ac-l">E</span><span class="nvh-ac-w">ndothelial cell</span></li>
+      <li><span class="nvh-ac-l">V</span><span class="nvh-ac-w">ascular smooth muscle cell</span></li>
+      <li><span class="nvh-ac-l">E</span><span class="nvh-ac-w">pithelial cell</span></li>
+      <li><span class="nvh-ac-l">R</span><span class="nvh-ac-w">egulatory T cell</span></li>
+      <li><span class="nvh-ac-l">S</span><span class="nvh-ac-w">tromal cell</span></li>
+      <li><span class="nvh-ac-l">E</span><span class="nvh-ac-w">rythroid progenitor</span></li>
+    </ol>
+    <p class="nvh-wordmark-cap">One vocabulary of cells and niches, read across every tissue in the nicheverse.</p>
   </section>
 </div>
 ```
@@ -64,9 +115,6 @@ Encoder registry: `mlp_deep` (default) / `mlp` / `mlp_plr` / `residual_mlp` / `t
 :::
 :::{grid-item-card} Spatial-aware
 Per-sample graphs (`knn`, `knn_radius` default at 50 microns, `radius`, `delaunay`, `alpha_complex`, `gabriel`, `rng`), inverse-distance aggregation, and opt-in spatial-coherence losses.
-:::
-:::{grid-item-card} Count-native
-Default negative-binomial cell likelihood with a detection hurdle and a Dirichlet-multinomial niche composition term on raw counts, plus transcript-level subcellular context.
 :::
 :::{grid-item-card} Reproducible
 Byte-exact reproduction of the published renal cell carcinoma and brain-metastasis model, guarded by a regression test.

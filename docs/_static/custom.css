@@ -976,9 +976,15 @@ html[data-theme="dark"] .hero-shot img { border-color: #20242b; }
 /* lightbox */
 .gx-lightbox { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; background: rgba(3,4,6,.94); padding: 2.5vmin; -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
 .gx-lightbox[hidden] { display: none; }
-.gx-lb-fig { margin: 0; max-width: 94vw; max-height: 92vh; display: flex; flex-direction: column; align-items: center; }
-.gx-lb-fig img { max-width: 94vw; max-height: 86vh; width: auto; height: auto; border-radius: 10px; background: #000; box-shadow: 0 24px 90px rgba(0,0,0,.6); }
+.gx-lb-stage { display: flex; align-items: center; justify-content: center; gap: 2rem; max-width: 96vw; max-height: 92vh; }
+.gx-lb-fig { margin: 0; max-width: 74vw; max-height: 92vh; display: flex; flex-direction: column; align-items: center; }
+.gx-lb-fig img { max-width: 74vw; max-height: 86vh; width: auto; height: auto; border-radius: 10px; background: #000; box-shadow: 0 24px 90px rgba(0,0,0,.6); }
 .gx-lb-fig figcaption { color: #e9ecef; font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: .85rem; margin-top: .75rem; text-align: center; }
+.gx-lb-key { flex: none; width: 208px; max-height: 86vh; overflow-y: auto; display: flex; flex-direction: column; gap: 0.32rem; padding: 0.2rem 0.4rem 0.2rem 0; }
+.gx-lb-key .gx-lb-key-h { color: #fff; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.13em; text-transform: uppercase; margin-bottom: 0.55rem; }
+.gx-lb-key .gx-k { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: #c9ccd1; padding: 0.1rem 0; letter-spacing: 0; }
+.gx-lb-key .gx-k i { width: 0.72rem; height: 0.72rem; border-radius: 2px; flex: none; }
+@media (max-width: 720px) { .gx-lb-stage { flex-direction: column; gap: 1rem; } .gx-lb-key { width: auto; max-width: 90vw; max-height: 22vh; flex-flow: row wrap; } .gx-lb-fig, .gx-lb-fig img { max-width: 92vw; } }
 .gx-lb-close { position: fixed; top: 1.1rem; right: 1.4rem; z-index: 1001; width: 2.4rem; height: 2.4rem; border: none; border-radius: 50%; background: rgba(255,255,255,.1); color: #fff; font-size: 1.6rem; line-height: 1; cursor: pointer; }
 .gx-lb-close:hover { background: rgba(255,255,255,.2); }
 
@@ -1071,10 +1077,41 @@ html[data-theme="dark"] .hero-shot img { border-color: #20242b; }
 .nvh .nvh-h2 { font-family: var(--nvh-serif); font-weight: 500; font-size: clamp(2rem, 4vw, 3.2rem); line-height: 1.05; color: #fff; margin: 0 0 1.1rem; }
 .nvh .nvh-p { font-size: 1.02rem; line-height: 1.62; color: #b9c0ca; margin: 0 0 1.7rem; max-width: 44ch; }
 .nvh .nvh-p b { color: #fff; font-weight: 600; }
+
+/* codebook + vocabulary showcase rows */
+.nvh-codebook, .nvh-vocab { max-width: 1600px; margin: clamp(3rem, 7vw, 7rem) auto 0; display: grid; grid-template-columns: 1fr 0.95fr; gap: clamp(1.6rem, 4vw, 4.5rem); align-items: center; }
+.nvh-vocab { grid-template-columns: 0.95fr 1fr; }
+.nvh-cb-shot, .nvh-vocab-shot { margin: 0; }
+.nvh-cb-shot img { width: 100%; max-height: min(74vh, 720px); object-fit: contain; display: block; background: #000; border-radius: 8px; }
+.nvh-vocab-shot img { width: 100%; max-height: min(70vh, 680px); object-fit: contain; display: block; background: #0b0b0d; border-radius: 8px; padding: clamp(0.6rem, 1.4vw, 1.2rem); }
+.nvh-cb-tags { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.nvh-tag { font-size: 0.82rem; color: #c9ccd1; border: 1px solid #2a2a2f; border-radius: 999px; padding: 0.4rem 0.9rem; letter-spacing: 0.01em; }
+.nvh-tag b { color: #35cabf; font-weight: 700; }
+
+/* encode / quantize / paint pipeline */
+.nvh-steps { max-width: 1400px; margin: clamp(3rem, 7vw, 7rem) auto 0; }
+.nvh-steplist { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1.4rem, 3vw, 3rem); }
+.nvh-steplist li { border-top: 2px solid #2a2a2f; padding-top: 1.3rem; }
+.nvh-step-n { display: block; font-family: var(--nvh-serif); font-size: clamp(1.6rem, 2.4vw, 2.2rem); font-weight: 600; color: #35cabf; letter-spacing: 0.02em; margin-bottom: 0.7rem; }
+.nvh .nvh-step-h { font-family: var(--nvh-serif); font-weight: 500; font-size: clamp(1.3rem, 2vw, 1.7rem); color: #fff; margin: 0 0 0.55rem; }
+.nvh .nvh-step-p { font-size: 0.98rem; line-height: 1.6; color: #b9c0ca; margin: 0; max-width: 34ch; }
+
+/* NICHEVERSE wordmark acrostic footer */
+.nvh-wordmark { max-width: 1100px; margin: clamp(3.5rem, 8vw, 8rem) auto 0; padding-bottom: clamp(2rem, 5vw, 4rem); }
+.nvh-acrostic { list-style: none; margin: 0; padding: 0; }
+.nvh-acrostic li { display: flex; align-items: baseline; gap: clamp(0.5rem, 1.4vw, 1.1rem); border-bottom: 1px solid #17171a; padding: clamp(0.15rem, 0.6vw, 0.4rem) 0; }
+.nvh-ac-l { font-family: var(--nvh-serif); font-weight: 600; font-size: clamp(2.4rem, 7vw, 5.2rem); line-height: 1; color: #fff; width: clamp(2.2rem, 7vw, 4.6rem); flex: none; }
+.nvh-acrostic li:hover .nvh-ac-l { color: #35cabf; }
+.nvh-ac-w { font-family: var(--nvh-serif); font-weight: 300; font-size: clamp(1.1rem, 3vw, 2.2rem); color: #7d828c; letter-spacing: 0.01em; transition: color 0.3s cubic-bezier(0.4,0,0.2,1); }
+.nvh-acrostic li:hover .nvh-ac-w { color: #e9ecef; }
+.nvh-wordmark-cap { font-size: 1rem; line-height: 1.6; color: #9aa0aa; margin: 1.6rem 0 0; max-width: 52ch; }
+
 @media (max-width: 860px) {
-  .nvh-hero, .nvh-explore { grid-template-columns: 1fr; }
+  .nvh-hero, .nvh-explore, .nvh-codebook, .nvh-vocab { grid-template-columns: 1fr; }
   .nvh-hero-shot { order: -1; } .nvh-hero-shot img { height: 46vh; }
   .nvh-explore { margin-top: 3rem; }
+  .nvh-vocab .nvh-vocab-shot { order: -1; }
+  .nvh-steplist { grid-template-columns: 1fr; }
 }
 
 /* smoothness pass (matches Beautiful Biology: standard ease, smooth scroll, antialiasing) */

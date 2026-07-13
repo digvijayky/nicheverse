@@ -10,7 +10,7 @@ html_theme.sidebar_secondary.remove: true
  <div class="gx-inner">
 
   <header class="gx-head reveal">
-    <h1 class="gx-serif">Explore the atlas</h1>
+    <h1 class="gx-serif">Explore the atlases mapped in the nicheverse</h1>
     <p class="gx-tagline" id="gx-tag">One frozen model, read across every tissue.</p>
   </header>
 
@@ -48,10 +48,13 @@ html_theme.sidebar_secondary.remove: true
 
  <div class="gx-lightbox" id="gx-lightbox" hidden aria-modal="true" role="dialog">
    <button class="gx-lb-close" id="gx-lb-close" aria-label="Close preview">&times;</button>
-   <figure class="gx-lb-fig">
-     <img id="gx-lb-img" src="" alt="">
-     <figcaption id="gx-lb-cap"></figcaption>
-   </figure>
+   <div class="gx-lb-stage">
+     <figure class="gx-lb-fig">
+       <img id="gx-lb-img" src="" alt="">
+       <figcaption id="gx-lb-cap"></figcaption>
+     </figure>
+     <aside class="gx-lb-key" id="gx-lb-key"></aside>
+   </div>
  </div>
 
 </div>

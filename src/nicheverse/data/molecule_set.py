@@ -82,8 +82,8 @@ class MoleculeSetDataset(Dataset):
             # Guard against overlapping shards: a row already filled by an earlier
             # shard (cross-shard) OR appearing twice within this shard (intra-shard)
             # means the same obs_name maps to two molecule sets, which would silently
-            # overwrite the cell's molecules with a different shard's rows (e.g. the
-            # S_0069555 safe-shard overlap). Fail loudly instead of mispairing a cell.
+            # overwrite the cell's molecules with a different shard's rows (e.g. a
+            # safe-shard overlap). Fail loudly instead of mispairing a cell.
             collided = filled[ridx].copy()
             _, first = np.unique(ridx, return_index=True)
             intra = np.ones(len(ridx), dtype=bool)

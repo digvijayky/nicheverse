@@ -56,14 +56,14 @@
       : '<span class="bb-noimg">rendering&hellip;</span>';
     var search = [d.dataset, d.dataset_title, d.sample, d.title, d.site, d.condition,
                   d.organism, d.platform, (d.cell_types || []).join(" ")].join(" ").toLowerCase();
-    var sub = (d.sample ? esc(d.dataset_title) : esc(d.site)) + "  ·  " + esc(platformFamily(d.platform));
+    var sub = d.sample ? esc(d.sample) : "";  // discriminator only (e.g. "Metastasis 010"); no site/platform line
     return (
       '<figure class="bb-tile" data-category="' + esc(d.category) + '" data-site="' + esc(d.site) +
       '" data-platform="' + esc(platformFamily(d.platform)) + '" data-dataset="' + esc(d.dataset) +
       '" data-search="' + esc(search) + '">' +
       '<span class="bb-frame">' + img + '<span class="bb-tag">' + esc(d.site) + "</span></span>" +
       '<figcaption class="bb-cap"><b>' + esc(d.title) + "</b>" +
-      '<span class="bb-cap-sub">' + sub + "</span></figcaption>" +
+      (sub ? '<span class="bb-cap-sub">' + sub + "</span>" : "") + "</figcaption>" +
       "</figure>"
     );
   }
@@ -103,6 +103,11 @@
       lbImg.src = img.src; lbImg.alt = img.alt || "";
       var t = tile.querySelector(".bb-cap b"); var s = tile.querySelector(".bb-cap-sub");
       lbCap.textContent = (t ? t.textContent : "") + (s ? "  ·  " + s.textContent : "");
+      var lbKey = document.getElementById("gx-lb-key");   // cell-type legend on the right of the enlarged map
+      if (lbKey && !lbKey.childElementCount)
+        lbKey.innerHTML = '<span class="gx-lb-key-h">Cell-state lineage</span>' + PAL.map(function (c) {
+          return '<span class="gx-k"><i style="background:' + c[1] + '"></i>' + esc(c[0]) + "</span>";
+        }).join("");
       lb.hidden = false; document.body.style.overflow = "hidden";
     }
     function closeLB() { if (!lb) return; lb.hidden = true; lbImg.src = ""; document.body.style.overflow = ""; }
