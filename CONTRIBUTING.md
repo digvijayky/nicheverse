@@ -48,19 +48,19 @@ Type hints are required on every public function and method. `from __future__ im
 
 Docstrings follow numpy style with at least `Parameters`, `Returns`, and `Raises` sections when they apply. Public docstrings should give enough context for a Cancer Cell reviewer to understand what the function does without reading the implementation.
 
-## Building the docs
+## Documentation
 
-```bash
-python -m sphinx -M html docs docs/_build
-# open docs/_build/html/index.html
-```
+The documentation site lives in a separate repository,
+[nicheverse-docs](https://github.com/digvijayky/nicheverse-docs), which rebuilds
+its API reference from this package on every push to `main`. See that
+repository's README to build the site locally.
 
 ## Pull request checklist
 
 1. `pytest -q` passes.
 2. `pre-commit run --all-files` is clean (runs `ruff check` and `ruff format`).
-3. Public APIs touched in the PR have updated docstrings, and new public symbols
-   are listed in `docs/api.md`.
+3. Public APIs touched in the PR have updated numpy-style docstrings (the API
+   reference in nicheverse-docs is generated from them by autodoc).
 4. `CHANGELOG.md` has a new bullet under `Unreleased` describing the change.
 5. If the PR changes a determinism contract, `DETERMINISM.md` is updated.
 

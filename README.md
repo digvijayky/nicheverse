@@ -105,7 +105,7 @@ After training, `adata.obs` carries `cell_codebook_idx` (0 to 255) and `neighbor
 - **Cosine-distance codebook** option (`ModelConfig.vq_distance="cosine"`) alongside the default squared-Euclidean assignment.
 - **Speed knobs (opt-in, accuracy-neutral)**: `TrainConfig.device_resident=True` keeps the feature tensors GPU-resident (roughly 3 to 15x faster, memory-fit-gated with a clean CPU fallback); `batch_size="auto"` adapts the batch to the panel size; per-run timing is written to `training_runtime.json`.
 - **Training knobs**: optional validation split with early stopping, best-checkpoint saving, gradient clipping, CUDA automatic mixed precision, checkpoint resume, `tqdm` progress, and per-epoch codebook perplexity logging.
-- **Packaging**: hatchling build backend, PyPI-ready metadata, and a Sphinx documentation site.
+- **Packaging**: hatchling build backend and PyPI-ready metadata.
 
 Pre-loss-refactor checkpoints still load via `ModelConfig.from_dict` backward-compatibility (they fall back to the old MSE-only cell/niche path so their state_dicts load strictly).
 

@@ -55,7 +55,7 @@ about:
     NICHEVERSE learns paired discrete codebooks over single cells and their
     spatial neighborhoods from imaging based spatial transcriptomics, yielding
     reproducible cell state and multicellular niche annotations.
-  doc_url: https://nicheverse.readthedocs.io/
+  doc_url: https://nicheverse.org/
   dev_url: https://github.com/digvijayky/nicheverse
 
 extra:
