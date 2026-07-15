@@ -87,7 +87,7 @@ doc = [
 ]
 
 [project.urls]
-Documentation = "https://nicheverse.readthedocs.io/"
+Documentation = "https://nicheverse.org/"
 Homepage = "https://github.com/digvijayky/nicheverse"
 Source = "https://github.com/digvijayky/nicheverse"
 Issues = "https://github.com/digvijayky/nicheverse/issues"

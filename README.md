@@ -1,6 +1,6 @@
 # NICHEVERSE
 
-[![Docs](https://img.shields.io/readthedocs/nicheverse)](https://nicheverse.readthedocs.io)
+[![Docs](https://img.shields.io/badge/docs-nicheverse.org-f59e0b)](https://nicheverse.org)
 [![PyPI](https://img.shields.io/pypi/v/nicheverse)](https://pypi.org/project/nicheverse)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/digvijayky/nicheverse/blob/main/LICENSE)
 [![CI](https://img.shields.io/github/actions/workflow/status/digvijayky/nicheverse/test.yaml?label=CI)](https://github.com/digvijayky/nicheverse/actions)
@@ -235,7 +235,7 @@ If you use NICHEVERSE in your work, please cite it. A manuscript is in preparati
 }
 ```
 
-Full documentation lives at [nicheverse.readthedocs.io](https://nicheverse.readthedocs.io). Contributions are welcome, see [CONTRIBUTING.md](CONTRIBUTING.md).
+Full documentation lives at [nicheverse.org](https://nicheverse.org). Contributions are welcome, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
