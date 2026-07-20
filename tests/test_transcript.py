@@ -51,3 +51,26 @@ def test_transcript_context_single_path(tmp_path):
     a, tx = _setup(tmp_path)
     feats = transcript_context(a, tx["S"], radius=10.0)  # single path, not a dict
     assert feats.shape == (3, 4)
+
+
+def test_transcript_context_multi_row_group(tmp_path):
+    """Molecule tables written with many small row groups (e.g. 10x Xenium
+    ``transcripts.parquet``) must read via the batched pyarrow path, not the
+    dataset-API column projection that raises ArrowInvalid on such files."""
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+
+    a = ad.AnnData(X=sp.csr_matrix(np.ones((2, 3), dtype="float32")))
+    a.var_names = ["g0", "g1", "g2"]
+    a.obs["sample_id"] = ["S", "S"]
+    a.obsm["spatial"] = np.array([[0.0, 0.0], [100.0, 100.0]])
+    rows = [(1.0, 1.0, "g0")] * 6 + [(101.0, 101.0, "g2")] * 4
+    rows += [(1.5, 1.5, "NegControlProbe_1")]  # control, must be dropped
+    df = pd.DataFrame(rows, columns=["x_location", "y_location", "feature_name"])
+    p = tmp_path / "transcripts.parquet"
+    pq.write_table(pa.Table.from_pandas(df, preserve_index=False), p, row_group_size=2)
+    assert pq.ParquetFile(p).num_row_groups >= 4  # forces multi-batch read
+
+    feats = transcript_context(a, {"S": str(p)}, radius=10.0)
+    np.testing.assert_allclose(feats[0], np.log1p([6, 0, 0]), atol=1e-5)
+    np.testing.assert_allclose(feats[1], np.log1p([0, 0, 4]), atol=1e-5)

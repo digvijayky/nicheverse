@@ -35,6 +35,36 @@ _PLATFORM_CONTROL = {
 }
 
 
+def _read_panel_molecules(path, x_col, y_col, feature_col, control, g2c):
+    """Read ``(xy, gene_code)`` for panel molecules from a per-sample molecule table.
+
+    Reads row-group batches through :class:`pyarrow.parquet.ParquetFile` and filters each
+    batch to panel genes (dropping control/blank probes) before accumulating. This avoids
+    the pyarrow dataset-API column-projection path used by ``pandas.read_parquet``, which
+    raises ``ArrowInvalid: Invalid number of indices: 0`` on some vendor-written files
+    (e.g. 10x Xenium ``transcripts.parquet``), and holds only the kept subset in memory.
+    """
+    import pyarrow.parquet as _pq
+
+    genes = set(g2c)
+    xs, ys, gs = [], [], []
+    for batch in _pq.ParquetFile(path).iter_batches(columns=[x_col, y_col, feature_col]):
+        d = batch.to_pandas()
+        fn = d[feature_col].astype(str)
+        keep = (~fn.str.contains(control)) & fn.isin(genes)
+        if not keep.any():
+            continue
+        xs.append(d.loc[keep, x_col].to_numpy(np.float64))
+        ys.append(d.loc[keep, y_col].to_numpy(np.float64))
+        gs.append(fn[keep].map(g2c).to_numpy())
+    if not xs:
+        return np.empty((0, 2), dtype=np.float64), np.empty((0,), dtype=np.intp)
+    return (
+        np.column_stack([np.concatenate(xs), np.concatenate(ys)]),
+        np.concatenate(gs),
+    )
+
+
 def transcript_context(
     adata: ad.AnnData,
     transcripts: dict | str | Path,
@@ -107,13 +137,11 @@ def transcript_context(
         if sample not in transcripts:
             raise ValueError(f"no transcripts path provided for sample {sample!r}")
         cidx = np.where(samples == sample)[0]
-        tdf = pd.read_parquet(transcripts[sample], columns=[x_col, y_col, feature_col])
-        fn = tdf[feature_col].astype(str)
-        keep = (~fn.str.contains(control)) & fn.isin(genes)
-        if not keep.any():
+        xy, gcol = _read_panel_molecules(
+            transcripts[sample], x_col, y_col, feature_col, control, g2c
+        )
+        if xy.shape[0] == 0:
             continue
-        gcol = fn[keep].map(g2c).to_numpy()
-        xy = tdf.loc[keep, [x_col, y_col]].to_numpy()
         nbrs = cKDTree(xy).query_ball_point(coords_all[cidx], r=radius)
         for j, nb in enumerate(nbrs):
             if nb:
