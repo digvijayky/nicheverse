@@ -35,21 +35,45 @@ _PLATFORM_CONTROL = {
 }
 
 
+def _iter_molecule_frames(path, x_col, y_col, feature_col):
+    """Yield pandas frames of the ``(x, y, feature)`` columns of a molecule-table parquet.
+
+    Prefers duckdb when it is importable: it decodes vendor-written molecule tables that
+    some pyarrow builds reject outright (10x Xenium ``transcripts.parquet`` fails on
+    ``pyarrow`` 22 with ``ArrowInvalid: Invalid number of indices: 0`` on certain row
+    groups, whether read whole or column-projected). Falls back to pyarrow row-group
+    batches when duckdb is unavailable. Streams in chunks so only a slice is in memory.
+    """
+    cols = [x_col, y_col, feature_col]
+    try:
+        import duckdb  # optional; robust decoder for vendor molecule tables
+    except ImportError:
+        duckdb = None
+    if duckdb is not None:
+        esc = str(path).replace("'", "''")
+        q = f"SELECT \"{x_col}\", \"{y_col}\", \"{feature_col}\" FROM read_parquet('{esc}')"
+        res = duckdb.connect().execute(q)
+        reader = (res.to_arrow_reader if hasattr(res, "to_arrow_reader")
+                  else res.fetch_record_batch)(1_000_000)
+        for batch in reader:
+            yield batch.to_pandas()
+    else:
+        import pyarrow.parquet as _pq
+
+        for batch in _pq.ParquetFile(path).iter_batches(columns=cols):
+            yield batch.to_pandas()
+
+
 def _read_panel_molecules(path, x_col, y_col, feature_col, control, g2c):
     """Read ``(xy, gene_code)`` for panel molecules from a per-sample molecule table.
 
-    Reads row-group batches through :class:`pyarrow.parquet.ParquetFile` and filters each
-    batch to panel genes (dropping control/blank probes) before accumulating. This avoids
-    the pyarrow dataset-API column-projection path used by ``pandas.read_parquet``, which
-    raises ``ArrowInvalid: Invalid number of indices: 0`` on some vendor-written files
-    (e.g. 10x Xenium ``transcripts.parquet``), and holds only the kept subset in memory.
+    Streams frames from :func:`_iter_molecule_frames` and filters each to panel genes
+    (dropping control/blank probes) before accumulating, so memory holds only the kept
+    subset rather than the full molecule table.
     """
-    import pyarrow.parquet as _pq
-
     genes = set(g2c)
     xs, ys, gs = [], [], []
-    for batch in _pq.ParquetFile(path).iter_batches(columns=[x_col, y_col, feature_col]):
-        d = batch.to_pandas()
+    for d in _iter_molecule_frames(path, x_col, y_col, feature_col):
         fn = d[feature_col].astype(str)
         keep = (~fn.str.contains(control)) & fn.isin(genes)
         if not keep.any():
