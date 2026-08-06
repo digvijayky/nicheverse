@@ -1,9 +1,6 @@
 # NICHEVERSE
 
 [![Docs](https://img.shields.io/badge/docs-nicheverse.org-f59e0b)](https://nicheverse.org)
-[![PyPI](https://img.shields.io/pypi/v/nicheverse)](https://pypi.org/project/nicheverse)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/digvijayky/nicheverse/blob/main/LICENSE)
-[![CI](https://img.shields.io/github/actions/workflow/status/digvijayky/nicheverse/test.yaml?label=CI)](https://github.com/digvijayky/nicheverse/actions)
 
 *Neighborhood-Inferred Cell type HiErarchical annotation + VEctor-quantized Representations of Spatial Ecotypes*
 
@@ -17,15 +14,11 @@ A PyTorch package, laid out like a deep-learning library: the model, encoders, a
 
 ## Install
 
-From PyPI (once released):
+Install from source with pip:
 
 ```bash
-pip install nicheverse
-```
-
-From source:
-
-```bash
+git clone https://github.com/digvijayky/nicheverse.git
+cd nicheverse
 pip install .
 # editable, with dev + docs + test tooling
 pip install -e ".[dev,doc,test]"
@@ -156,7 +149,7 @@ attach_labels(adata, "cell_codebook_idx", labels, key_added="celltype_annot")
 niches = annotate_niches(adata, "neighborhood_codebook_idx", "celltype_annot")
 ```
 
-Install the backends with `pip install nicheverse[llm]`. Claude Code and Codex can
+Install the backends with `pip install ".[llm]"` from the cloned repo. Claude Code and Codex can
 run the whole workflow through the bundled MCP server (`nicheverse-mcp`) and the
 `nicheverse-annotate` skill.
 
