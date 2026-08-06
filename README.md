@@ -1,16 +1,10 @@
-# NICHEVERSE
+# Nicheverse
 
 [![Docs](https://img.shields.io/badge/docs-nicheverse.org-f59e0b)](https://nicheverse.org)
 
-*Neighborhood-Inferred Cell type HiErarchical annotation + VEctor-quantized Representations of Spatial Ecotypes*
+Interpretable modeling of tissues. Nicheverse is a hierarchical VQ-VAE that tokenizes imaging-based spatial transcriptomics (Xenium, MERFISH, seqFISH, CosMx) into two coupled codebooks: one of recurrent cell states and one of recurrent multicellular niches.
 
-A world model for tissues: hierarchical VQ-VAE codebooks of cell states and spatial niches for imaging-based spatial transcriptomics (Xenium, MERFISH, seqFISH, CosMx).
-
-Trains a two-codebook model (a cell codebook and a tissue neighborhood codebook) on any imaging spatial-transcriptomics cell-by-gene matrix with spatial coordinates. The cell codebook captures recurrent transcriptional states; the neighborhood codebook captures recurrent multicellular niches. A cross attention block couples the two so that cell-state assignment is informed by spatial context.
-
-Originally developed for the renal cell carcinoma plus brain metastasis cohort described in our Cancer Cell submission, the package runs on any Xenium output and was used to discover 256 cell states and 32 niches across 173 samples (5.66 million cells).
-
-A PyTorch package, laid out like a deep-learning library: the model, encoders, and quantizers live in `nicheverse.models`; the spatial dataset, neighbor featurizer, and Xenium I/O in `nicheverse.data`; the `Trainer` and inference in `nicheverse.training`; figures in `nicheverse.plotting`. It runs on any imaging spatial-transcriptomics data loaded into [AnnData](https://anndata.readthedocs.io/): a Xenium reader is built in, and MERFISH, CosMx, seqFISH, or any cell-by-gene matrix with coordinates loads via `read_spatial` / `SpatialDataset.from_anndata`. Encoders and quantizers are swappable through the `nicheverse.models.build_encoder` / `nicheverse.models.build_quantizer` registries.
+It trains on any cell-by-gene matrix with spatial coordinates. The cell codebook captures transcriptional states; the neighborhood codebook captures the local tissue context around each cell. A gated cross-attention block couples them, so each cell's state assignment is informed by its niche. Nicheverse was built for the renal cell carcinoma and brain metastasis cohort in our Cancer Cell submission, where it resolved 256 cell states and 32 niches across 173 samples (5.66 million cells), and it runs on any Xenium output without changes.
 
 ## Install
 
@@ -20,11 +14,11 @@ Install from source with pip:
 git clone https://github.com/digvijayky/nicheverse.git
 cd nicheverse
 pip install .
-# editable, with dev + docs + test tooling
-pip install -e ".[dev,doc,test]"
 ```
 
-GPU is optional. PyTorch picks `cuda` automatically when available. Python 3.10 or newer is required.
+For development, install editable with the dev, doc, and test extras: `pip install -e ".[dev,doc,test]"`.
+
+GPU is optional. PyTorch selects `cuda` automatically when available. Python 3.10 or newer is required.
 
 ## Quickstart
 
@@ -179,16 +173,6 @@ Any imaging spatial-transcriptomics data works: bring an AnnData with `obsm['spa
 
 Each cell carries `obs['sample_id']` and `obsm['spatial']` (x_centroid, y_centroid in microns). For multi sample training, the k nearest neighbor graph used to build the neighborhood feature is computed within sample only, so cross sample edges never form.
 
-## Method
-
-For each cell i with feature vector x_i and physical coordinates (x, y), we build a paired neighborhood feature h_i by aggregating the k nearest neighbor cells within the same Xenium run using inverse distance weighting:
-
-    h_i = sum_j w_ij x_j,   w_ij proportional to 1 / d_ij
-
-Both x_i and the concatenation (x_i, h_i) feed two separate encoders (the default backbone is `mlp_deep`, a SwiGLU pre-norm residual MLP). The cell encoder output is quantized against a learned cell codebook of K_c entries; the neighborhood encoder output is quantized against a separate niche codebook of K_n entries. A cross attention layer lets the cell representation attend to its niche before reconstruction. Codebooks are trained with EMA updates, k means++ initialization, and a dead code reset; the EMA codebook is frozen from the optimizer. A diversity term penalizes low entropy code usage.
-
-By default the cell branch is fit with a negative-binomial NLL on the raw counts (scVI-style library from the observed total count) plus a Bernoulli detection hurdle, and the niche branch with composition MSE plus a Dirichlet-multinomial on the count-scale aggregated composition; these count-native defaults require raw INTEGER counts in `adata.X`. The total loss adds the commitment terms from both VQ layers and the diversity entropy term. The pure-MSE path is recoverable with `cell_recon="mse"` + `niche_recon="mse"`. Defaults: K_c = 256, K_n = 32, k_neighbors = 20, cell_embedding_dim = 64, neighborhood_embedding_dim = 256, hidden_dims = (256, 128), optimizer AdamW with decoupled weight decay 0.01, lr = 3e-4.
-
 ## Reproducibility
 
 The exact hyperparameters used in the Cancer Cell submission for the 173 sample RCC plus BrM cohort:
@@ -217,19 +201,15 @@ The test suite uses tiny synthetic data and covers forward pass shapes, every re
 
 ## Citation
 
-If you use NICHEVERSE in your work, please cite it. A manuscript is in preparation; in the meantime you can cite the software:
+If you use Nicheverse in your work, please cite it. A manuscript is in preparation; in the meantime you can cite the software:
 
 ```bibtex
 @article{nicheverse2026,
-  title   = {NICHEVERSE: hierarchical spatial tokenization of cell states and multicellular niches},
+  title   = {Nicheverse: hierarchical spatial tokenization of cell states and multicellular niches},
   author  = {Yarlagadda, Digvijay and others},
   year    = {2026},
   note    = {manuscript in preparation}
 }
 ```
 
-Full documentation lives at [nicheverse.org](https://nicheverse.org). Contributions are welcome, see [CONTRIBUTING.md](CONTRIBUTING.md).
-
-## License
-
-MIT.
+Full documentation lives at [nicheverse.org](https://nicheverse.org).
