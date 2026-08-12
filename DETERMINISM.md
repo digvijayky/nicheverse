@@ -27,7 +27,7 @@ Floating point reductions (matrix multiplies, attention) on CUDA depend on
 warp counts and tensor core layout. Switching GPU model (e.g. A100 to H100) or
 CUDA version may change the last few bits of the continuous embeddings, which
 in rare cases (cells near a code centroid boundary) can change the hard
-assignment. The Cancer Cell submission was trained on a single GPU class; the
+assignment. The published model was trained on a single GPU class; the
 released checkpoint is the source of truth and `predict` against that
 checkpoint on a different GPU is expected to reproduce assignments for
 >99.9% of cells, with the exact cutoff documented per release.

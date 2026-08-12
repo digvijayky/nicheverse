@@ -1,10 +1,11 @@
-"""NICHEVERSE: hierarchical vector-quantized codebooks of cell states and spatial niches.
+"""Nicheverse: a hierarchical VQ-VAE that tokenizes imaging-based spatial transcriptomics.
 
-NICHEVERSE = Neighborhood-Inferred Cell type HiErarchical annotation + VEctor-quantized
-Representations of Spatial Ecotypes (NICHE + VERSE; the second E is the E in VEctor).
+Nicheverse learns two coupled discrete codebooks, a cell codebook of transcriptional
+states and a neighborhood (niche) codebook of multicellular contexts, joined by a
+one-directional gated cross-attention block, and assigns every cell an interpretable
+cell-state code and niche code.
 
-A PyTorch package for imaging-based spatial transcriptomics, laid out like a
-typical deep-learning library:
+Subpackages:
 
 - :mod:`nicheverse.models`   -- the model, encoders, quantizers
 - :mod:`nicheverse.data`     -- the spatial dataset, neighbor featurizer, Xenium I/O

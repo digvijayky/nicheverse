@@ -3,19 +3,21 @@
 [![Docs](https://img.shields.io/badge/docs-nicheverse.org-f59e0b)](https://nicheverse.org)
 
 
-Nicheverse trains on any cell-by-gene matrix with spatial coordinates. The cell codebook captures transcriptional states; the neighborhood codebook captures the local tissue context around each cell. A gated cross-attention block couples them, so each cell's state assignment is informed by its niche.
+Nicheverse is a hierarchical VQ-VAE that tokenizes imaging-based spatial transcriptomics into a discrete vocabulary of cell states and tissue niches. It trains on any cell-by-gene count matrix with spatial coordinates and runs on any imaging platform (Xenium, MERFISH, CosMx, seqFISH, and more). A cell encoder maps each cell to a **cell codebook** of transcriptional states, and a neighborhood encoder maps its surrounding tissue to a **niche codebook**. The two branches are coupled by a one-directional gated cross-attention block: the cell attends to its own niche before decoding, so spatial context can settle a borderline assignment, yet the cell code stays anchored to that cell's own transcripts and is never overridden by its neighbors. Because every cell is quantized against the same fixed codebook, the learned vocabulary is portable, the same code denotes the same state across cohorts, tissues, and platforms.
 
 ## Install
 
-Install from source with pip:
+```bash
+pip install nicheverse
+```
+
+Or from source (editable, so edits to the tree take effect with no reinstall):
 
 ```bash
 git clone https://github.com/digvijayky/nicheverse.git
 cd nicheverse
-pip install .
+pip install -e .
 ```
-
-For development, install editable with the dev, doc, and test extras: `pip install -e ".[dev,doc,test]"`.
 
 
 
@@ -79,7 +81,7 @@ After training, `adata.obs` carries `cell_codebook_idx` (0 to 255) and `neighbor
 
 ## Model and training options
 
-- **Encoders** (`ModelConfig.encoder_type`): `mlp_deep` (default; a SwiGLU pre-norm residual MLP), plus `mlp`, `mlp_plr`, `residual_mlp`, `transformer`, `cnn`, `fast_cnn`, `deep_cnn`, `gnn`, `diffusion`, `dit`, `set_transformer`, `perceiver_io`, `soft_moe`, `ft_transformer`; registry `nicheverse.models.build_encoder`. `mlp_deep` is the default because it gives the healthiest raw codebook on sparse Xenium counts; per-gene numerical embeddings (`mlp_plr` / PLE) degenerate on sparse counts.
+- **Encoders** (`ModelConfig.encoder_type`): `mlp_deep` (default; a SwiGLU pre-norm residual MLP), plus `mlp`, `mlp_plr`, `residual_mlp`, `transformer`, `cnn`, `fast_cnn`, `deep_cnn`, `gnn`, `diffusion`, `dit`, `set_transformer`, `perceiver_io`, `soft_moe`, `ft_transformer`; registry `nicheverse.models.build_encoder`. `mlp_deep` is the default because it gives the healthiest raw codebook on the sparse, low-magnitude counts typical of imaging panels; per-gene numerical embeddings (`mlp_plr` / PLE) degenerate on sparse counts.
 - **Quantizers** (`ModelConfig.quantizer_type`): `vq` (default; stabilized EMA codebook with k-means++ init, dead-code reset, and a diversity term, and the EMA codebook is frozen from the optimizer), plus `rvq`, `grvq`, `pq`, `qinco`, `rot`, `soft`, `bsq`, `lfq`, `fsq`, `residual_fsq`; registry `nicheverse.models.build_quantizer`.
 - **Cell reconstruction** (`ModelConfig.cell_recon`): default `nb` is a negative-binomial NLL on the RAW counts (scVI-style library from the observed total count) plus a Bernoulli/BCE detection hurdle (`detection_weight=0.5`); no MSE on the cell branch. Set `cell_recon="mse"` (with `detection_weight=0`) to recover the pure MSE-on-log1p path.
 - **Niche reconstruction** (`ModelConfig.niche_recon`): default `mse_dirmult` is composition MSE plus a Dirichlet-multinomial on the count-scale aggregated-neighbor composition. Set `niche_recon="mse"` for pure composition MSE.
@@ -172,14 +174,14 @@ Any imaging spatial-transcriptomics data works: bring an AnnData with `obsm['spa
 
 Each cell carries `obs['sample_id']` and `obsm['spatial']` (x_centroid, y_centroid in microns). For multi sample training, the k nearest neighbor graph used to build the neighborhood feature is computed within sample only, so cross sample edges never form.
 
-## Reproducibility
+## Reproducing the study model
 
-The exact hyperparameters used in the Cancer Cell submission for the 173 sample RCC plus BrM cohort:
+The model in the accompanying manuscript was trained on a 173-sample imaging spatial-transcriptomics cohort (5.66M cells, 366-gene Xenium panel). Its architecture and optimization hyperparameters:
 
 ```bash
 nicheverse train \
     --input cohort.h5ad \
-    --checkpoint-dir checkpoint_rcc_brm_v4_dev \
+    --checkpoint-dir checkpoint \
     --num-epochs 300 \
     --cell-codebook-size 256 \
     --cell-codebook-embdim 64 \
@@ -188,7 +190,7 @@ nicheverse train \
     --k-neighbors 20
 ```
 
-Set `torch.manual_seed(9)` is applied automatically via `TrainConfig.seed`.
+The released model additionally uses the transcript-context input: a 7-micron segmentation-free molecular field concatenated onto the segmented counts, giving a 732-dimensional cell input. Build it with `nicheverse.data.transcript_context` and train on the concatenated matrix as shown in `notebooks/02_transcript_context.ipynb`. Every other setting (encoder `mlp_deep`, quantizer `vq`, per-sample `knn_radius` graph at radius 50 microns, inverse-distance aggregation, seed 9) is a library default. `TrainConfig.seed` (default 9) is applied automatically, so a fixed model and seed give bit-reproducible codes.
 
 ## Testing
 
@@ -200,7 +202,7 @@ The test suite uses tiny synthetic data and covers forward pass shapes, every re
 
 ## Citation
 
-If you use Nicheverse in your work, please cite it. A manuscript is in preparation; in the meantime you can cite the software:
+If you use Nicheverse, please cite the preprint (and the method's original conference paper):
 
 ```bibtex
 @article{yarlagadda2026developmental,

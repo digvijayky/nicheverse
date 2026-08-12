@@ -173,7 +173,7 @@ def _add_info(sp: argparse._SubParsersAction) -> None:
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="nicheverse",
-        description="NICHEVERSE: hierarchical VQ-VAE codebooks of cell states and spatial niches for Xenium",
+        description="Nicheverse: a hierarchical VQ-VAE that tokenizes imaging-based spatial transcriptomics into codebooks of cell states and spatial niches",
     )
     from . import __version__
 

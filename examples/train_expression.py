@@ -7,13 +7,13 @@ short verification of the codes written back to the AnnData.
 
     python examples/train_expression.py
 
-The b32k reference config is num_epochs=300, batch_size=32768, seed=9,
+The reference configuration is num_epochs=300, batch_size=32768, seed=9,
 spatial_graph='knn_radius' at radius=50 um, k_neighbors=20, lr=3e-4,
 encoder_type='mlp_deep', quantizer_type='vq', neighborhood_aggregation=
 'weighted_mean' (all ModelConfig/TrainConfig defaults). This demo keeps those
 defaults but shrinks num_epochs (300 -> 20) and batch_size (32768 -> 2048) so it
 finishes in a couple of minutes on the tiny bundled core (batch 32768 exceeds the
-~7.8k cells here); the other fields below are the b32k defaults, passed explicitly
+~7.8k cells here); the other fields below are the reference defaults, passed explicitly
 only for clarity. On sparse Xenium counts like this panel, per-gene numerical
 embeddings ('mlp_plr') degenerate, so the simple MLP encoders are preferred.
 
@@ -54,14 +54,14 @@ def main() -> None:
         neighborhood_embedding_dim=256,
     )
     tc = TrainConfig(
-        num_epochs=20,            # b32k default is 300; shrunk for a fast demo
-        batch_size=2048,          # b32k default is 32768; shrunk for the tiny demo core
-        k_neighbors=20,           # b32k default
-        spatial_graph="knn_radius",  # b32k default
-        radius=50.0,              # b32k default
-        neighborhood_aggregation="weighted_mean",  # b32k default
+        num_epochs=20,            # default is 300; shrunk for a fast demo
+        batch_size=2048,          # default is 32768; shrunk for the tiny demo core
+        k_neighbors=20,           # reference default
+        spatial_graph="knn_radius",  # reference default
+        radius=50.0,              # reference default
+        neighborhood_aggregation="weighted_mean",  # reference default
         save_best=False,
-        seed=9,                   # b32k default seed
+        seed=9,                   # default seed
     )
 
     model, adata = train_model(adata, CKPT, model_config=mc, train_config=tc,

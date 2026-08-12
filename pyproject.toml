@@ -23,7 +23,6 @@ keywords = [
   "merfish",
   "cosmx",
   "seqfish",
-  "world-model",
   "vq-vae",
   "single-cell",
   "anndata",

@@ -1,4 +1,4 @@
-"""Vector quantizers for the NICHEVERSE tokenizer.
+"""Vector quantizers for the Nicheverse tokenizer.
 
 The default ``vq`` is an EMA codebook with k-means++ init, dead-code reset, and a
 diversity term. All registered quantizers (built by :func:`build_quantizer`):
@@ -48,7 +48,7 @@ class VectorQuantizer(nn.Module):
     """EMA vector quantizer with k-means++ init, dead code reset, and diversity term.
 
     This is the default quantizer (``quantizer_type="vq"``) and the discretization
-    core of the NICHEVERSE model. Given an encoded cell (or neighborhood)
+    core of the Nicheverse model. Given an encoded cell (or neighborhood)
     embedding it snaps that continuous vector to the nearest of ``K`` learned
     codebook entries, so the integer code index becomes the cell-state (or niche)
     vocabulary symbol that downstream annotation and the neighborhood codebook

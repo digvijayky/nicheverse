@@ -1,9 +1,9 @@
 """Molecule-set (subcellular point-cloud) encoder and hierarchical VQ-VAE.
 
-An alternative input modality for NICHEVERSE: instead of a per-cell aggregated gene
+An alternative input modality for Nicheverse: instead of a per-cell aggregated gene
 vector, encode each cell as the *set of its transcript molecules* -- one token per
 molecule, carrying the molecule's gene identity and its subcellular offset from the
-cell centroid. This keeps the codebook/VQ core of NICHEVERSE unchanged while letting
+cell centroid. This keeps the codebook/VQ core of Nicheverse unchanged while letting
 the cell branch model spatial molecular structure directly.
 
 Encoder (:class:`MoleculeSetEncoder`) is a permutation-invariant, mask-aware Set

@@ -1,13 +1,12 @@
-# NICHEVERSE examples and quickstart
+# Nicheverse examples and quickstart
 
-**NICHEVERSE** = **N**eighborhood-**I**nferred **C**ell type **H**i**E**rarchical annotation +
-**VE**ctor-quantized **R**epresentations of **S**patial **E**cotypes (the letters spell
-NICHE + VERSE; the second E is the E in VEctor).
-
-NICHEVERSE learns two coupled vector-quantized codebooks from imaging spatial
-transcriptomics: a **cell codebook** (recurrent transcriptional states) and a
-**neighborhood codebook** (recurrent multicellular niches). A cross-attention block
-lets each cell's state assignment be informed by its spatial context.
+Nicheverse is a hierarchical VQ-VAE that tokenizes imaging-based spatial
+transcriptomics into two coupled discrete codebooks: a **cell codebook** of
+recurrent transcriptional states and a **neighborhood codebook** of recurrent
+multicellular niches. A gated cross-attention block conditions each cell's state
+assignment on its niche, so identity is read in spatial context. The learned
+codebook is a shared discrete vocabulary that transfers unchanged across cohorts,
+tissues, and imaging platforms.
 
 This folder holds a runnable quickstart, small example scripts, and tested
 notebooks that train on a bundled **real** dataset out of the box.
@@ -15,16 +14,22 @@ notebooks that train on a bundled **real** dataset out of the box.
 ## Install
 
 ```bash
-# from the repo root (editable install picks up local edits with no reinstall)
+pip install nicheverse
+```
+
+To hack on the examples, install the cloned repo in editable mode instead (edits
+to the source tree take effect with no reinstall):
+
+```bash
+git clone https://github.com/digvijayky/nicheverse
+cd nicheverse
 pip install -e .
-# with the optional dev / docs / test tooling
-pip install -e ".[dev,doc,test]"
 ```
 
 Python 3.10+ is required. A GPU is optional; PyTorch selects CUDA automatically
 when available, otherwise everything runs on CPU.
 
-## The three inputs NICHEVERSE needs
+## The three inputs Nicheverse needs
 
 Any imaging spatial transcriptomics platform works (Xenium, MERFISH, CosMx,
 seqFISH). Load your data into an [AnnData](https://anndata.readthedocs.io/) with:
