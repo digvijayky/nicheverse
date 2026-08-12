@@ -116,7 +116,7 @@ recommended starting encoder is `mlp_deep`.
 | transcript context (segmentation-free molecular field concatenated to counts) | `mlp_deep` | `vq` | radius 7 um; input dim doubles |
 | molecule set (subcellular transcript point cloud) | `MoleculeSetVQVAE` (Set-Transformer) | `vq` | pool with concat[masked max, masked mean, PMA] |
 
-Benchmark takeaways worth knowing:
+Benchmark takeaways:
 
 - MLP-family encoders (`mlp_deep`, `mlp`, `mlp_plr`) + the default `vq` give the
   healthiest, most even cell codebook. **RVQ underperforms VQ.**
