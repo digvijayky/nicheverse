@@ -185,6 +185,8 @@ python examples/apply_codes.py         # train on 80%, assign codes to the held-
 | `notebooks/02_transcript_context.ipynb` | compute `transcript_context` (radius 7 um) from a transcripts table, concat to counts, train `mlp_deep` |
 | `notebooks/03_molecule_set.ipynb` | the subcellular molecule-set (point-cloud) representation with `MoleculeSetVQVAE` |
 | `notebooks/04_apply_to_new_data.ipynb` | load a trained checkpoint and assign codes to held-out cells with `predict_codes` |
+| `notebooks/05_annotate_codes.ipynb` | turn codes into named cell types and niches: per-code evidence and coarse-to-fine grouping (offline), then optional LLM labeling with `annotate_codes` / `annotate_niches` |
+| `notebooks/06_downstream_analysis.ipynb` | what to do with the codes: UMAP of the cell embedding, the cell-code x niche composition, and per-sample code usage |
 
 ### Platform-specific notebooks
 
@@ -216,7 +218,7 @@ Nothing is simulated or randomly subsampled.
 
 | file | contents | used by |
 |---|---|---|
-| `merfish_retina.h5ad` | real MERFISH mouse retina (Vizgen), 113,385 cells x 368 genes, 4 samples, raw counts, `obsm["spatial"]` (microns), `obs["sample_id"]` | `01_quickstart`, `04_apply_to_new_data` |
+| `merfish_retina.h5ad` | real MERFISH mouse retina (Vizgen), 113,385 cells x 368 genes, 4 samples, raw counts, `obsm["spatial"]` (microns), `obs["sample_id"]` | `01_quickstart`, `04_apply_to_new_data`, `05_annotate_codes`, `06_downstream_analysis` |
 | `xenium_rcc_core.h5ad` | one human RCC Xenium tissue-microarray core (in-house cohort), 7,824 cells x 366 genes, raw counts, `obsm["spatial"]` (microns), `obs["sample_id"]` | `02_transcript_context`, `03_molecule_set` |
 | `xenium_rcc_core_transcripts.parquet` | the matched molecule table (`x_location`, `y_location`, `feature_name`, `cell_id`, `overlaps_nucleus`) | `02_transcript_context` |
 | `xenium_rcc_core_molecule_sets/` | per-cell subcellular molecule-set shards (radius 7 um) | `03_molecule_set` |

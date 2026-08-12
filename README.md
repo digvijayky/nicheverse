@@ -77,7 +77,7 @@ annotated = nv.predict_codes(new, "./checkpoint/hierarchical_vqvae_checkpoint.pt
 
 `Trainer` wraps the functional `train_model` / `predict_codes`, which are also importable at the top level.
 
-After training, `adata.obs` carries `cell_codebook_idx` (0 to 255) and `neighborhood_codebook_idx` (0 to 31). `adata.obsm` carries `X_cell_embedding` and `X_neighborhood_embedding` for downstream UMAP, clustering, or differential analysis. The canonical key names are available programmatically via `nv.anndata_keys()`.
+After training, `adata.obs` carries `cell_codebook_idx` (0 to 255) and `neighborhood_codebook_idx` (0 to 31). `adata.obsm` carries `X_cell_embedding` and `X_neighborhood_embedding` for downstream UMAP, clustering, or differential analysis. The canonical key names are available programmatically via `nv.anndata_keys()`. See `notebooks/06_downstream_analysis.ipynb` for a worked example (UMAP of the embedding, cell-code x niche composition, per-sample usage).
 
 ## Model and training options
 
@@ -146,7 +146,8 @@ niches = annotate_niches(adata, "neighborhood_codebook_idx", "celltype_annot")
 
 Install the backends with `pip install ".[llm]"` from the cloned repo. Claude Code and Codex can
 run the whole workflow through the bundled MCP server (`nicheverse-mcp`) and the
-`nicheverse-annotate` skill.
+`nicheverse-annotate` skill. See `notebooks/05_annotate_codes.ipynb` for the end-to-end
+annotation walkthrough (the evidence layer runs offline; the LLM labeling is optional).
 
 ## Outputs
 
