@@ -5,7 +5,7 @@ requires = ["hatchling"]
 [project]
 name = "nicheverse"
 version = "0.2.0"
-description = "NICHEVERSE: a world model for tissues that learns hierarchical vector-quantized codebooks of cell states and spatial niches from imaging-based spatial transcriptomics (Xenium, MERFISH, seqFISH, CosMx)."
+description = "Nicheverse: a hierarchical VQ-VAE that tokenizes imaging-based spatial transcriptomics (Xenium, MERFISH, seqFISH, CosMx) into coupled codebooks of cell states and multicellular niches."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { file = "LICENSE" }
