@@ -2,9 +2,8 @@
 
 [![Docs](https://img.shields.io/badge/docs-nicheverse.org-f59e0b)](https://nicheverse.org)
 
-Interpretable modeling of tissues. Nicheverse is a hierarchical VQ-VAE that tokenizes imaging-based spatial transcriptomics (Xenium, MERFISH, seqFISH, CosMx) into two coupled codebooks: one of recurrent cell states and one of recurrent multicellular niches.
 
-It trains on any cell-by-gene matrix with spatial coordinates. The cell codebook captures transcriptional states; the neighborhood codebook captures the local tissue context around each cell. A gated cross-attention block couples them, so each cell's state assignment is informed by its niche. Nicheverse was built for the renal cell carcinoma and brain metastasis cohort in our Cancer Cell submission, where it resolved 256 cell states and 32 niches across 173 samples (5.66 million cells), and it runs on any Xenium output without changes.
+Nicheverse trains on any cell-by-gene matrix with spatial coordinates. The cell codebook captures transcriptional states; the neighborhood codebook captures the local tissue context around each cell. A gated cross-attention block couples them, so each cell's state assignment is informed by its niche.
 
 ## Install
 
@@ -18,7 +17,7 @@ pip install .
 
 For development, install editable with the dev, doc, and test extras: `pip install -e ".[dev,doc,test]"`.
 
-GPU is optional. PyTorch selects `cuda` automatically when available. Python 3.10 or newer is required.
+
 
 ## Quickstart
 
@@ -204,11 +203,29 @@ The test suite uses tiny synthetic data and covers forward pass shapes, every re
 If you use Nicheverse in your work, please cite it. A manuscript is in preparation; in the meantime you can cite the software:
 
 ```bibtex
-@article{nicheverse2026,
-  title   = {Nicheverse: hierarchical spatial tokenization of cell states and multicellular niches},
-  author  = {Yarlagadda, Digvijay and others},
+@article{yarlagadda2026developmental,
+  title   = {Developmental reversion underlies resistance to immune
+             checkpoint blockade in kidney cancer},
+  author  = {Yarlagadda, Dig Vijay Kumar and Wang, Zhenghan and
+             Jiang, Hui and Vuong, Lynda and Sanmiguel, Andrea L{\'o}pez and
+             Yang, Ching-Yeuh and Kotecha, Ritesh R. and Chen, Ying-Bei and
+             Hakimi, A. Ari and Leslie, Christina S. and Massagu{\'e}, Joan},
+  journal = {bioRxiv},
   year    = {2026},
-  note    = {manuscript in preparation}
+  month   = {aug},
+  doi     = {10.64898/2026.08.05.743137},
+  url     = {https://www.biorxiv.org/content/10.64898/2026.08.05.743137v1},
+  note    = {Preprint}
+}
+
+@INPROCEEDINGS{10350864,
+  author={Yarlagadda, Dig Vijay Kumar and Massagué, Joan and Leslie, Christina},
+  booktitle={2023 IEEE/CVF International Conference on Computer Vision Workshops (ICCVW)}, 
+  title={Discrete Representation Learning for Modeling Imaging-based Spatial Transcriptomics Data}, 
+  year={2023},
+  pages={3848-3857},
+  keywords={Representation learning;Annotations;Biological system modeling;Transcriptomics;Predictive models;Data models;Spatial databases},
+  doi={10.1109/ICCVW60793.2023.00416}
 }
 ```
 
