@@ -205,6 +205,9 @@ The test suite uses tiny synthetic data and covers forward pass shapes, every re
 
 If you use Nicheverse, please cite the preprint (and the method's original conference paper):
 
+1. Yarlagadda DVK, Wang Z, Jiang H, Vuong L, López Sanmiguel A, Yang CY, Kotecha RR, Chen YB, Hakimi AA, Leslie CS, Massagué J. [Developmental reversion underlies resistance to immune checkpoint blockade in kidney cancer](https://www.biorxiv.org/content/10.64898/2026.08.05.743137v1). *bioRxiv* (2026). doi: [10.64898/2026.08.05.743137](https://doi.org/10.64898/2026.08.05.743137)
+2. Yarlagadda DVK, Massagué J, Leslie C. [Discrete Representation Learning for Modeling Imaging-based Spatial Transcriptomics Data](https://doi.org/10.1109/ICCVW60793.2023.00416). *2023 IEEE/CVF International Conference on Computer Vision Workshops (ICCVW)*, 3848-3857. doi: [10.1109/ICCVW60793.2023.00416](https://doi.org/10.1109/ICCVW60793.2023.00416)
+
 ```bibtex
 @article{yarlagadda2026developmental,
   title   = {Developmental reversion underlies resistance to immune
@@ -232,4 +235,4 @@ If you use Nicheverse, please cite the preprint (and the method's original confe
 }
 ```
 
-Full documentation lives at [nicheverse.org](https://nicheverse.org).
+Full documentation at [nicheverse.org](https://nicheverse.org).
