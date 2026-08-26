@@ -61,7 +61,8 @@ class SpatialDataset(Dataset):
     cell_features
         ``(n_cells, n_features)`` dense ndarray or scipy sparse matrix.
     spatial_coords
-        ``(n_cells, 2)`` physical coordinates in microns.
+        ``(n_cells, 2)`` physical coordinates in microns, or ``(n_cells, 3)``
+        for volumetric data such as 3D MERFISH.
     sample_ids
         ``(n_cells,)`` string label per cell. The spatial graph is computed
         within sample only; cells from different samples never become neighbors.
@@ -157,9 +158,10 @@ class SpatialDataset(Dataset):
                 f"spatial_coords has {self.spatial_coords.shape[0]} rows but "
                 f"cell_features has {n_cells}"
             )
-        if self.spatial_coords.ndim != 2 or self.spatial_coords.shape[1] != 2:
+        if self.spatial_coords.ndim != 2 or self.spatial_coords.shape[1] not in (2, 3):
             raise ValueError(
-                f"spatial_coords must be (n_cells, 2), got shape {self.spatial_coords.shape}"
+                "spatial_coords must be (n_cells, 2) for planar sections or "
+                f"(n_cells, 3) for volumetric data, got shape {self.spatial_coords.shape}"
             )
         if self.sample_ids.shape[0] != n_cells:
             raise ValueError(
@@ -211,7 +213,8 @@ class SpatialDataset(Dataset):
         sample_col
             ``obs`` column naming the per-sample (or per-FOV) unit.
         spatial_key
-            ``obsm`` key holding an ``(n_cells, 2)`` coordinate array.
+            ``obsm`` key holding an ``(n_cells, 2)`` or ``(n_cells, 3)``
+            coordinate array. All columns are used; none are dropped.
         x_col, y_col
             Fallback ``obs`` coordinate columns used when ``obsm[spatial_key]`` is absent.
         coord_scale
@@ -236,7 +239,14 @@ class SpatialDataset(Dataset):
         else:
             samples = np.full(adata.n_obs, "sample0", dtype=object)
         if spatial_key in adata.obsm:
-            coords = np.asarray(adata.obsm[spatial_key], dtype=np.float64)[:, :2]
+            coords = np.asarray(adata.obsm[spatial_key], dtype=np.float64)
+            if coords.ndim != 2 or coords.shape[1] not in (2, 3):
+                raise ValueError(
+                    f"obsm['{spatial_key}'] must be (n_cells, 2) or (n_cells, 3), "
+                    f"got shape {coords.shape}. Slice it yourself if it carries "
+                    "extra columns; silently dropping axes would build the "
+                    "neighbourhood graph on a projection."
+                )
         elif x_col and y_col and x_col in adata.obs and y_col in adata.obs:
             coords = np.column_stack(
                 [adata.obs[x_col].to_numpy(), adata.obs[y_col].to_numpy()]
@@ -573,7 +583,7 @@ def read_spatial(
         ``obs`` column naming the per-sample (or per-FOV) unit; created as a
         single sample if absent.
     spatial_key
-        ``obsm`` key for the ``(n_cells, 2)`` micron coordinates.
+        ``obsm`` key for the ``(n_cells, 2)`` or ``(n_cells, 3)`` micron coordinates.
     x_col, y_col
         ``obs`` coordinate columns used to build ``obsm[spatial_key]`` when absent.
     coord_scale

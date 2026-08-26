@@ -349,14 +349,18 @@ class TrainConfig:
     warmup_frac: float = 0.03
     min_lr: float = 0.0
     decoupled_weight_decay: bool = True
-    spatial_loss_type: str = "graph_tv"
-    """Auxiliary spatial-structure loss. ``graph_tv`` acts on the niche branch
-    and is on by default: across 15 weight and neighbourhood settings on three
-    datasets it improved both niche spatial coherence (hypothalamus 0.20 to 0.99,
-    CosMx 0.24 to 0.66) and cell-code agreement. The cell-branch losses
-    (``laplacian``, ``contrastive``, ``codebook_consistency``) measured as
-    harmful and remain opt-in. Set ``spatial_loss_weight=0.0`` to disable."""
-    spatial_loss_weight: float = 0.1
+    spatial_loss_type: str = "none"
+    """Auxiliary spatial-structure loss, off by default.
+
+    ``graph_tv`` acts on the niche branch and helped on 2D data (niche spatial
+    coherence 0.20 to 0.99 on the MERFISH hypothalamus, 0.24 to 0.66 on CosMx),
+    but it is NOT safe as a default: on volumetric 3D MERFISH it collapses the
+    niche codebook, from 32 active codes to 10 at 189k cells and to 2 at 52k
+    cells, and the collapse threshold moves with dataset size. Enable it
+    deliberately and check ``niche`` codebook utilization when you do. The
+    cell-branch losses (``laplacian``, ``contrastive``, ``codebook_consistency``)
+    measured as harmful throughout."""
+    spatial_loss_weight: float = 0.0
     spatial_loss_k: int = 6
     cell_weight: float = 1.0
     neighborhood_weight: float = 1.0

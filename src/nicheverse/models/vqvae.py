@@ -187,13 +187,12 @@ class ModelConfig:
     use_cross_attention: bool = True
     cross_attention_weight: float = 0.5
     cross_attention_heads: int = 4
-    vq_distance: str = "cosine"
-    """Codebook lookup metric. Cosine is the default because it is the single
-    largest improvement measured across four labeled datasets: matched ARI rises
-    on all four and significantly on two (CosMx kidney 0.402 to 0.602, p=2e-5;
-    seqFISH embryo 0.411 to 0.543, p=3e-4; 5 seeds each), and cell-code
-    recurrence across seeds rises from 0.009 to 0.272. Pass "l2" to restore the
-    previous behaviour."""
+    vq_distance: str = "l2"
+    """Codebook lookup metric. Default is l2. Cosine measured better on every
+    labeled dataset tried so far (matched ARI 0.402 to 0.602 on CosMx kidney,
+    p=2e-5; 0.411 to 0.543 on seqFISH embryo, p=3e-4, 5 seeds each; and cell-code
+    recurrence across seeds 0.009 to 0.272), so ``vq_distance="cosine"`` is worth
+    trying, but it is opt-in rather than the shipped default."""
     quantizer_type: str = "vq"
     quantizer_kwargs: dict[str, Any] = field(default_factory=dict)
     encoder_type: str = "mlp_deep"

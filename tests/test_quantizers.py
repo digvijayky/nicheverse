@@ -184,19 +184,18 @@ def test_default_quantizer_is_vectorquantizer():
     m = HierarchicalVQVAE(_cfg("vq"))
     assert type(m.cell_vq) is VectorQuantizer
     assert type(m.neighborhood_vq) is VectorQuantizer
-    # cosine is the measured default; see test_evidence_backed_defaults.py
-    assert m.cell_vq.distance_metric == "cosine"
-    assert m.neighborhood_vq.distance_metric == "cosine"
+    assert m.cell_vq.distance_metric == "l2"
+    assert m.neighborhood_vq.distance_metric == "l2"
 
 
-def test_l2_lookup_still_selectable():
+def test_cosine_lookup_still_selectable():
     # _cfg routes **kw into quantizer_kwargs, so build the config directly here
     cfg = ModelConfig(input_dim=20, hidden_dims=(16,), cell_embedding_dim=8,
                       cell_num_embeddings=12, neighborhood_embedding_dim=8,
-                      neighborhood_num_embeddings=6, vq_distance="l2",
+                      neighborhood_num_embeddings=6, vq_distance="cosine",
                       gene_names=tuple(f"g{i}" for i in range(20)))
     m = HierarchicalVQVAE(cfg)
-    assert m.cell_vq.distance_metric == "l2"
+    assert m.cell_vq.distance_metric == "cosine"
 
 
 def test_modelconfig_rejects_unknown_quantizer():

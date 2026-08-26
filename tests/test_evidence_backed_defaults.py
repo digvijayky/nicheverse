@@ -7,23 +7,24 @@ from nicheverse import ModelConfig, TrainConfig
 from nicheverse.models.vqvae import HierarchicalVQVAE
 
 
-def test_cosine_is_the_default_lookup():
-    assert ModelConfig(input_dim=8).vq_distance == "cosine"
+def test_l2_is_the_default_lookup():
+    assert ModelConfig(input_dim=8).vq_distance == "l2"
 
 
-def test_l2_remains_available():
-    assert ModelConfig(input_dim=8, vq_distance="l2").vq_distance == "l2"
+def test_cosine_remains_available():
+    assert ModelConfig(input_dim=8, vq_distance="cosine").vq_distance == "cosine"
 
 
-def test_niche_spatial_loss_on_by_default():
+def test_spatial_loss_off_by_default():
+    """It collapses the niche codebook on volumetric data, so it is opt-in."""
     tc = TrainConfig()
-    assert tc.spatial_loss_type == "graph_tv"
-    assert tc.spatial_loss_weight == 0.1
-
-
-def test_spatial_loss_can_be_disabled():
-    tc = TrainConfig(spatial_loss_weight=0.0)
+    assert tc.spatial_loss_type == "none"
     assert tc.spatial_loss_weight == 0.0
+
+
+def test_spatial_loss_can_be_enabled():
+    tc = TrainConfig(spatial_loss_type="graph_tv", spatial_loss_weight=0.1)
+    assert tc.spatial_loss_weight == 0.1
 
 
 def test_graph_tv_targets_the_niche_branch():
