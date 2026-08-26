@@ -178,6 +178,12 @@ class ModelConfig:
     neighborhood_embedding_dim: int = 256
     neighborhood_num_embeddings: int = 32
     commitment_cost: float = 0.25
+    fuse_codebooks: bool = False
+    """Ablation control: quantize the concatenated cell and niche latents with a
+    SINGLE shared codebook, so one code must carry both cell identity and spatial
+    context. This is the direct test of the two-codebook decomposition claim; with
+    it on, ``cell_codebook_idx`` and ``neighborhood_codebook_idx`` are identical.
+    The shared codebook holds ``cell_num_embeddings`` entries."""
     use_cross_attention: bool = True
     cross_attention_weight: float = 0.5
     cross_attention_heads: int = 4
@@ -362,6 +368,16 @@ class HierarchicalVQVAE(nn.Module):
             distance_metric=config.vq_distance,
             **config.quantizer_kwargs,
         )
+        self.fuse_codebooks = bool(getattr(config, "fuse_codebooks", False))
+        if self.fuse_codebooks:
+            self.fused_vq = build_quantizer(
+                config.quantizer_type,
+                num_embeddings=config.cell_num_embeddings,
+                embedding_dim=config.cell_embedding_dim + config.neighborhood_embedding_dim,
+                commitment_cost=config.commitment_cost,
+                distance_metric=config.vq_distance,
+                **config.quantizer_kwargs,
+            )
         self.use_cross_attention = config.use_cross_attention
         self.cross_attention_weight = config.cross_attention_weight
         if self.use_cross_attention:
@@ -431,12 +447,24 @@ class HierarchicalVQVAE(nn.Module):
         cell_perp, neigh_perp
             Batch perplexities of the two codebooks.
         """
-        z_cell = self.cell_encoder(cell_features).unsqueeze(2)
-        cell_vq_loss, q_cell, cell_perp, cell_idx = self.cell_vq(z_cell)
-        q_cell = q_cell.squeeze(2)
-        z_neigh = self.neighborhood_encoder(neighborhood_features).unsqueeze(2)
-        neigh_vq_loss, q_neigh, neigh_perp, neigh_idx = self.neighborhood_vq(z_neigh)
-        q_neigh = q_neigh.squeeze(2)
+        z_cell = self.cell_encoder(cell_features)
+        z_neigh = self.neighborhood_encoder(neighborhood_features)
+        if self.fuse_codebooks:
+            # one codebook over the concatenated latents: a single index must
+            # explain both branches, which is the decomposition ablation
+            z_fused = torch.cat([z_cell, z_neigh], dim=1).unsqueeze(2)
+            vq_loss, q_fused, perp, idx = self.fused_vq(z_fused)
+            q_fused = q_fused.squeeze(2)
+            d = self.config.cell_embedding_dim
+            q_cell, q_neigh = q_fused[:, :d], q_fused[:, d:]
+            cell_vq_loss = neigh_vq_loss = vq_loss * 0.5
+            cell_perp = neigh_perp = perp
+            cell_idx = neigh_idx = idx
+        else:
+            cell_vq_loss, q_cell, cell_perp, cell_idx = self.cell_vq(z_cell.unsqueeze(2))
+            q_cell = q_cell.squeeze(2)
+            neigh_vq_loss, q_neigh, neigh_perp, neigh_idx = self.neighborhood_vq(z_neigh.unsqueeze(2))
+            q_neigh = q_neigh.squeeze(2)
         if self.use_cross_attention:
             proj = self.neighborhood_projection(q_neigh)
             attn, _ = self.cross_attention(
