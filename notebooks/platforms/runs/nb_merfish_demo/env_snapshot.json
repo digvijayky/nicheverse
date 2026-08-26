@@ -1,0 +1,20 @@
+{
+  "nicheverse_version": "0.2.0",
+  "python": "3.10.19",
+  "platform": "Linux-4.18.0-425.19.2.el8_7.x86_64-x86_64-with-glibc2.28",
+  "torch": "2.5.1+cu121",
+  "cuda_available": true,
+  "cuda_device": "NVIDIA A100 80GB PCIe",
+  "cuda_version": "12.1",
+  "cudnn_version": 90100,
+  "numpy": "2.2.6",
+  "scanpy": "1.11.5",
+  "anndata": "0.11.4",
+  "pandas": "2.3.3",
+  "scipy": "1.15.3",
+  "sklearn": "1.7.2",
+  "matplotlib": "3.10.7",
+  "h5py": "3.15.1",
+  "pyarrow": "22.0.0",
+  "git_sha": "188209c45107db01e1f2207de481488003a51dce"
+}

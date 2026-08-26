@@ -1,0 +1,19 @@
+{
+  "total_seconds": 3.397,
+  "total_hms": "0:00:03",
+  "n_epochs": 40,
+  "mean_epoch_seconds": 0.085,
+  "cells_per_second": 92129.26,
+  "iters_per_second": 47.101,
+  "n_cells": 7824,
+  "effective_batch_size": 2048,
+  "nominal_learning_rate": 0.0003,
+  "effective_learning_rate": 0.0003,
+  "lr_scaled_with_batch": false,
+  "n_batches_per_epoch": 4,
+  "peak_gpu_gb": 0.238,
+  "device": "cuda",
+  "encoder_type": "mlp",
+  "quantizer_type": "vq",
+  "input_dim": 366
+}
