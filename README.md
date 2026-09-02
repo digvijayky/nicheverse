@@ -3,6 +3,8 @@
 [![Docs](https://img.shields.io/badge/docs-nicheverse.org-f59e0b)](https://nicheverse.org)
 
 
+<p align="center"><img src="assets/architecture.png" alt="Nicheverse architecture: a cell encoder and a niche encoder each quantize to their own codebook (256 cell codes, 32 niche codes), a gated cross-attention block lets the cell read its niche, and two decoders reconstruct expression and neighborhood composition" width="960"></p>
+
 Nicheverse is a hierarchical VQ-VAE that tokenizes imaging-based spatial transcriptomics into a discrete vocabulary of cell states and tissue niches. It trains on any cell-by-gene count matrix with spatial coordinates and runs on any imaging platform (Xenium, MERFISH, CosMx, seqFISH, and more). A cell encoder maps each cell to a **cell codebook** of transcriptional states, and a neighborhood encoder maps its surrounding tissue to a **niche codebook**. The two branches are coupled by a one-directional gated cross-attention block: the cell attends to its own niche before decoding, so spatial context can settle a borderline assignment, yet the cell code stays anchored to that cell's own transcripts and is never overridden by its neighbors. Because every cell is quantized against the same fixed codebook, the learned vocabulary is portable, the same code denotes the same state across cohorts, tissues, and platforms.
 
 ## Install
