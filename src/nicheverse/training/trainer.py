@@ -372,6 +372,13 @@ class TrainConfig:
     normalize: bool = True
     log1p: bool = True
     val_fraction: float = 0.0
+    holdout_key: str | None = None
+    """Optional ``adata.obs`` boolean column naming the cells to hold out as the
+    validation set instead of a random ``val_fraction`` draw. Held-out cells stay in
+    the spatial graph (they still feed their neighbors' neighborhood features) but
+    are never seeds or reconstruction targets, which is the held-out-region protocol
+    used for reconstruction and imputation benchmarks. ``None`` (default) keeps the
+    released random split; when set it takes precedence over ``val_fraction``."""
     early_stopping_patience: int | None = None
     grad_clip: float | None = None
     amp: bool = False
@@ -1217,10 +1224,22 @@ def train_model(
     loader_pin = False if device_resident else pin
     # Index-only collate for the resident path; None keeps default_collate (CPU path).
     resident_collate = _collate_index if device_resident else None
-    if tc.val_fraction > 0:
+    holdout_mask = None
+    if tc.holdout_key is not None:
+        if tc.holdout_key not in adata.obs:
+            raise ValueError(f"holdout_key={tc.holdout_key!r} not found in adata.obs")
+        holdout_mask = np.asarray(adata.obs[tc.holdout_key].to_numpy(), dtype=bool)
+        if holdout_mask.all() or not holdout_mask.any():
+            raise ValueError("holdout_key must mark a non-empty strict subset of cells")
+    if tc.val_fraction > 0 or holdout_mask is not None:
         n = len(dataset)
-        perm = torch.randperm(n, generator=torch.Generator().manual_seed(tc.seed)).tolist()
-        n_val = max(1, round(n * tc.val_fraction))
+        if holdout_mask is not None:
+            val_idx = np.where(holdout_mask)[0].tolist()
+            perm = val_idx + np.where(~holdout_mask)[0].tolist()
+            n_val = len(val_idx)
+        else:
+            perm = torch.randperm(n, generator=torch.Generator().manual_seed(tc.seed)).tolist()
+            n_val = max(1, round(n * tc.val_fraction))
         val_ds = Subset(dataset, perm[:n_val])
         train_ds: SpatialDataset | Subset = Subset(dataset, perm[n_val:])
         # On the resident path the loader iterates the index view (same length + same
