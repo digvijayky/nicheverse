@@ -81,7 +81,12 @@ class VectorQuantizer(nn.Module):
         batch average soft assignment used in the diversity term. Lower values
         sharpen the soft assignment (closer to the hard one).
     dead_code_reset_interval
-        Number of training steps between dead code resets.
+        Number of training steps between dead code resets. ``0`` disables dead
+        code resets entirely (ablation control; the default interval is unchanged).
+    kmeans_init
+        Seed the codebook with k-means++ on the first training batch (``True``,
+        default). ``False`` keeps the uniform random init, the van den Oord 2017
+        behaviour, as an ablation control.
     dead_code_usage_fraction
         A code is considered dead if its EMA usage (an EMA of raw per-code
         assignment counts) falls below this fraction of the per-code fair share,
@@ -142,6 +147,7 @@ class VectorQuantizer(nn.Module):
         dead_code_reset_interval: int = DEAD_CODE_RESET_INTERVAL,
         dead_code_usage_fraction: float = DEAD_CODE_USAGE_FRACTION,
         distance_metric: str = "l2",
+        kmeans_init: bool = True,
     ) -> None:
         super().__init__()
         if num_embeddings <= 0 or embedding_dim <= 0:
@@ -151,6 +157,10 @@ class VectorQuantizer(nn.Module):
             )
         if not 0.0 < ema_decay < 1.0:
             raise ValueError(f"ema_decay must be in (0, 1), got {ema_decay}")
+        if int(dead_code_reset_interval) < 0:
+            raise ValueError(
+                f"dead_code_reset_interval must be >= 0 (0 disables resets), got {dead_code_reset_interval}"
+            )
         if distance_metric not in ("l2", "cosine"):
             raise ValueError(f"distance_metric must be 'l2' or 'cosine', got {distance_metric!r}")
         if diversity_temperature <= 0.0:
@@ -165,6 +175,7 @@ class VectorQuantizer(nn.Module):
         self.dead_code_reset_interval = int(dead_code_reset_interval)
         self.dead_code_usage_fraction = float(dead_code_usage_fraction)
         self.distance_metric = distance_metric
+        self.kmeans_init = bool(kmeans_init)
         self.epsilon = 1e-5
         self.embedding = nn.Embedding(num_embeddings, embedding_dim)
         self.embedding.weight.data.uniform_(-1.0, 1.0)
@@ -359,7 +370,10 @@ class VectorQuantizer(nn.Module):
         input_shape = inputs.shape
         flat = inputs.view(-1, self.embedding_dim)
         if self.training and not bool(self._initialized):
-            if is_dist_avail_and_initialized():
+            if not self.kmeans_init:
+                # ablation control: keep the uniform random codebook, no data seeding
+                self._initialized.fill_(True)
+            elif is_dist_avail_and_initialized():
                 # DDP equivalence: seed the codebook from the *global* first batch
                 # (gathered across ranks) on rank 0, then broadcast so all ranks
                 # start from an identical codebook. Single-process path is unchanged.
@@ -411,7 +425,10 @@ class VectorQuantizer(nn.Module):
                 )
                 self.embedding.weight.data.copy_(self.ema_embed_sum / cluster.unsqueeze(1))
                 self.code_usage.mul_(CODE_USAGE_EMA).add_(enc_sum, alpha=1 - CODE_USAGE_EMA)
-                if int(self.update_count.item()) % self.dead_code_reset_interval == 0:
+                if (
+                    self.dead_code_reset_interval > 0
+                    and int(self.update_count.item()) % self.dead_code_reset_interval == 0
+                ):
                     self._reset_dead_codes(flat)
         if self.use_ema:
             loss = self.commitment_cost * F.mse_loss(quantized.detach(), inputs)
