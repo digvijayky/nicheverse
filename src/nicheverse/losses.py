@@ -49,6 +49,10 @@ __all__ = [
     "codebook_consistency",
     "laplacian_smoothness",
     "spatial_contrastive",
+    "masked_nb_nll",
+    "masked_poisson_nll",
+    "masked_bernoulli_detection_bce",
+    "masked_dirichlet_multinomial_nll",
 ]
 
 
@@ -448,3 +452,95 @@ SPATIAL_LOSSES = {
 #: assignments across the spatial graph, so the trainer feeds it the neighborhood
 #: encoder output; all other entries operate on the cell latent.
 NICHE_SPATIAL_LOSSES = frozenset({"graph_tv"})
+
+
+# ---------------------------------------------------------------------------------------
+# Masked (measured-gene) variants, for panels that share one vocabulary
+# ---------------------------------------------------------------------------------------
+def _align_measured(t: torch.Tensor, measured: torch.Tensor, dim: int = -1) -> torch.Tensor:
+    """Gather ``t`` at ``measured`` along ``dim``, or return it unchanged when already gathered.
+
+    A tensor whose size along ``dim`` already equals ``len(measured)`` is assumed to be the
+    gathered form (the multi panel decoders emit only the measured columns), so the same
+    loss function serves both a dense vocabulary sized tensor and a pre gathered one.
+    """
+    if t.shape[dim] == measured.shape[0]:
+        return t
+    return t.index_select(dim if dim >= 0 else t.dim() + dim, measured)
+
+
+def masked_nb_nll(
+    x: torch.Tensor,
+    cr: torch.Tensor,
+    log_theta: torch.Tensor,
+    measured: torch.Tensor,
+    eps: float = 1e-8,
+    library: torch.Tensor | None = None,
+) -> torch.Tensor:
+    """Negative binomial NLL restricted to the genes a panel actually measures.
+
+    Identical to :func:`nb_nll` evaluated on ``x[:, measured]``, ``cr[:, measured]`` and
+    ``log_theta[measured]``. Unmeasured genes contribute nothing: they are not zeros to be
+    explained, they were never assayed, so including them would teach the model that every
+    panel's missing genes are absent. The softmax proportion is therefore taken WITHIN the
+    measured panel, which matches how a single panel model is trained.
+
+    Any argument already reduced to the measured columns is passed through unchanged, so the
+    decoder can gather its vocabulary sized weight matrix once and never materialize a dense
+    vocabulary sized target.
+
+    Parameters
+    ----------
+    x, cr
+        ``(B, V)`` or ``(B, M)`` observed counts and decoder logits.
+    log_theta
+        ``(V,)`` or ``(M,)`` per gene log inverse dispersion.
+    measured
+        ``(M,)`` int64 indices of the measured genes.
+    eps, library
+        As in :func:`nb_nll`.
+    """
+    return nb_nll(
+        _align_measured(x, measured),
+        _align_measured(cr, measured),
+        _align_measured(log_theta, measured, 0),
+        eps=eps,
+        library=library,
+    )
+
+
+def masked_poisson_nll(
+    x: torch.Tensor,
+    cr: torch.Tensor,
+    measured: torch.Tensor,
+    eps: float = 1e-8,
+    library: torch.Tensor | None = None,
+) -> torch.Tensor:
+    """Poisson NLL restricted to the measured genes (see :func:`masked_nb_nll`)."""
+    return poisson_nll(
+        _align_measured(x, measured), _align_measured(cr, measured), eps=eps, library=library
+    )
+
+
+def masked_bernoulli_detection_bce(
+    x: torch.Tensor, logits: torch.Tensor, measured: torch.Tensor
+) -> torch.Tensor:
+    """Detection hurdle BCE restricted to the measured genes (see :func:`bernoulli_detection_bce`)."""
+    return bernoulli_detection_bce(_align_measured(x, measured), _align_measured(logits, measured))
+
+
+def masked_dirichlet_multinomial_nll(
+    target: torch.Tensor,
+    logits: torch.Tensor,
+    log_alpha: torch.Tensor,
+    measured: torch.Tensor,
+    eps: float = 1e-8,
+) -> torch.Tensor:
+    """Dirichlet multinomial NLL restricted to the measured genes (see
+    :func:`dirichlet_multinomial_nll`)."""
+    return dirichlet_multinomial_nll(
+        _align_measured(target, measured),
+        _align_measured(logits, measured),
+        _align_measured(log_alpha, measured, 0),
+        eps=eps,
+    )

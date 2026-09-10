@@ -273,6 +273,10 @@ class VectorQuantizer(nn.Module):
         if is_main_process():
             ridx = torch.randint(0, batch_size, (n_dead,), device=flat_input.device)
             new_e = flat_input[ridx] + torch.randn_like(flat_input[ridx]) * 0.01
+            # Under autocast the encoder output can be bf16/fp16 while the codebook and
+            # its EMA buffers stay fp32; match the destination dtype so the reseed works
+            # in mixed precision as well as in fp32.
+            new_e = new_e.to(self.embedding.weight.dtype)
             self.embedding.weight.data[dead] = new_e
             self.ema_embed_sum[dead] = new_e
             self.ema_cluster_size[dead] = 1.0
