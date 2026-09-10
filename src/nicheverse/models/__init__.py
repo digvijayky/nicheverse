@@ -19,6 +19,8 @@ from .quantizers import (
     build_quantizer,
     register_quantizer,
 )
+from .sparse import SparseBag, SparseBagEncoder
+from .foundation import FoundationConfig, FoundationVQVAE, load_foundation, save_foundation
 from .vqvae import HierarchicalVQVAE, ModelConfig, load_checkpoint, save_checkpoint
 
 __all__ = [
@@ -37,6 +39,12 @@ __all__ = [
     "ResidualFSQ",
     "ResidualVQ",
     "HierarchicalVQVAE",
+    "SparseBag",
+    "SparseBagEncoder",
+    "FoundationConfig",
+    "FoundationVQVAE",
+    "load_foundation",
+    "save_foundation",
     "ModelConfig",
     "RotVQ",
     "SoftVQ",
