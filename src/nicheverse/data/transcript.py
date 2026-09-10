@@ -36,7 +36,11 @@ _PLATFORM_CONTROL = {
 
 
 def _iter_molecule_frames(path, x_col, y_col, feature_col):
-    """Yield pandas frames of the ``(x, y, feature)`` columns of a molecule-table parquet.
+    """Yield pandas frames of the ``(x, y, feature)`` columns of a molecule table.
+
+    Parquet (Xenium ``transcripts.parquet``) and delimited text, plain or gzipped (CosMx
+    ``*_tx_file.csv[.gz]``, MERFISH ``detected_transcripts.csv``) are both accepted; the
+    format is taken from the file extension.
 
     Prefers duckdb when it is importable: it decodes vendor-written molecule tables that
     some pyarrow builds reject outright (10x Xenium ``transcripts.parquet`` fails on
@@ -45,6 +49,14 @@ def _iter_molecule_frames(path, x_col, y_col, feature_col):
     batches when duckdb is unavailable. Streams in chunks so only a slice is in memory.
     """
     cols = [x_col, y_col, feature_col]
+    name = str(path).lower()
+    if name.endswith((".csv", ".csv.gz", ".tsv", ".tsv.gz", ".txt", ".txt.gz")):
+        import pandas as _pd
+
+        sep = "\t" if ".tsv" in name or ".txt" in name else ","
+        for chunk in _pd.read_csv(path, sep=sep, usecols=cols, chunksize=2_000_000):
+            yield chunk
+        return
     try:
         import duckdb  # optional; robust decoder for vendor molecule tables
     except ImportError:
@@ -78,9 +90,19 @@ def _read_panel_molecules(path, x_col, y_col, feature_col, control, g2c):
         keep = (~fn.str.contains(control)) & fn.isin(genes)
         if not keep.any():
             continue
-        xs.append(d.loc[keep, x_col].to_numpy(np.float64))
-        ys.append(d.loc[keep, y_col].to_numpy(np.float64))
-        gs.append(fn[keep].map(g2c).to_numpy())
+        import pandas as _pd
+
+        # Vendor text exports occasionally carry a malformed coordinate; coerce and drop
+        # those molecules rather than failing the whole table.
+        xv = _pd.to_numeric(d.loc[keep, x_col], errors="coerce").to_numpy(np.float64)
+        yv = _pd.to_numeric(d.loc[keep, y_col], errors="coerce").to_numpy(np.float64)
+        gv = fn[keep].map(g2c).to_numpy()
+        good = np.isfinite(xv) & np.isfinite(yv)
+        if not good.any():
+            continue
+        xs.append(xv[good])
+        ys.append(yv[good])
+        gs.append(gv[good])
     if not xs:
         return np.empty((0, 2), dtype=np.float64), np.empty((0,), dtype=np.intp)
     return (
@@ -101,6 +123,9 @@ def transcript_context(
     control_pattern: re.Pattern | None = None,
     key_added: str = "transcript_context",
     copy: bool = False,
+    log1p: bool = True,
+    sparse: bool = False,
+    molecule_scale: float = 1.0,
 ) -> ad.AnnData | np.ndarray:
     """Compute the per-cell local molecular field and store it in ``obsm``.
 
@@ -128,6 +153,27 @@ def transcript_context(
     copy
         If True, operate on and return a copy; else write in place and return the
         feature matrix.
+    log1p
+        Apply ``log1p`` to the molecule counts (default True, the released behavior).
+        Set False to keep the RAW local molecule counts, which is what a count
+        likelihood (negative binomial / Dirichlet multinomial) needs as its target.
+    sparse
+        Return (and store) a :class:`scipy.sparse.csr_matrix` instead of a dense array.
+        The field is mostly zeros for a large panel, so this is the memory safe option
+        for multi million cell cohorts. Default False (the released behavior).
+    molecule_scale
+        Multiply the molecule coordinates by this factor before the radius query. Use it
+        when the molecule table and ``obsm['spatial']`` share a frame whose unit is not
+        microns (CosMx global pixels, for instance): pass the same factor that converts
+        the cell coordinates to microns, so ``radius`` stays a real micron distance.
+        Default 1.0 (the released behavior).
+
+    Notes
+    -----
+    Samples that share the same molecule table path are read ONCE and queried together,
+    so a TMA slide holding many cores costs one pass over its molecule table rather than
+    one pass per core. The result is identical either way, because a cell is only ever
+    matched to molecules within ``radius`` of it.
 
     Raises
     ------
@@ -156,21 +202,66 @@ def transcript_context(
     if not isinstance(transcripts, dict):
         transcripts = {s: transcripts for s in np.unique(samples)}
 
-    feats = np.zeros((adata.n_obs, len(genes)), dtype=np.float32)
+    by_path: dict[str, list[int]] = {}
     for sample in np.unique(samples):
         if sample not in transcripts:
             raise ValueError(f"no transcripts path provided for sample {sample!r}")
-        cidx = np.where(samples == sample)[0]
-        xy, gcol = _read_panel_molecules(
-            transcripts[sample], x_col, y_col, feature_col, control, g2c
-        )
+        by_path.setdefault(str(transcripts[sample]), []).extend(np.where(samples == sample)[0])
+
+    if sparse:
+        import scipy.sparse as _sp
+
+        blocks: list = []
+    else:
+        feats = np.zeros((adata.n_obs, len(genes)), dtype=np.float32)
+    rows_all: list[np.ndarray] = []
+    for path, cells in by_path.items():
+        cidx = np.asarray(sorted(cells))
+        xy, gcol = _read_panel_molecules(path, x_col, y_col, feature_col, control, g2c)
         if xy.shape[0] == 0:
             continue
+        if molecule_scale != 1.0:
+            xy = xy * float(molecule_scale)
         nbrs = cKDTree(xy).query_ball_point(coords_all[cidx], r=radius)
-        for j, nb in enumerate(nbrs):
-            if nb:
-                feats[cidx[j]] = np.bincount(gcol[nb], minlength=len(genes))
-    feats = np.log1p(feats)
+        if sparse:
+            ii, jj, vv = [], [], []
+            for j, nb in enumerate(nbrs):
+                if not nb:
+                    continue
+                u, c = np.unique(gcol[nb], return_counts=True)
+                ii.append(np.full(len(u), j)); jj.append(u); vv.append(c)
+            n_local = len(cidx)
+            if ii:
+                blocks.append(
+                    _sp.csr_matrix(
+                        (np.concatenate(vv).astype(np.float32), (np.concatenate(ii), np.concatenate(jj))),
+                        shape=(n_local, len(genes)),
+                    )
+                )
+            else:
+                blocks.append(_sp.csr_matrix((n_local, len(genes)), dtype=np.float32))
+            rows_all.append(cidx)
+        else:
+            for j, nb in enumerate(nbrs):
+                if nb:
+                    feats[cidx[j]] = np.bincount(gcol[nb], minlength=len(genes))
+    if sparse:
+        out = _sp.csr_matrix((adata.n_obs, len(genes)), dtype=np.float32)
+        if blocks:
+            # Blocks are in per-path order; scatter them back to cell order with a
+            # permutation matrix (cheap, and it never materializes a dense array).
+            stacked = _sp.vstack(blocks).tocsr()
+            order = np.concatenate(rows_all)
+            perm = _sp.csr_matrix(
+                (np.ones(len(order), np.float32), (order, np.arange(len(order)))),
+                shape=(adata.n_obs, len(order)),
+            )
+            out = (perm @ stacked).tocsr()
+        if log1p:
+            out.data = np.log1p(out.data)
+        feats = out
+    elif log1p:
+        feats = np.log1p(feats)
     target = adata.copy() if copy else adata
     target.obsm[key_added] = feats
     return target if copy else feats

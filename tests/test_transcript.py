@@ -74,3 +74,78 @@ def test_transcript_context_multi_row_group(tmp_path):
     feats = transcript_context(a, {"S": str(p)}, radius=10.0)
     np.testing.assert_allclose(feats[0], np.log1p([6, 0, 0]), atol=1e-5)
     np.testing.assert_allclose(feats[1], np.log1p([0, 0, 4]), atol=1e-5)
+
+
+# --- multi panel additions: csv molecule tables, raw counts, sparse output, scaling ---
+def _shim(coords, genes):
+    import anndata as _ad
+    import numpy as _np
+    import pandas as _pd
+
+    a = _ad.AnnData(_np.zeros((len(coords), len(genes)), dtype=_np.float32))
+    a.var_names = list(genes)
+    a.obsm["spatial"] = _np.asarray(coords, dtype=float)
+    a.obs["sample_id"] = _pd.Categorical(["s"] * len(coords))
+    return a
+
+
+def test_csv_molecule_table(tmp_path):
+    import numpy as np
+    import pandas as pd
+
+    from nicheverse.data.transcript import transcript_context
+
+    mol = pd.DataFrame({"x_location": [0.0, 1.0, 50.0], "y_location": [0.0, 1.0, 50.0],
+                        "feature_name": ["A", "B", "A"]})
+    p = tmp_path / "tx.csv"
+    mol.to_csv(p, index=False)
+    a = _shim([[0.0, 0.0], [50.0, 50.0]], ["A", "B"])
+    f = transcript_context(a, str(p), radius=5.0, log1p=False)
+    assert np.allclose(f, np.array([[1.0, 1.0], [1.0, 0.0]]))
+    pg = tmp_path / "tx2.csv.gz"
+    mol.to_csv(pg, index=False, compression="gzip")
+    a2 = _shim([[0.0, 0.0], [50.0, 50.0]], ["A", "B"])
+    assert np.allclose(transcript_context(a2, str(pg), radius=5.0, log1p=False), f)
+
+
+def test_raw_counts_and_sparse_output(tmp_path):
+    import numpy as np
+    import pandas as pd
+    import scipy.sparse as sp
+
+    from nicheverse.data.transcript import transcript_context
+
+    mol = pd.DataFrame({"x_location": [0.0, 0.1, 0.2], "y_location": [0.0, 0.1, 0.2],
+                        "feature_name": ["A", "A", "B"]})
+    p = tmp_path / "tx.csv"
+    mol.to_csv(p, index=False)
+    a = _shim([[0.0, 0.0]], ["A", "B"])
+    raw = transcript_context(a, str(p), radius=5.0, log1p=False)
+    assert np.allclose(raw, [[2.0, 1.0]])
+    logged = transcript_context(_shim([[0.0, 0.0]], ["A", "B"]), str(p), radius=5.0, log1p=True)
+    assert np.allclose(logged, np.log1p(raw))
+    spm = transcript_context(_shim([[0.0, 0.0]], ["A", "B"]), str(p), radius=5.0,
+                             log1p=False, sparse=True)
+    assert sp.issparse(spm) and np.allclose(spm.toarray(), raw)
+
+
+def test_molecule_scale_and_shared_table(tmp_path):
+    import numpy as np
+    import pandas as pd
+
+    from nicheverse.data.transcript import transcript_context
+
+    # molecules are in a frame 10x finer than the cell frame
+    mol = pd.DataFrame({"x_location": [0.0, 100.0], "y_location": [0.0, 100.0],
+                        "feature_name": ["A", "A"]})
+    p = tmp_path / "tx.csv"
+    mol.to_csv(p, index=False)
+    a = _shim([[0.0, 0.0], [10.0, 10.0]], ["A"])
+    f = transcript_context(a, str(p), radius=2.0, log1p=False, molecule_scale=0.1)
+    assert np.allclose(f, [[1.0], [1.0]])
+    # two samples pointing at the same table are read once and give the same answer
+    b = _shim([[0.0, 0.0], [10.0, 10.0]], ["A"])
+    b.obs["sample_id"] = pd.Categorical(["s1", "s2"])
+    g = transcript_context(b, {"s1": str(p), "s2": str(p)}, radius=2.0, log1p=False,
+                           molecule_scale=0.1)
+    assert np.allclose(g, f)
