@@ -44,6 +44,7 @@ def test_registry_names():
         "mlp_deep",
         "mlp_plr",
         "ft_transformer",
+        "sparse_bag",
     }
 
 
