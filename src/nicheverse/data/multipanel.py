@@ -110,6 +110,10 @@ class MultiPanelSpatialDataset(IterableDataset):
         Cap on ``batch_size * panel size``, which bounds the dense reconstruction target.
     with_context
         Emit the transcript context bags.
+    with_targets
+        Emit the dense ``(batch, panel size)`` reconstruction targets. Training needs them;
+        inference does not, and skipping them also lifts the ``max_target_elements`` cap on
+        the batch size, which is what makes a transcriptome wide panel slow to encode.
     drop_last_smaller_than
         Skip trailing minibatches with fewer cells than this (BatchNorm needs >= 2).
     """
@@ -123,6 +127,7 @@ class MultiPanelSpatialDataset(IterableDataset):
         aggregation: str = "weighted_mean",
         max_target_elements: int = 8_000_000,
         with_context: bool = True,
+        with_targets: bool = True,
         drop_last_smaller_than: int = 2,
     ) -> None:
         self.panels = list(panels)
@@ -132,6 +137,7 @@ class MultiPanelSpatialDataset(IterableDataset):
         self.aggregation = aggregation
         self.max_target_elements = int(max_target_elements)
         self.with_context = bool(with_context)
+        self.with_targets = bool(with_targets)
         self.drop_last_smaller_than = int(drop_last_smaller_than)
         self.epoch = 0
         self._index: list[tuple[int, int]] = [
@@ -143,7 +149,13 @@ class MultiPanelSpatialDataset(IterableDataset):
         self.epoch = int(epoch)
 
     def panel_batch_size(self, panel: PanelSpec) -> int:
-        """Minibatch size for one panel, capped so the dense target stays bounded."""
+        """Minibatch size for one panel, capped so the dense target stays bounded.
+
+        The cap only exists to bound the dense reconstruction target, so it is lifted when
+        targets are not emitted (inference).
+        """
+        if not self.with_targets:
+            return int(max(self.drop_last_smaller_than, self.batch_size))
         m = max(1, len(panel.measured))
         return int(max(self.drop_last_smaller_than, min(self.batch_size, self.max_target_elements // m)))
 
@@ -206,8 +218,9 @@ class MultiPanelSpatialDataset(IterableDataset):
                         out[f"{tag}_val"] = torch.from_numpy(v)
                         out[f"{tag}_off"] = torch.from_numpy(o)
                     out["has_ctx"] = torch.from_numpy(has_ctx[sel].astype(np.float32))
-                out["cell_target"] = torch.from_numpy(_dense_gathered(c, measured))
-                out["nbr_target"] = torch.from_numpy(_dense_gathered(nb, measured))
+                if self.with_targets:
+                    out["cell_target"] = torch.from_numpy(_dense_gathered(c, measured))
+                    out["nbr_target"] = torch.from_numpy(_dense_gathered(nb, measured))
                 out["measured"] = torch.from_numpy(measured)
                 b = len(sel)
                 out["platform_id"] = torch.full((b,), panel.platform_id, dtype=torch.long)

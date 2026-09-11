@@ -279,3 +279,28 @@ def test_splits_never_drop_cells():
             assert all(b[i][1] == b[i + 1][0] for i in range(len(b) - 1))
             if n >= 2:
                 assert all(s2 - s1 >= 2 for s1, s2 in b)
+
+
+def test_inference_mode_skips_targets_and_lifts_the_batch_cap(tmp_path):
+    """with_targets=False must drop the dense targets and stop capping the batch size."""
+    idx = {"a": _stage(tmp_path, "a", n=40, ds_id=0)}
+    (tmp_path / "index.json").write_text(json.dumps({"datasets": idx}))
+    train = MultiPanelSpatialDataset.from_staging(
+        tmp_path, batch_size=32, shuffle=False, max_target_elements=12)
+    infer = MultiPanelSpatialDataset.from_staging(
+        tmp_path, batch_size=32, shuffle=False, max_target_elements=12, with_targets=False)
+    assert train.panel_batch_size(train.panels[0]) == 2
+    assert infer.panel_batch_size(infer.panels[0]) == 32
+    seen = []
+    for b in infer:
+        assert "cell_target" not in b and "nbr_target" not in b
+        assert b["cell_idx"].numel() > 0 and b["measured"].numel() > 0
+        seen.extend(b["row"].tolist())
+    assert sorted(seen) == list(range(40))
+    # the bags themselves are unchanged, so the encoder sees identical input either way
+    tb = next(iter(MultiPanelSpatialDataset.from_staging(
+        tmp_path, batch_size=40, shuffle=False, with_targets=True)))
+    ib = next(iter(MultiPanelSpatialDataset.from_staging(
+        tmp_path, batch_size=40, shuffle=False, with_targets=False)))
+    for k in ("cell_idx", "cell_val", "cell_off", "nbr_idx", "nbr_val", "nbr_off", "row"):
+        assert torch.equal(tb[k], ib[k]), k
