@@ -21,6 +21,8 @@ from .quantizers import (
 )
 from .sparse import SparseBag, SparseBagEncoder
 from .foundation import FoundationConfig, FoundationVQVAE, load_foundation, save_foundation
+from .foundation_moe import MoEConfig, MoEFoundationVQVAE, load_moe_foundation, save_moe_foundation
+from .moe import DeterministicRouter, MoEDecoder, MoENicheDecoder, TopKRouter
 from .vqvae import HierarchicalVQVAE, ModelConfig, load_checkpoint, save_checkpoint
 
 __all__ = [
@@ -53,4 +55,12 @@ __all__ = [
     "load_checkpoint",
     "register_quantizer",
     "save_checkpoint",
+    "MoEConfig",
+    "MoEFoundationVQVAE",
+    "load_moe_foundation",
+    "save_moe_foundation",
+    "TopKRouter",
+    "DeterministicRouter",
+    "MoEDecoder",
+    "MoENicheDecoder",
 ]

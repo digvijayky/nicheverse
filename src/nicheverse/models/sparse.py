@@ -159,33 +159,14 @@ class SparseBagEncoder(nn.Module):
         )
         return emb, scal
 
-    # -- forward -----------------------------------------------------------------------
-    def forward(
+    # -- pooling (shared, usable by MoE wrappers) + forward ----------------------------
+    def _pool_all(
         self,
         x: torch.Tensor | Sequence[SparseBag],
         context: Sequence[SparseBag | None] | None = None,
         has_context: torch.Tensor | None = None,
     ) -> torch.Tensor:
-        """Encode a batch.
-
-        Parameters
-        ----------
-        x
-            Either a dense ``(B, in_dim)`` tensor (fallback path, used by the encoder
-            registry tests and by any caller that already has dense features), or a sequence
-            of ``n_bags`` :class:`SparseBag` instances of RAW counts.
-        context
-            Optional sequence of ``n_bags`` transcript context bags (``None`` entries are
-            allowed and are replaced by the learned missing context vector).
-        has_context
-            ``(B,)`` 0/1 tensor marking which cells actually have a transcript context field.
-            Rows with 0 get the learned missing context vector.
-
-        Returns
-        -------
-        torch.Tensor
-            ``(B, out_dim)`` latent.
-        """
+        """Pool all bags and return the concatenated pre-norm vector ``(B, pooled_dim)``."""
         parts: list[torch.Tensor] = []
         scals: list[torch.Tensor] = []
         if torch.is_tensor(x):
@@ -204,8 +185,6 @@ class SparseBagEncoder(nn.Module):
                 for c in chunks:
                     ctx = self.missing_context.expand(c.shape[0], -1)
                     parts.append(ctx)
-            b = x.shape[0]
-            device = x.device
         else:
             bags = list(x)
             if len(bags) != self.n_bags:
@@ -234,8 +213,32 @@ class SparseBagEncoder(nn.Module):
         h = torch.cat(parts, 1)
         if h.shape[1] != self.norm.normalized_shape[0]:  # pragma: no cover - guard
             raise ValueError(f"pooled width {h.shape[1]} != expected {self.norm.normalized_shape[0]}")
-        del b, device
-        return self.mlp(self.norm(h))
+        return h
+
+    def forward(
+        self,
+        x: torch.Tensor | Sequence[SparseBag],
+        context: Sequence[SparseBag | None] | None = None,
+        has_context: torch.Tensor | None = None,
+    ) -> torch.Tensor:
+        """Encode a batch.
+
+        Parameters
+        ----------
+        x
+            Either a dense ``(B, in_dim)`` tensor or a sequence of ``n_bags``
+            :class:`SparseBag` instances of RAW counts.
+        context
+            Optional sequence of ``n_bags`` transcript context bags.
+        has_context
+            ``(B,)`` 0/1 tensor marking which cells have a transcript context field.
+
+        Returns
+        -------
+        torch.Tensor
+            ``(B, out_dim)`` latent.
+        """
+        return self.mlp(self.norm(self._pool_all(x, context, has_context)))
 
 
 @register_encoder("sparse_bag")
