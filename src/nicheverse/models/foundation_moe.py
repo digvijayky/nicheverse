@@ -119,6 +119,20 @@ class MoEFoundationVQVAE(nn.Module):
         self.cell_log_theta = nn.Parameter(torch.zeros(config.vocab_size))
         self.niche_log_theta = nn.Parameter(torch.zeros(config.vocab_size))
 
+        if config.condition_decoders:
+            self.platform_embed = nn.Embedding(config.n_platforms, config.condition_dim)
+            self.species_embed = nn.Embedding(config.n_species, config.condition_dim)
+            nn.init.zeros_(self.platform_embed.weight)
+            nn.init.zeros_(self.species_embed.weight)
+            self.cond_to_cell = nn.Linear(config.condition_dim, config.cell_embedding_dim)
+            self.cond_to_niche = nn.Linear(config.condition_dim, config.neighborhood_embedding_dim)
+
+    def _condition(self, platform_id: torch.Tensor | None, species_id: torch.Tensor | None):
+        if not self.config.condition_decoders or platform_id is None:
+            return None, None
+        c = self.platform_embed(platform_id.reshape(-1)) + self.species_embed(species_id.reshape(-1))
+        return self.cond_to_cell(c), self.cond_to_niche(c)
+
     @staticmethod
     def _build_router(input_dim: int, config: MoEConfig):
         if config.moe_mode == "deterministic":
@@ -168,6 +182,11 @@ class MoEFoundationVQVAE(nn.Module):
             q_cell_final = q_cell + self.cross_attention_weight * attn.squeeze(1)
         else:
             q_cell_final = q_cell
+
+        c_cell, c_niche = self._condition(platform_id, species_id)
+        if c_cell is not None:
+            q_cell_final = q_cell_final + c_cell
+            q_niche = q_niche + c_niche
 
         dec_aux = torch.zeros((), device=measured.device)
         if self._has_decoder_moe:
@@ -298,6 +317,11 @@ class MoEFoundationVQVAE(nn.Module):
             model.niche_nbr_head.load_state_dict(base.niche_nbr_head.state_dict())
         model.cell_log_theta.data.copy_(base.cell_log_theta.data)
         model.niche_log_theta.data.copy_(base.niche_log_theta.data)
+        if moe_config.condition_decoders and base.config.condition_decoders:
+            model.platform_embed.load_state_dict(base.platform_embed.state_dict())
+            model.species_embed.load_state_dict(base.species_embed.state_dict())
+            model.cond_to_cell.load_state_dict(base.cond_to_cell.state_dict())
+            model.cond_to_niche.load_state_dict(base.cond_to_niche.state_dict())
         return model
 
 

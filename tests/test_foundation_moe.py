@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 import torch
+import torch.nn as nn
 
 from nicheverse.models.foundation import FoundationConfig, FoundationVQVAE, save_foundation
 from nicheverse.models.foundation_moe import (
@@ -214,3 +215,47 @@ class TestGradientFlow:
         loss.backward()
         enc_weight = model.cell_encoder.count_embed.weight
         assert enc_weight.grad is not None
+
+    def test_conditioning_gradients(self):
+        cfg = _cfg(num_experts=4, top_k=2, moe_mode='topk', condition_decoders=True)
+        model = MoEFoundationVQVAE(cfg)
+        batch = _make_batch()
+        out = model(batch['cell_bag'], batch['nbr_bag'], batch['measured'],
+                     cell_context=batch['cell_context'], nbr_context=batch['nbr_context'],
+                     has_context=batch['has_context'], platform_id=batch['platform_id'],
+                     species_id=batch['species_id'])
+        loss, parts = model.compute_loss(out, batch['cell_target'], batch['nbr_target'], batch['measured'])
+        loss.backward()
+        assert model.platform_embed.weight.grad is not None
+        assert model.platform_embed.weight.grad.abs().sum() > 0
+        assert model.cond_to_cell.weight.grad is not None
+
+    def test_no_conditioning(self):
+        cfg = _cfg(num_experts=4, top_k=2, moe_mode='topk', condition_decoders=False)
+        model = MoEFoundationVQVAE(cfg)
+        assert not hasattr(model, 'platform_embed')
+        batch = _make_batch()
+        out = model(batch['cell_bag'], batch['nbr_bag'], batch['measured'],
+                     cell_context=batch['cell_context'], nbr_context=batch['nbr_context'],
+                     has_context=batch['has_context'], platform_id=batch['platform_id'],
+                     species_id=batch['species_id'])
+        loss, _ = model.compute_loss(out, batch['cell_target'], batch['nbr_target'], batch['measured'])
+        loss.backward()
+
+    def test_conditioning_affects_output(self):
+        cfg = _cfg(num_experts=4, top_k=1, moe_mode='topk', condition_decoders=True)
+        model = MoEFoundationVQVAE(cfg)
+        model.eval()
+        nn.init.normal_(model.platform_embed.weight, std=1.0)
+        nn.init.normal_(model.cond_to_cell.weight, std=1.0)
+        batch = _make_batch()
+        with torch.no_grad():
+            out1 = model(batch['cell_bag'], batch['nbr_bag'], batch['measured'],
+                         cell_context=batch['cell_context'], nbr_context=batch['nbr_context'],
+                         has_context=batch['has_context'], platform_id=torch.zeros(B, dtype=torch.long),
+                         species_id=batch['species_id'])
+            out2 = model(batch['cell_bag'], batch['nbr_bag'], batch['measured'],
+                         cell_context=batch['cell_context'], nbr_context=batch['nbr_context'],
+                         has_context=batch['has_context'], platform_id=torch.ones(B, dtype=torch.long),
+                         species_id=batch['species_id'])
+        assert not torch.allclose(out1['cell_logits'], out2['cell_logits'])
