@@ -87,6 +87,18 @@ def warm_start(model, ds, dev, amp_dtype, n_batches):
     log(f'  codebooks warm started from {len(zc)} batches over {len(per)} datasets')
 
 
+def cosine_lr(epoch, total_epochs, warmup_epochs, lr_max, lr_min):
+    if epoch < warmup_epochs:
+        return lr_min + (lr_max - lr_min) * epoch / max(warmup_epochs, 1)
+    progress = (epoch - warmup_epochs) / max(total_epochs - warmup_epochs, 1)
+    return lr_min + 0.5 * (lr_max - lr_min) * (1 + math.cos(math.pi * progress))
+
+
+def set_lr(opt, lr):
+    for g in opt.param_groups:
+        g['lr'] = lr
+
+
 def gini(c):
     c = np.sort(np.asarray(c, np.float64))
     n = len(c)
@@ -104,6 +116,8 @@ def main():
     ap.add_argument('--batch-size', type=int, default=4096, help='GLOBAL batch size (split across GPUs)')
     ap.add_argument('--max-target-elements', type=int, default=8_000_000)
     ap.add_argument('--lr', type=float, default=1e-3)
+    ap.add_argument('--lr-min', type=float, default=1e-5, help='minimum LR for cosine decay')
+    ap.add_argument('--warmup-epochs', type=int, default=2, help='linear LR warmup epochs')
     ap.add_argument('--weight-decay', type=float, default=1e-4)
     ap.add_argument('--cell-codes', type=int, default=1024)
     ap.add_argument('--niche-codes', type=int, default=64)
@@ -183,10 +197,13 @@ def main():
     hist = json.load(open(hist_path)) if os.path.exists(hist_path) else []
     t_start = time.time()
     for ep in range(start_epoch, a.epochs):
+        cur_lr = cosine_lr(ep, a.epochs, a.warmup_epochs, a.lr, a.lr_min)
+        set_lr(opt, cur_lr)
         ds.set_epoch(ep)
         dl = DataLoader(ds, batch_size=None, num_workers=a.workers, pin_memory=True,
                         prefetch_factor=4 if a.workers else None, persistent_workers=False)
         model.train()
+        log(f'epoch {ep} lr={cur_lr:.2e}')
         agg, nb, seen = {}, 0, 0
         cell_use = np.zeros(a.cell_codes, np.int64)
         niche_use = np.zeros(a.niche_codes, np.int64)
@@ -219,7 +236,7 @@ def main():
                     f'niche={agg["niche"] / nb:.4f} vq={agg["vq"] / nb:.4f} '
                     f'active={int((cell_use > 0).sum())}')
         el = time.time() - t0
-        rec = dict(epoch=ep, batches=nb, cells=int(seen), seconds=round(el, 1),
+        rec = dict(epoch=ep, lr=round(cur_lr, 8), batches=nb, cells=int(seen), seconds=round(el, 1),
                    cells_per_second=round(seen / max(el, 1e-9), 1),
                    gpus=world_size,
                    active_cell_codes=int((cell_use > 0).sum()),
