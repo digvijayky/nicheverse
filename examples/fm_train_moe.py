@@ -37,17 +37,20 @@ def bags(b, dev):
     return cell, nbr, ctx, nctx, has
 
 
-def run_batch(fwd_model, loss_model, b, dev, amp_dtype):
+def run_batch(fwd_model, loss_model, b, dev, amp_dtype, routing_key='platform'):
     cell, nbr, ctx, nctx, has = bags(b, dev)
     measured = b['measured'].to(dev, non_blocking=True)
+    rid_key = 'tissue_id' if routing_key == 'tissue' else 'platform_id'
+    rid = b[rid_key].to(dev, non_blocking=True) if rid_key in b else None
     with torch.autocast('cuda', dtype=amp_dtype, enabled=amp_dtype is not None):
         out = fwd_model(cell, nbr, measured, cell_context=ctx, nbr_context=nctx, has_context=has,
-                        platform_id=b['platform_id'].to(dev), species_id=b['species_id'].to(dev))
+                        platform_id=b['platform_id'].to(dev), species_id=b['species_id'].to(dev),
+                        routing_id=rid)
     loss, parts = loss_model.compute_loss(out, b['cell_target'].to(dev), b['nbr_target'].to(dev), measured)
     return loss, parts, out
 
 
-def warm_start(model, ds, dev, amp_dtype, n_batches):
+def warm_start(model, ds, dev, amp_dtype, n_batches, routing_key='platform'):
     if not hasattr(model.cell_vq, '_kmeans_init'):
         return
     per = {}
@@ -60,8 +63,9 @@ def warm_start(model, ds, dev, amp_dtype, n_batches):
                 continue
             per[d] = per.get(d, 0) + 1
             cell, nbr, ctx, nctx, has = bags(b, dev)
-            pid = b['platform_id'].to(dev, non_blocking=True) if 'platform_id' in b else None
-            enc_kw = dict(platform_id=pid) if hasattr(model.cell_encoder, 'router') else {}
+            rid_key = 'tissue_id' if routing_key == 'tissue' else 'platform_id'
+            rid = b[rid_key].to(dev, non_blocking=True) if rid_key in b else None
+            enc_kw = dict(platform_id=rid) if hasattr(model.cell_encoder, 'router') else {}
             with torch.autocast('cuda', dtype=amp_dtype, enabled=amp_dtype is not None):
                 z1 = model.cell_encoder([cell], [ctx], has, **enc_kw)
                 z2 = model.neighborhood_encoder([cell, nbr], [ctx, nctx], has, **enc_kw)
@@ -136,6 +140,9 @@ def main():
     ap.add_argument('--router-z-loss-weight', type=float, default=0.001)
     ap.add_argument('--moe-noise-std', type=float, default=0.1)
     ap.add_argument('--pretrained-base', default='', help='path to pretrained FoundationVQVAE model.pt')
+    ap.add_argument('--routing-key', default='platform',
+                    choices=['platform', 'tissue'],
+                    help='which batch field drives MoE routing (conditioning always uses platform)')
     a = ap.parse_args()
 
     rank, world_size, local_rank = 0, 1, 0
@@ -157,8 +164,10 @@ def main():
         a.shards, keep, batch_size=per_rank_batch, shuffle=True, seed=17,
         max_target_elements=a.max_target_elements)
     n_cells = sum(index['datasets'][p.name]['n_cells'] for p in ds.panels)
+    tissues = sorted({d.get('tissue', '') for d in index['datasets'].values()})
+    n_tissues = len(tissues)
     log(f'{len(ds.panels)} datasets, {n_cells} cells, vocabulary {len(voc)}, '
-        f'{world_size} GPU(s), per-rank batch {per_rank_batch}')
+        f'{world_size} GPU(s), per-rank batch {per_rank_batch}, {n_tissues} tissues')
 
     cfg = MoEConfig(
         vocab_size=len(voc), hidden_dims=tuple(int(x) for x in a.hidden.split(',')),
@@ -172,6 +181,7 @@ def main():
         num_experts=a.num_experts, top_k=a.top_k, moe_mode=a.moe_mode,
         moe_scope=a.moe_scope, load_balance_weight=a.load_balance_weight,
         router_z_loss_weight=a.router_z_loss_weight, moe_noise_std=a.moe_noise_std,
+        n_routing_categories=n_tissues if a.routing_key == 'tissue' else 0,
     )
 
     if a.pretrained_base and os.path.exists(a.pretrained_base):
@@ -192,7 +202,7 @@ def main():
         start_epoch = int(s['epoch']) + 1
         log(f'resumed from {ck} at epoch {start_epoch}')
     elif not a.pretrained_base:
-        warm_start(model, ds, dev, amp_dtype, a.warm_batches)
+        warm_start(model, ds, dev, amp_dtype, a.warm_batches, a.routing_key)
 
     if world_size > 1:
         broadcast_module_(model, src=0)
@@ -222,7 +232,7 @@ def main():
         per_ds = {}
         t0 = time.time()
         for b in dl:
-            loss, parts, out = run_batch(model, raw_model, b, dev, amp_dtype)
+            loss, parts, out = run_batch(model, raw_model, b, dev, amp_dtype, a.routing_key)
             opt.zero_grad(set_to_none=True)
             if scaler.is_enabled():
                 scaler.scale(loss).backward(); scaler.unscale_(opt)
@@ -252,7 +262,7 @@ def main():
         rec = dict(epoch=ep, lr=round(cur_lr, 8), batches=nb, cells=int(seen), seconds=round(el, 1),
                    cells_per_second=round(seen / max(el, 1e-9), 1),
                    gpus=world_size, num_experts=a.num_experts, top_k=a.top_k,
-                   moe_mode=a.moe_mode, moe_scope=a.moe_scope,
+                   moe_mode=a.moe_mode, moe_scope=a.moe_scope, routing_key=a.routing_key,
                    active_cell_codes=int((cell_use > 0).sum()),
                    active_niche_codes=int((niche_use > 0).sum()),
                    cell_gini=round(gini(cell_use), 4), niche_gini=round(gini(niche_use), 4),

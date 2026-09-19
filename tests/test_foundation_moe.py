@@ -259,3 +259,17 @@ class TestGradientFlow:
                          has_context=batch['has_context'], platform_id=torch.ones(B, dtype=torch.long),
                          species_id=batch['species_id'])
         assert not torch.allclose(out1['cell_logits'], out2['cell_logits'])
+
+    def test_routing_id_overrides_platform(self):
+        cfg = _cfg(num_experts=4, top_k=2, moe_mode='topk', moe_scope='decoder_full')
+        model = MoEFoundationVQVAE(cfg)
+        batch = _make_batch()
+        tissue_ids = torch.randint(0, 8, (B,))
+        out = model(batch['cell_bag'], batch['nbr_bag'], batch['measured'],
+                     cell_context=batch['cell_context'], nbr_context=batch['nbr_context'],
+                     has_context=batch['has_context'], platform_id=batch['platform_id'],
+                     species_id=batch['species_id'], routing_id=tissue_ids)
+        assert out['cell_logits'].shape == (B, M)
+        loss, parts = model.compute_loss(out, batch['cell_target'], batch['nbr_target'], batch['measured'])
+        assert loss.isfinite()
+        loss.backward()

@@ -49,6 +49,7 @@ class PanelSpec:
         dataset_id: int,
         platform_id: int,
         species_id: int,
+        tissue_id: int = 0,
     ) -> None:
         self.name = name
         self.shards = [Path(p) for p in shards]
@@ -56,6 +57,7 @@ class PanelSpec:
         self.dataset_id = int(dataset_id)
         self.platform_id = int(platform_id)
         self.species_id = int(species_id)
+        self.tissue_id = int(tissue_id)
 
 
 class MultiPanelBatch(dict):
@@ -230,6 +232,7 @@ class MultiPanelSpatialDataset(IterableDataset):
                 out["platform_id"] = torch.full((b,), panel.platform_id, dtype=torch.long)
                 out["species_id"] = torch.full((b,), panel.species_id, dtype=torch.long)
                 out["dataset_id"] = torch.full((b,), panel.dataset_id, dtype=torch.long)
+                out["tissue_id"] = torch.full((b,), panel.tissue_id, dtype=torch.long)
                 out["row"] = torch.from_numpy(sel.astype(np.int64))
                 out["dataset"] = panel.name
                 out["shard"] = panel.shards[si].name
@@ -250,6 +253,8 @@ class MultiPanelSpatialDataset(IterableDataset):
         """
         root = Path(root)
         index = json.loads((root / "index.json").read_text())
+        tissues = sorted({d.get("tissue", "") for d in index["datasets"].values()})
+        tissue_to_id = {t: i for i, t in enumerate(tissues)}
         panels = []
         for name, d in index["datasets"].items():
             if datasets is not None and name not in datasets:
@@ -263,6 +268,7 @@ class MultiPanelSpatialDataset(IterableDataset):
                     d["dataset_id"],
                     d["platform_id"],
                     d["species_id"],
+                    tissue_to_id.get(d.get("tissue", ""), 0),
                 )
             )
         return cls(panels, **kwargs)

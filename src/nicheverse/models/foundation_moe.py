@@ -32,6 +32,7 @@ class MoEConfig(FoundationConfig):
     load_balance_weight: float = 0.01
     router_z_loss_weight: float = 0.001
     moe_noise_std: float = 0.1
+    n_routing_categories: int = 0
 
 
 class MoEFoundationVQVAE(nn.Module):
@@ -138,10 +139,11 @@ class MoEFoundationVQVAE(nn.Module):
         if config.moe_mode == "deterministic":
             return DeterministicRouter(config.num_experts)
         use_platform = config.moe_mode == "hybrid"
+        n_rcat = config.n_routing_categories if config.n_routing_categories > 0 else config.n_platforms
         return TopKRouter(
             input_dim=input_dim, num_experts=config.num_experts,
             top_k=config.top_k, noise_std=config.moe_noise_std,
-            use_platform=use_platform, n_platforms=config.n_platforms,
+            use_platform=use_platform, n_platforms=n_rcat,
             z_loss_weight=config.router_z_loss_weight / max(config.load_balance_weight, 1e-8),
         )
 
@@ -155,15 +157,17 @@ class MoEFoundationVQVAE(nn.Module):
         has_context: torch.Tensor | None = None,
         platform_id: torch.Tensor | None = None,
         species_id: torch.Tensor | None = None,
+        routing_id: torch.Tensor | None = None,
     ) -> dict[str, torch.Tensor]:
+        rid = routing_id if routing_id is not None else platform_id
         enc_aux = torch.zeros((), device=measured.device)
         if self._has_encoder_moe:
             z_cell = self.cell_encoder(
-                [cell_bag], [cell_context], has_context, platform_id=platform_id)
+                [cell_bag], [cell_context], has_context, platform_id=rid)
             enc_aux = enc_aux + self.cell_encoder._last_aux
             z_niche = self.neighborhood_encoder(
                 [cell_bag, nbr_bag], [cell_context, nbr_context], has_context,
-                platform_id=platform_id)
+                platform_id=rid)
             enc_aux = enc_aux + self.neighborhood_encoder._last_aux
         else:
             z_cell = self.cell_encoder([cell_bag], [cell_context], has_context)
@@ -191,8 +195,8 @@ class MoEFoundationVQVAE(nn.Module):
 
         dec_aux = torch.zeros((), device=measured.device)
         if self._has_decoder_moe:
-            cell_logits, cell_dec_aux = self.cell_decoder(q_cell_final, measured, platform_id)
-            niche_self, niche_nbr, niche_dec_aux = self.niche_decoder(q_niche, measured, platform_id)
+            cell_logits, cell_dec_aux = self.cell_decoder(q_cell_final, measured, rid)
+            niche_self, niche_nbr, niche_dec_aux = self.niche_decoder(q_niche, measured, rid)
             dec_aux = cell_dec_aux + niche_dec_aux
         else:
             h_cell = self.cell_trunk(q_cell_final)
