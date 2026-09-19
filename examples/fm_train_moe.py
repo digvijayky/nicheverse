@@ -60,9 +60,11 @@ def warm_start(model, ds, dev, amp_dtype, n_batches):
                 continue
             per[d] = per.get(d, 0) + 1
             cell, nbr, ctx, nctx, has = bags(b, dev)
+            pid = b['platform_id'].to(dev, non_blocking=True) if 'platform_id' in b else None
+            enc_kw = dict(platform_id=pid) if hasattr(model.cell_encoder, 'router') else {}
             with torch.autocast('cuda', dtype=amp_dtype, enabled=amp_dtype is not None):
-                z1 = model.cell_encoder([cell], [ctx], has)
-                z2 = model.neighborhood_encoder([cell, nbr], [ctx, nctx], has)
+                z1 = model.cell_encoder([cell], [ctx], has, **enc_kw)
+                z2 = model.neighborhood_encoder([cell, nbr], [ctx, nctx], has, **enc_kw)
             take = min(64, z1.shape[0])
             zc.append(z1[:take].float().cpu()); zn.append(z2[:take].float().cpu())
             if len(zc) >= n_batches:

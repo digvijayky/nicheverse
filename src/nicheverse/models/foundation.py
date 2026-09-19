@@ -336,9 +336,11 @@ class FoundationVQVAE(nn.Module):
             q_niche = q_niche + c_niche
         h_cell = self.cell_trunk(q_cell_final)
         h_niche = self.niche_trunk(q_niche)
+        cell_logits = self.cell_head(h_cell, measured) + 0.0 * self.cell_log_theta.sum()
+        niche_self_logits = self.niche_self_head(h_niche, measured) + 0.0 * self.niche_log_theta.sum()
         return dict(
-            cell_logits=self.cell_head(h_cell, measured),
-            niche_self_logits=self.niche_self_head(h_niche, measured),
+            cell_logits=cell_logits,
+            niche_self_logits=niche_self_logits,
             niche_nbr_logits=self.niche_nbr_head(h_niche, measured),
             cell_idx=cell_idx.reshape(-1),
             niche_idx=niche_idx.reshape(-1),

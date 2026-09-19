@@ -103,7 +103,7 @@ class TestBuildPlatformToExpert:
 
 
 @pytest.mark.parametrize("moe_mode", ["topk", "deterministic", "hybrid"])
-@pytest.mark.parametrize("moe_scope", ["decoder_full", "decoder_head"])
+@pytest.mark.parametrize("moe_scope", ["decoder_full", "decoder_head", "encoder", "encoder_decoder"])
 class TestMoEFoundationVQVAE:
     def test_forward(self, moe_mode, moe_scope):
         cfg = _cfg(num_experts=4, top_k=2, moe_mode=moe_mode, moe_scope=moe_scope)

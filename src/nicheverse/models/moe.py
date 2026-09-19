@@ -179,7 +179,8 @@ class MoESparseBagEncoder(nn.Module):
         platform_id: torch.Tensor | None = None,
     ) -> torch.Tensor:
         pooled = self.base._pool_all(x, context, has_context)
-        weights, indices, aux = self.router(pooled, platform_id)
+        pooled_normed = self.base.norm(pooled)
+        weights, indices, aux = self.router(pooled_normed, platform_id)
         B = pooled.shape[0]
         out_dim = self.expert_mlps[0][-1].out_features
         out = torch.zeros(B, out_dim, device=pooled.device, dtype=pooled.dtype)

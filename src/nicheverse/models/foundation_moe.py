@@ -201,6 +201,9 @@ class MoEFoundationVQVAE(nn.Module):
             niche_self = self.niche_self_head(h_niche, measured)
             niche_nbr = self.niche_nbr_head(h_niche, measured)
 
+        cell_logits = cell_logits + 0.0 * self.cell_log_theta.sum()
+        niche_self = niche_self + 0.0 * self.niche_log_theta.sum()
+
         return dict(
             cell_logits=cell_logits,
             niche_self_logits=niche_self,
@@ -277,6 +280,10 @@ class MoEFoundationVQVAE(nn.Module):
             model.cell_encoder.base.load_state_dict(base.cell_encoder.state_dict())
             model.neighborhood_encoder.base.load_state_dict(
                 base.neighborhood_encoder.state_dict())
+            for en in model.cell_encoder.expert_norms:
+                en.load_state_dict(model.cell_encoder.base.norm.state_dict())
+            for en in model.neighborhood_encoder.expert_norms:
+                en.load_state_dict(model.neighborhood_encoder.base.norm.state_dict())
         else:
             model.cell_encoder.load_state_dict(base.cell_encoder.state_dict())
             model.neighborhood_encoder.load_state_dict(
