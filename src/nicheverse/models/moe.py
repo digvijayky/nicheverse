@@ -80,11 +80,13 @@ class TopKRouter(nn.Module):
         use_platform: bool = False,
         n_platforms: int = 1,
         platform_embed_dim: int = 16,
+        z_loss_weight: float = 0.1,
     ) -> None:
         super().__init__()
         self.num_experts = num_experts
         self.top_k = min(top_k, num_experts)
         self.noise_std = noise_std
+        self.z_loss_weight = z_loss_weight
         self.use_platform = use_platform
         gate_in = input_dim
         if use_platform:
@@ -110,7 +112,7 @@ class TopKRouter(nn.Module):
         tokens_per_expert = F.one_hot(top_idx[:, 0], self.num_experts).float().mean(0)
         balance_loss = self.num_experts * (tokens_per_expert * probs.mean(0)).sum()
         z_loss = logits.logsumexp(dim=-1).square().mean()
-        aux = balance_loss + 0.1 * z_loss
+        aux = balance_loss + self.z_loss_weight * z_loss
         return weights, top_idx, aux
 
 

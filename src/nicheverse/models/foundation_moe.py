@@ -142,6 +142,7 @@ class MoEFoundationVQVAE(nn.Module):
             input_dim=input_dim, num_experts=config.num_experts,
             top_k=config.top_k, noise_std=config.moe_noise_std,
             use_platform=use_platform, n_platforms=config.n_platforms,
+            z_loss_weight=config.router_z_loss_weight / max(config.load_balance_weight, 1e-8),
         )
 
     def forward(
