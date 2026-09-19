@@ -186,6 +186,10 @@ class MultiPanelSpatialDataset(IterableDataset):
         rng = np.random.default_rng(self.seed + 9973 * self.epoch)
         if self.shuffle:
             rng.shuffle(order)
+        from .._distributed import get_rank, get_world_size
+        rank, world = get_rank(), get_world_size()
+        if world > 1:
+            order = order[rank::world]
         if info is not None:
             order = order[info.id :: info.num_workers]
         for pi, si in order:
