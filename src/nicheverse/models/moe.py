@@ -2,14 +2,18 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from .sparse import SparseBag, SparseBagEncoder
+
 __all__ = [
     "TopKRouter", "DeterministicRouter", "MoEDecoder", "MoENicheDecoder",
-    "build_platform_to_expert", "moe_mlp",
-    "PLATFORM_GROUPS",
+    "MoESparseBagEncoder", "build_platform_to_expert", "build_tissue_to_expert",
+    "moe_mlp", "PLATFORM_GROUPS", "TISSUE_SYSTEMS",
 ]
 
 PLATFORM_GROUPS = {
@@ -26,6 +30,17 @@ PLATFORM_GROUPS = {
     "other": ["BARISTAseq", "EEL FISH", "RAEFISH", "RIBOmap"],
 }
 
+TISSUE_SYSTEMS = {
+    "Neural": ["Brain", "Cortex", "Hypothalamus", "Spinal cord", "Whole brain", "Retina"],
+    "Immune": ["Bone marrow", "Lymph node", "Tonsil"],
+    "Thoracic": ["Lung", "Heart", "Breast"],
+    "GI": ["Colon", "Liver", "Pancreas"],
+    "Renal": ["Kidney"],
+    "Reproductive": ["Ovary", "Cervix", "Prostate", "Placenta"],
+    "Skin": ["Skin"],
+    "Other": ["Bone", "Carotid artery", "Multi-tissue", "Whole pup", "Whole embryo"],
+}
+
 
 def moe_mlp(in_dim: int, hidden: list[int], out_dim: int, dropout: float = 0.2) -> nn.Sequential:
     layers: list[nn.Module] = []
@@ -38,14 +53,21 @@ def moe_mlp(in_dim: int, hidden: list[int], out_dim: int, dropout: float = 0.2) 
 
 
 def build_platform_to_expert(platform_names: list[str]) -> dict[int, int]:
-    name_to_group = {}
+    name_to_group: dict[str, int] = {}
     for gid, (_, members) in enumerate(PLATFORM_GROUPS.items()):
         for m in members:
             name_to_group[m] = gid
-    result = {}
-    for pid, name in enumerate(platform_names):
-        result[pid] = name_to_group.get(name, len(PLATFORM_GROUPS) - 1)
-    return result
+    return {pid: name_to_group.get(name, len(PLATFORM_GROUPS) - 1)
+            for pid, name in enumerate(platform_names)}
+
+
+def build_tissue_to_expert(tissue_names: list[str]) -> dict[int, int]:
+    name_to_sys: dict[str, int] = {}
+    for sid, (_, members) in enumerate(TISSUE_SYSTEMS.items()):
+        for m in members:
+            name_to_sys[m] = sid
+    return {tid: name_to_sys.get(name, len(TISSUE_SYSTEMS) - 1)
+            for tid, name in enumerate(tissue_names)}
 
 
 class TopKRouter(nn.Module):
@@ -84,12 +106,9 @@ class TopKRouter(nn.Module):
             logits = logits + torch.randn_like(logits) * self.noise_std
         top_vals, top_idx = logits.topk(self.top_k, dim=-1)
         weights = F.softmax(top_vals, dim=-1)
-        # load-balancing loss (Switch Transformer)
         probs = F.softmax(logits, dim=-1)
         tokens_per_expert = F.one_hot(top_idx[:, 0], self.num_experts).float().mean(0)
-        mean_prob = probs.mean(0)
-        balance_loss = self.num_experts * (tokens_per_expert * mean_prob).sum()
-        # router z-loss
+        balance_loss = self.num_experts * (tokens_per_expert * probs.mean(0)).sum()
         z_loss = logits.logsumexp(dim=-1).square().mean()
         aux = balance_loss + 0.1 * z_loss
         return weights, top_idx, aux
@@ -117,6 +136,63 @@ class DeterministicRouter(nn.Module):
         weights = torch.ones(b, 1, device=dev, dtype=x.dtype)
         indices = eid.unsqueeze(1)
         return weights, indices, torch.zeros((), device=dev)
+
+
+class MoESparseBagEncoder(nn.Module):
+    """Encoder MoE: shared gene embeddings + pooling, per-expert norm+MLP."""
+
+    def __init__(
+        self,
+        base_encoder: SparseBagEncoder,
+        num_experts: int,
+        router: TopKRouter | DeterministicRouter,
+    ) -> None:
+        super().__init__()
+        self.base = base_encoder
+        self.num_experts = num_experts
+        self.router = router
+        pooled_dim = base_encoder.norm.normalized_shape[0]
+        hidden = [m.out_features for m in base_encoder.mlp if isinstance(m, nn.Linear)][:-1]
+        out_dim = [m.out_features for m in base_encoder.mlp if isinstance(m, nn.Linear)][-1]
+        dp = 0.0
+        for m in base_encoder.mlp:
+            if isinstance(m, nn.Dropout):
+                dp = m.p
+                break
+        self.expert_norms = nn.ModuleList(
+            [nn.LayerNorm(pooled_dim) for _ in range(num_experts)]
+        )
+        self.expert_mlps = nn.ModuleList(
+            [moe_mlp(pooled_dim, hidden, out_dim, dp) for _ in range(num_experts)]
+        )
+        for i in range(num_experts):
+            self.expert_norms[i].load_state_dict(base_encoder.norm.state_dict())
+        self._last_aux: torch.Tensor | float = 0.0
+
+    def forward(
+        self,
+        x: torch.Tensor | Sequence[SparseBag],
+        context: Sequence[SparseBag | None] | None = None,
+        has_context: torch.Tensor | None = None,
+        platform_id: torch.Tensor | None = None,
+    ) -> torch.Tensor:
+        pooled = self.base._pool_all(x, context, has_context)
+        weights, indices, aux = self.router(pooled, platform_id)
+        B = pooled.shape[0]
+        out_dim = self.expert_mlps[0][-1].out_features
+        out = torch.zeros(B, out_dim, device=pooled.device, dtype=pooled.dtype)
+        top_k = indices.shape[1]
+        for k in range(top_k):
+            eid = indices[:, k]
+            w = weights[:, k : k + 1]
+            for e in range(self.num_experts):
+                mask = eid == e
+                if not mask.any():
+                    continue
+                h = self.expert_mlps[e](self.expert_norms[e](pooled[mask]))
+                out[mask] = out[mask] + w[mask] * h
+        self._last_aux = aux
+        return out
 
 
 class _Expert(nn.Module):
@@ -155,26 +231,17 @@ class MoEDecoder(nn.Module):
     ) -> tuple[torch.Tensor, torch.Tensor]:
         weights, indices, aux_loss = self.router(x, platform_id)
         b, top_k = indices.shape
-        if self.share_trunk:
-            h = self.shared_trunk(x)
-            out = torch.zeros(b, measured.shape[0], device=x.device, dtype=x.dtype)
-            for k in range(top_k):
-                expert_ids = indices[:, k]
-                w = weights[:, k].unsqueeze(1)
-                for e in range(self.num_experts):
-                    mask = expert_ids == e
-                    if not mask.any():
-                        continue
-                    out[mask] += w[mask] * self.expert_heads[e](h[mask], measured)
-        else:
-            out = torch.zeros(b, measured.shape[0], device=x.device, dtype=x.dtype)
-            for k in range(top_k):
-                expert_ids = indices[:, k]
-                w = weights[:, k].unsqueeze(1)
-                for e in range(self.num_experts):
-                    mask = expert_ids == e
-                    if not mask.any():
-                        continue
+        out = torch.zeros(b, measured.shape[0], device=x.device, dtype=x.dtype)
+        for k in range(top_k):
+            eid = indices[:, k]
+            w = weights[:, k].unsqueeze(1)
+            for e in range(self.num_experts):
+                mask = eid == e
+                if not mask.any():
+                    continue
+                if self.share_trunk:
+                    out[mask] += w[mask] * self.expert_heads[e](self.shared_trunk(x[mask]), measured)
+                else:
                     out[mask] += w[mask] * self.experts[e](x[mask], measured)
         return out, aux_loss
 
@@ -211,10 +278,10 @@ class MoENicheDecoder(nn.Module):
         self_out = torch.zeros(b, m, device=x.device, dtype=x.dtype)
         nbr_out = torch.zeros(b, m, device=x.device, dtype=x.dtype)
         for k in range(top_k):
-            expert_ids = indices[:, k]
+            eid = indices[:, k]
             w = weights[:, k].unsqueeze(1)
             for e in range(self.num_experts):
-                mask = expert_ids == e
+                mask = eid == e
                 if not mask.any():
                     continue
                 if self.share_trunk:

@@ -129,7 +129,7 @@ def main():
     ap.add_argument('--top-k', type=int, default=2)
     ap.add_argument('--moe-mode', default='topk', choices=['topk', 'deterministic', 'hybrid'])
     ap.add_argument('--moe-scope', default='decoder_full',
-                    choices=['decoder_full', 'decoder_head'])
+                    choices=['encoder', 'decoder_full', 'decoder_head', 'encoder_decoder'])
     ap.add_argument('--load-balance-weight', type=float, default=0.01)
     ap.add_argument('--router-z-loss-weight', type=float, default=0.001)
     ap.add_argument('--moe-noise-std', type=float, default=0.1)

@@ -14,7 +14,7 @@ from ..losses import masked_bernoulli_detection_bce, masked_nb_nll
 from .encoders import _largest_divisor, build_encoder
 from .foundation import FoundationConfig, _GeneHead, load_foundation
 from .moe import (
-    DeterministicRouter, MoEDecoder, MoENicheDecoder,
+    DeterministicRouter, MoEDecoder, MoENicheDecoder, MoESparseBagEncoder,
     TopKRouter, build_platform_to_expert, moe_mlp,
 )
 from .quantizers import build_quantizer
@@ -78,8 +78,19 @@ class MoEFoundationVQVAE(nn.Module):
             self.neighborhood_projection = nn.Linear(
                 config.neighborhood_embedding_dim, config.cell_embedding_dim,
             )
+        self._has_encoder_moe = config.moe_scope in ("encoder", "encoder_decoder")
+        if self._has_encoder_moe:
+            cell_enc_router = self._build_router(
+                self.cell_encoder.norm.normalized_shape[0], config)
+            nbr_enc_router = self._build_router(
+                self.neighborhood_encoder.norm.normalized_shape[0], config)
+            self.cell_encoder = MoESparseBagEncoder(
+                self.cell_encoder, config.num_experts, cell_enc_router)
+            self.neighborhood_encoder = MoESparseBagEncoder(
+                self.neighborhood_encoder, config.num_experts, nbr_enc_router)
+
         rev = list(reversed(hd))
-        self._has_decoder_moe = config.moe_scope in ("decoder_full", "decoder_head")
+        self._has_decoder_moe = config.moe_scope in ("decoder_full", "decoder_head", "encoder_decoder")
 
         if self._has_decoder_moe:
             share_trunk = config.moe_scope == "decoder_head"
@@ -130,9 +141,19 @@ class MoEFoundationVQVAE(nn.Module):
         platform_id: torch.Tensor | None = None,
         species_id: torch.Tensor | None = None,
     ) -> dict[str, torch.Tensor]:
-        z_cell = self.cell_encoder([cell_bag], [cell_context], has_context)
-        z_niche = self.neighborhood_encoder(
-            [cell_bag, nbr_bag], [cell_context, nbr_context], has_context)
+        enc_aux = torch.zeros((), device=measured.device)
+        if self._has_encoder_moe:
+            z_cell = self.cell_encoder(
+                [cell_bag], [cell_context], has_context, platform_id=platform_id)
+            enc_aux = enc_aux + self.cell_encoder._last_aux
+            z_niche = self.neighborhood_encoder(
+                [cell_bag, nbr_bag], [cell_context, nbr_context], has_context,
+                platform_id=platform_id)
+            enc_aux = enc_aux + self.neighborhood_encoder._last_aux
+        else:
+            z_cell = self.cell_encoder([cell_bag], [cell_context], has_context)
+            z_niche = self.neighborhood_encoder(
+                [cell_bag, nbr_bag], [cell_context, nbr_context], has_context)
 
         with torch.autocast(device_type=z_cell.device.type, enabled=False):
             cell_vq_loss, q_cell, cell_perp, cell_idx = self.cell_vq(z_cell.float().unsqueeze(2))
@@ -172,7 +193,7 @@ class MoEFoundationVQVAE(nn.Module):
             niche_perplexity=niche_perp,
             z_cell=z_cell,
             z_niche=z_niche,
-            moe_aux_loss=dec_aux,
+            moe_aux_loss=enc_aux + dec_aux,
         )
 
     def compute_loss(
@@ -232,9 +253,14 @@ class MoEFoundationVQVAE(nn.Module):
     ) -> MoEFoundationVQVAE:
         base = load_foundation(base_path, device=device)
         model = cls(moe_config).to(device)
-        model.cell_encoder.load_state_dict(base.cell_encoder.state_dict())
-        model.neighborhood_encoder.load_state_dict(
-            base.neighborhood_encoder.state_dict())
+        if model._has_encoder_moe:
+            model.cell_encoder.base.load_state_dict(base.cell_encoder.state_dict())
+            model.neighborhood_encoder.base.load_state_dict(
+                base.neighborhood_encoder.state_dict())
+        else:
+            model.cell_encoder.load_state_dict(base.cell_encoder.state_dict())
+            model.neighborhood_encoder.load_state_dict(
+                base.neighborhood_encoder.state_dict())
         model.cell_vq.load_state_dict(base.cell_vq.state_dict())
         model.neighborhood_vq.load_state_dict(base.neighborhood_vq.state_dict())
         if model.use_cross_attention and base.use_cross_attention:
