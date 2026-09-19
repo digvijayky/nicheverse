@@ -46,13 +46,14 @@ def bags(b, dev):
     return cell, nbr, ctx, nctx, has
 
 
-def run_batch(model, b, dev, amp_dtype):
+def run_batch(fwd_model, loss_model, b, dev, amp_dtype):
+    """Forward through fwd_model (DDP wrapped or raw), loss through loss_model (always raw)."""
     cell, nbr, ctx, nctx, has = bags(b, dev)
     measured = b['measured'].to(dev, non_blocking=True)
     with torch.autocast('cuda', dtype=amp_dtype, enabled=amp_dtype is not None):
-        out = model(cell, nbr, measured, cell_context=ctx, nbr_context=nctx, has_context=has,
-                    platform_id=b['platform_id'].to(dev), species_id=b['species_id'].to(dev))
-    loss, parts = model.compute_loss(out, b['cell_target'].to(dev), b['nbr_target'].to(dev), measured)
+        out = fwd_model(cell, nbr, measured, cell_context=ctx, nbr_context=nctx, has_context=has,
+                        platform_id=b['platform_id'].to(dev), species_id=b['species_id'].to(dev))
+    loss, parts = loss_model.compute_loss(out, b['cell_target'].to(dev), b['nbr_target'].to(dev), measured)
     return loss, parts, out
 
 
@@ -192,7 +193,7 @@ def main():
         per_ds = {}
         t0 = time.time()
         for b in dl:
-            loss, parts, out = run_batch(raw_model, b, dev, amp_dtype)
+            loss, parts, out = run_batch(model, raw_model, b, dev, amp_dtype)
             opt.zero_grad(set_to_none=True)
             if scaler.is_enabled():
                 scaler.scale(loss).backward(); scaler.unscale_(opt)
