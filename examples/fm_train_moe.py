@@ -10,6 +10,7 @@ Optionally initialize from a pretrained base FoundationVQVAE:
   --pretrained-base /path/to/base/model.pt
 """
 import os, json, time, math, argparse, numpy as np, torch
+import torch.distributed as dist
 from torch.utils.data import DataLoader
 from nicheverse.data.multipanel import MultiPanelSpatialDataset
 from nicheverse.data.vocabulary import GeneVocabulary
@@ -236,7 +237,20 @@ def main():
         niche_use = np.zeros(a.niche_codes, np.int64)
         per_ds = {}
         t0 = time.time()
-        for b in dl:
+        it = iter(dl)
+        while True:
+            try:
+                b = next(it)
+                local_done = 0
+            except StopIteration:
+                local_done = 1
+            if world_size > 1:
+                done_t = torch.tensor([local_done], device=dev)
+                dist.all_reduce(done_t, op=dist.ReduceOp.MAX)
+                if done_t.item() > 0:
+                    break
+            elif local_done:
+                break
             loss, parts, out = run_batch(model, raw_model, b, dev, amp_dtype, a.routing_key)
             opt.zero_grad(set_to_none=True)
             if scaler.is_enabled():
