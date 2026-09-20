@@ -63,8 +63,13 @@ def warm_start(model, ds, dev, amp_dtype, n_batches):
     per = {}
     zc, zn = [], []
     model.eval()
+    total_iters = 0
+    max_iters = n_batches * 20
     with torch.no_grad():
         for b in DataLoader(ds, batch_size=None, num_workers=2):
+            total_iters += 1
+            if total_iters >= max_iters:
+                break
             d = b['dataset']
             if per.get(d, 0) >= 2:
                 continue
