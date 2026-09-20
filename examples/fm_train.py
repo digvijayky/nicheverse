@@ -136,6 +136,7 @@ def main():
     ap.add_argument('--vq-weight', type=float, default=1.0)
     ap.add_argument('--commitment-cost', type=float, default=0.25)
     ap.add_argument('--keep-epoch-checkpoints', action='store_true')
+    ap.add_argument('--init-from', default='', help='initialize weights from a saved model.pt (fresh optimizer, epoch 0); skips warm start')
     ap.add_argument('--amp', default='bf16', choices=['bf16', 'fp16', 'off'])
     ap.add_argument('--warm-batches', type=int, default=64)
     ap.add_argument('--log-every', type=int, default=200)
@@ -185,6 +186,10 @@ def main():
         model.load_state_dict(s['state_dict'])
         start_epoch = int(s['epoch']) + 1
         log(f'resumed from {ck} at epoch {start_epoch}')
+    elif a.init_from:
+        s0 = torch.load(a.init_from, map_location=dev, weights_only=False)
+        model.load_state_dict(s0['state_dict'])
+        log(f'initialized weights from {a.init_from} (fresh optimizer, epoch 0)')
     else:
         warm_start(model, ds, dev, amp_dtype, a.warm_batches)
 
