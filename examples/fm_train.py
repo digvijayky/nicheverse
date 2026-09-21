@@ -137,6 +137,9 @@ def main():
     ap.add_argument('--commitment-cost', type=float, default=0.25)
     ap.add_argument('--keep-epoch-checkpoints', action='store_true')
     ap.add_argument('--init-from', default='', help='initialize weights from a saved model.pt (fresh optimizer, epoch 0); skips warm start')
+    ap.add_argument('--freeze-codebook-epochs', type=int, default=0,
+                    help='hold both VQ codebooks fixed (no EMA update, no dead code reset) for the LAST N epochs so the '
+                         'encoder converges to a fixed code set; needed for stable, annotatable codes. -1 = all epochs')
     ap.add_argument('--amp', default='bf16', choices=['bf16', 'fp16', 'off'])
     ap.add_argument('--warm-batches', type=int, default=64)
     ap.add_argument('--log-every', type=int, default=200)
@@ -214,7 +217,12 @@ def main():
         dl = DataLoader(ds, batch_size=None, num_workers=a.workers, pin_memory=True,
                         prefetch_factor=4 if a.workers else None, persistent_workers=False)
         model.train()
-        log(f'epoch {ep} lr={cur_lr:.2e}')
+        freeze = a.freeze_codebook_epochs == -1 or (a.freeze_codebook_epochs > 0 and ep >= a.epochs - a.freeze_codebook_epochs)
+        if freeze:
+            # eval() on the quantizers disables the EMA codebook update and the dead code reset
+            # (both gated on self.training) while the encoders and decoders keep training
+            raw_model.cell_vq.eval(); raw_model.neighborhood_vq.eval()
+        log(f'epoch {ep} lr={cur_lr:.2e}' + ('  [codebook frozen]' if freeze else ''))
         agg, nb, seen = {}, 0, 0
         cell_use = np.zeros(a.cell_codes, np.int64)
         niche_use = np.zeros(a.niche_codes, np.int64)
@@ -260,7 +268,7 @@ def main():
                     f'niche={agg["niche"] / nb:.4f} vq={agg["vq"] / nb:.4f} '
                     f'active={int((cell_use > 0).sum())}')
         el = time.time() - t0
-        rec = dict(epoch=ep, lr=round(cur_lr, 8), batches=nb, cells=int(seen), seconds=round(el, 1),
+        rec = dict(epoch=ep, lr=round(cur_lr, 8), batches=nb, cells=int(seen), seconds=round(el, 1), codebook_frozen=bool(freeze),
                    cells_per_second=round(seen / max(el, 1e-9), 1),
                    gpus=world_size,
                    active_cell_codes=int((cell_use > 0).sum()),
