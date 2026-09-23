@@ -111,6 +111,40 @@ def _read_panel_molecules(path, x_col, y_col, feature_col, control, g2c):
     )
 
 
+def _stream_panel_context(path, cell_xy, n_genes, radius, molecule_scale,
+                          x_col, y_col, feature_col, control, g2c):
+    """Count all nearby molecules one input frame at a time."""
+    from scipy.spatial import cKDTree
+    import scipy.sparse as sp
+
+    cells = cKDTree(cell_xy)
+    keys, counts = [], []
+    for d in _iter_molecule_frames(path, x_col, y_col, feature_col):
+        fn = d[feature_col].astype(str)
+        keep = (~fn.str.contains(control)) & fn.isin(g2c)
+        if not keep.any():
+            continue
+        xv = pd.to_numeric(d.loc[keep, x_col], errors="coerce").to_numpy(np.float64)
+        yv = pd.to_numeric(d.loc[keep, y_col], errors="coerce").to_numpy(np.float64)
+        gv = fn[keep].map(g2c).to_numpy()
+        good = np.isfinite(xv) & np.isfinite(yv)
+        if not good.any():
+            continue
+        xy = np.column_stack((xv[good], yv[good])) * float(molecule_scale)
+        pairs = cells.sparse_distance_matrix(cKDTree(xy), radius, output_type="coo_matrix")
+        if not pairs.nnz:
+            continue
+        key = pairs.row.astype(np.int64) * n_genes + gv[good][pairs.col]
+        unique, count = np.unique(key, return_counts=True)
+        keys.append(unique)
+        counts.append(count.astype(np.float32))
+    if not keys:
+        return sp.csr_matrix((len(cell_xy), n_genes), dtype=np.float32)
+    key = np.concatenate(keys)
+    return sp.csr_matrix((np.concatenate(counts), (key // n_genes, key % n_genes)),
+                         shape=(len(cell_xy), n_genes), dtype=np.float32)
+
+
 def transcript_context(
     adata: ad.AnnData,
     transcripts: dict | str | Path,
@@ -126,6 +160,7 @@ def transcript_context(
     log1p: bool = True,
     sparse: bool = False,
     molecule_scale: float = 1.0,
+    stream: bool = False,
 ) -> ad.AnnData | np.ndarray:
     """Compute the per-cell local molecular field and store it in ``obsm``.
 
@@ -167,6 +202,9 @@ def transcript_context(
         microns (CosMx global pixels, for instance): pass the same factor that converts
         the cell coordinates to microns, so ``radius`` stays a real micron distance.
         Default 1.0 (the released behavior).
+    stream
+        Process each molecule table frame separately and aggregate the exact sparse counts.
+        This bounds memory for very large molecule tables without discarding molecules.
 
     Notes
     -----
@@ -217,6 +255,16 @@ def transcript_context(
     rows_all: list[np.ndarray] = []
     for path, cells in by_path.items():
         cidx = np.asarray(sorted(cells))
+        if stream:
+            block = _stream_panel_context(path, coords_all[cidx], len(genes), radius,
+                                          molecule_scale, x_col, y_col, feature_col,
+                                          control, g2c)
+            if sparse:
+                blocks.append(block)
+                rows_all.append(cidx)
+            else:
+                feats[cidx] = block.toarray()
+            continue
         xy, gcol = _read_panel_molecules(path, x_col, y_col, feature_col, control, g2c)
         if xy.shape[0] == 0:
             continue
