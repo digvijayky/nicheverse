@@ -70,6 +70,8 @@ class FoundationConfig:
         Encoder backbone; ``"sparse_bag"`` is the only one that consumes sparse bags.
     use_context
         Allocate the transcript context tables and the missing context vector.
+    mlp_norm
+        Normalization in encoder MLPs and decoder trunks: ``"batch"`` or ``"layer"``.
     n_platforms, n_species, n_datasets
         Cardinalities of the conditioning vocabularies.
     condition_decoders
@@ -116,6 +118,7 @@ class FoundationConfig:
     vq_weight: float = 1.0
     tie_decoder: bool = False
     vocabulary: tuple[str, ...] = field(default_factory=tuple)
+    mlp_norm: str = "batch"
 
     def __post_init__(self) -> None:
         if self.vocab_size <= 0:
@@ -135,6 +138,8 @@ class FoundationConfig:
                 raise ValueError(f"{name} must be positive, got {getattr(self, name)}")
         if self.vq_distance not in ("l2", "cosine"):
             raise ValueError(f"vq_distance must be 'l2' or 'cosine', got {self.vq_distance!r}")
+        if self.mlp_norm not in ("batch", "layer"):
+            raise ValueError(f"mlp_norm must be 'batch' or 'layer', got {self.mlp_norm!r}")
         if self.detection_weight < 0:
             raise ValueError(f"detection_weight must be >= 0, got {self.detection_weight}")
         if self.vocabulary and len(self.vocabulary) != self.vocab_size:
@@ -196,6 +201,8 @@ class FoundationVQVAE(nn.Module):
             use_context=config.use_context,
         )
         enc_kw.update(config.encoder_kwargs)
+        if config.encoder_type == "sparse_bag":
+            enc_kw["mlp_norm"] = config.mlp_norm
         self.cell_encoder = build_encoder(
             config.encoder_type,
             in_dim=config.vocab_size,
@@ -242,10 +249,12 @@ class FoundationVQVAE(nn.Module):
             )
         rev = list(reversed(hd))
         self.cell_trunk = _mlp(
-            config.cell_embedding_dim, rev, config.decoder_hidden, config.dropout
+            config.cell_embedding_dim, rev, config.decoder_hidden, config.dropout,
+            norm=config.mlp_norm,
         )
         self.niche_trunk = _mlp(
-            config.neighborhood_embedding_dim, rev, config.decoder_hidden, config.dropout
+            config.neighborhood_embedding_dim, rev, config.decoder_hidden, config.dropout,
+            norm=config.mlp_norm,
         )
         tied = None
         if config.tie_decoder and config.gene_embed_dim == config.decoder_hidden:

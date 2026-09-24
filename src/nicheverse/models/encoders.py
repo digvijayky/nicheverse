@@ -34,17 +34,21 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-def _mlp(in_dim: int, hidden: Sequence[int], out_dim: int, dropout: float = 0.2) -> nn.Sequential:
-    """Build a Linear -> BN -> ReLU -> Dropout stack ending in a Linear projection.
+def _mlp(in_dim: int, hidden: Sequence[int], out_dim: int, dropout: float = 0.2,
+         norm: str = "batch") -> nn.Sequential:
+    """Build a Linear -> norm -> ReLU -> Dropout stack ending in a Linear projection.
 
     ``hidden`` must be a non-empty sequence; the caller is expected to validate.
     """
     if len(hidden) < 1:
         raise ValueError("hidden must contain at least one layer width")
+    if norm not in ("batch", "layer"):
+        raise ValueError(f"norm must be 'batch' or 'layer', got {norm!r}")
     layers: list[nn.Module] = []
     d = in_dim
     for h in hidden:
-        layers += [nn.Linear(d, h), nn.BatchNorm1d(h), nn.ReLU(), nn.Dropout(dropout)]
+        layers += [nn.Linear(d, h), nn.BatchNorm1d(h) if norm == "batch" else nn.LayerNorm(h),
+                   nn.ReLU(), nn.Dropout(dropout)]
         d = h
     layers.append(nn.Linear(d, out_dim))
     return nn.Sequential(*layers)

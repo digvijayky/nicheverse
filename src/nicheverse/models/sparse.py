@@ -91,6 +91,8 @@ class SparseBagEncoder(nn.Module):
     target_sum
         Library size the counts are normalized to before ``log1p`` (10000 by default, the
         standard single cell convention used elsewhere in nicheverse).
+    mlp_norm
+        ``"batch"`` (default) or ``"layer"`` normalization in the MLP stack.
     """
 
     def __init__(
@@ -105,6 +107,7 @@ class SparseBagEncoder(nn.Module):
         n_bags: int | None = None,
         use_context: bool = True,
         target_sum: float = 1e4,
+        mlp_norm: str = "batch",
     ) -> None:
         super().__init__()
         hidden = list(hidden)
@@ -129,7 +132,7 @@ class SparseBagEncoder(nn.Module):
             self.missing_context = nn.Parameter(torch.zeros(self.embed_dim))
         pooled = self.n_bags * self.embed_dim * (2 if self.use_context else 1) + 2 * self.n_bags
         self.norm = nn.LayerNorm(pooled)
-        self.mlp = _mlp(pooled, hidden, out_dim, dropout)
+        self.mlp = _mlp(pooled, hidden, out_dim, dropout, norm=mlp_norm)
 
     # -- pooling -----------------------------------------------------------------------
     def _pool(self, bag: SparseBag, table: nn.EmbeddingBag) -> tuple[torch.Tensor, torch.Tensor]:

@@ -7,6 +7,7 @@ import json
 import numpy as np
 import scipy.sparse as sp
 import torch
+from torch import nn
 
 from nicheverse.data.multipanel import MultiPanelSpatialDataset, PanelSpec
 from nicheverse.data.shards import to_bag, write_shard
@@ -101,6 +102,42 @@ def _cfg(**kw):
     )
     base.update(kw)
     return FoundationConfig(**base)
+
+
+def test_mlp_norm_legacy_config_and_strict_state_dict():
+    cfg = _cfg()
+    old_config = cfg.to_dict()
+    old_config.pop("mlp_norm")
+    restored = FoundationConfig.from_dict(old_config)
+    assert restored.mlp_norm == "batch"
+    original = FoundationVQVAE(cfg)
+    legacy = FoundationVQVAE(restored)
+    legacy.load_state_dict(original.state_dict(), strict=True)
+    for block in (legacy.cell_encoder.mlp, legacy.neighborhood_encoder.mlp,
+                  legacy.cell_trunk, legacy.niche_trunk):
+        assert isinstance(block[1], nn.BatchNorm1d)
+
+
+def test_layer_norm_roundtrip_and_train_eval_codes():
+    cfg = _cfg(mlp_norm="layer", dropout=0.0)
+    restored = FoundationConfig.from_dict(cfg.to_dict())
+    assert restored.mlp_norm == "layer"
+    model = FoundationVQVAE(restored)
+    copy = FoundationVQVAE(restored)
+    copy.load_state_dict(model.state_dict(), strict=True)
+    for block in (copy.cell_encoder.mlp, copy.neighborhood_encoder.mlp,
+                  copy.cell_trunk, copy.niche_trunk):
+        assert isinstance(block[1], nn.LayerNorm)
+        width = block[0].in_features
+        features = torch.sin(torch.arange(4 * width, dtype=torch.float32).reshape(4, width))
+        block.train()
+        train_latent = block(features)
+        block.eval()
+        eval_latent = block(features)
+        assert torch.allclose(train_latent, eval_latent, atol=1e-6)
+        codes = torch.arange(8 * train_latent.shape[1], dtype=torch.float32).reshape(8, -1)
+        assert torch.equal(torch.cdist(train_latent, codes).argmin(1),
+                           torch.cdist(eval_latent, codes).argmin(1))
 
 
 def _batch(V=24, B=7, seed=0, measured=None):

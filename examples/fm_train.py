@@ -129,6 +129,7 @@ def main():
     ap.add_argument('--niche-codes', type=int, default=64)
     ap.add_argument('--gene-embed-dim', type=int, default=256)
     ap.add_argument('--hidden', default='512,256')
+    ap.add_argument('--mlp-norm', default='batch', choices=['batch', 'layer'])
     ap.add_argument('--workers', type=int, default=6)
     ap.add_argument('--datasets', default='')
     ap.add_argument('--no-condition', action='store_true')
@@ -172,6 +173,7 @@ def main():
         vocab_size=len(voc), hidden_dims=tuple(int(x) for x in a.hidden.split(',')),
         cell_num_embeddings=a.cell_codes, neighborhood_num_embeddings=a.niche_codes,
         gene_embed_dim=a.gene_embed_dim, decoder_hidden=a.gene_embed_dim,
+        mlp_norm=a.mlp_norm,
         n_platforms=len(index['platforms']), n_species=len(index['species']),
         n_datasets=max(d['dataset_id'] for d in index['datasets'].values()) + 1,
         condition_decoders=not a.no_condition,
